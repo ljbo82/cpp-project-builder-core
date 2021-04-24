@@ -6,3 +6,4 @@ gcc-project-builder TODO
 * Cross-compilation tests
 * Utility Makefile to collect information about git repository
 * Utitlity Makefile to expose a target for doxygen-based documentation build
+* Use gcc-project-builder to build arduino projects
