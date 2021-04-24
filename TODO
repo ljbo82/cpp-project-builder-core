@@ -1,0 +1,8 @@
+gcc-project-builder TODO
+
+* Documentation
+* Demo for libraries
+* Test windows hosts
+* Cross-compilation tests
+* Utility Makefile to collect information about git repository
+* Utitlity Makefile to expose a target for doxygen-based documentation build
