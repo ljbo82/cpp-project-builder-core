@@ -250,16 +250,20 @@ all: dist
 build: post-build
 
 .PHONY: pre-build
+pre-build: __nl__ := $(__nl__)
 pre-build: __v__  := $(__v__)
 pre-build: $(PRE_BUILD_DEPS)
     ifneq ($(PRE_BUILD), )
+	    @printf "$(__nl__)[PRE_BUILD]\n"
 	    $(__v__)$(PRE_BUILD)
     endif
 
 .PHONY: post-build
+post-build: __nl__ := $(__nl__)
 post-build: __v__  := $(__v__)
 post-build: pre-build $(BUILD_DEPS) $(fullBuildDir)/$(artifactName) $(__postBuildDeps__) $(POST_BUILD_DEPS)
     ifneq ($(POST_BUILD), )
+	    @printf "$(__nl__)[POST_BUILD]\n"
 	    $(__v__)$(POST_BUILD)
     endif
 # ==============================================================================
@@ -269,17 +273,22 @@ post-build: pre-build $(BUILD_DEPS) $(fullBuildDir)/$(artifactName) $(__postBuil
 clean: post-clean
 
 .PHONY: pre-clean
+pre-clean: __nl__ := $(__nl__)
 pre-clean: __v__  := $(__v__)
 pre-clean:
     ifneq ($(PRE_CLEAN), )
+	    @printf "$(__nl__)[PRE_CLEAN]\n"
 	    $(__v__)$(PRE_CLEAN)
     endif
 
 .PHONY: post-clean
+post-clean: __nl__ := $(__nl__)
 post-clean: __v__  := $(__v__)
 post-clean: pre-clean
+	@printf "$(__nl__)[CLEAN]\n"
 	$(__v__)rm -rf $(BUILD_DIR_BASE) $(DIST_DIR_BASE)
     ifneq ($(POST_CLEAN), )
+	    @printf "$(__nl__)[POST_CLEAN]\n"
 	    $(__v__)$(POST_CLEAN)
     endif
 # ==============================================================================
@@ -289,16 +298,20 @@ post-clean: pre-clean
 dist: post-dist
 
 .PHONY: pre-dist
+pre-dist: __nl__ := $(__nl__)
 pre-dist: __v__ := $(__v__)
 pre-dist: $(PRE_DIST_DEPS)
     ifneq ($(PRE_DIST), )
+	    @printf "$(__nl__)[PRE_DIST]\n"
 	    $(__v__)$(PRE_DIST)
     endif
 
 .PHONY: post-dist
-post-dist: __v__ := $(__v__)
+post-dist: __nl__ := $(__nl__)
+post-dist: __v__  := $(__v__)
 post-dist: pre-dist $(DIST_DEPS) build $(__postDistDeps__) $(POST_DIST_DEPS)
     ifneq ($(POST_DIST), )
+	    @printf "$(__nl__)[POST_DIST]\n"
 	    $(__v__)$(POST_DIST)
     endif
 # ==============================================================================
