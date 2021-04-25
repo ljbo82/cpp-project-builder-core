@@ -147,7 +147,7 @@ srcDirs := $(sort $(srcDirs))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-__srcFiles__ := $(strip $(foreach srcDir, $(srcDirs), $(shell find $(srcDir) -type f -name *.c -or -name *.cpp -or -name *.S 2> /dev/null)))
+__srcFiles__ := $(sort $(strip $(foreach srcDir, $(srcDirs), $(shell find $(srcDir) -type f -name *.c -or -name *.cpp -or -name *.S 2> /dev/null))))
 ifeq ($(DEBUG), 1)
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
@@ -178,7 +178,7 @@ ifneq ($(wildcard include), )
     includeDirs  += include
     ifeq ($(PROJ_TYPE), lib)
         __libDistHeaders__ := $(shell find include -type f -name *.h -or -name *.hpp 2> /dev/null)
-        __postDistDeps__   += $(foreach libDistHeader, $(__libDistHeaders__), $(fullDistDir)/$(libDistHeader))
+        __postDistDeps__   := $(__postDistDeps__) $(foreach libDistHeader, $(__libDistHeaders__), $(fullDistDir)/$(libDistHeader))
     endif
 endif
 includeDirs += $(INCLUDE_DIRS)
@@ -325,8 +325,8 @@ $(fullBuildDir)/$(artifactName):  $(__objFiles__)
 $(fullDistDir)/include/%.h: __nl__ := $(__nl__)
 $(fullDistDir)/include/%.h: __v__  := $(__v__)
 $(fullDistDir)/include/%.h : include/%.h
-	@mkdir -p $(dir $@)
 	@printf "$(__nl__)[DIST] $@\n"
+	@mkdir -p $(dir $@)
 	$(__v__)ln $< $@
 
 $(fullBuildDir)/%.c$(__objSuffix__): __nl__           := $(__nl__)
@@ -334,8 +334,8 @@ $(fullBuildDir)/%.c$(__objSuffix__): __v__            := $(__v__)
 $(fullBuildDir)/%.c$(__objSuffix__): __cFlags__       := $(__cFlags__)
 $(fullBuildDir)/%.c$(__objSuffix__): __includeFlags__ := $(__includeFlags__)
 $(fullBuildDir)/%.c$(__objSuffix__): %.c
-	@mkdir -p $(dir $@)
 	@printf "$(__nl__)[CC] $@\n"
+	@mkdir -p $(dir $@)
 	$(__v__)$(CC) $(strip $(__cFlags__) -MMD $(CFLAGS) $(__includeFlags__) -c $< -o $@)
 
 $(fullBuildDir)/%.cpp$(__objSuffix__): __nl__           := $(__nl__)
@@ -343,8 +343,8 @@ $(fullBuildDir)/%.cpp$(__objSuffix__): __v__            := $(__v__)
 $(fullBuildDir)/%.cpp$(__objSuffix__): __cxxFlags__     := $(__cxxFlags__)
 $(fullBuildDir)/%.cpp$(__objSuffix__): __includeFlags__ := $(__includeFlags__)
 $(fullBuildDir)/%.cpp$(__objSuffix__): %.cpp
-	@mkdir -p $(dir $@)
 	@printf "$(__nl__)[CXX] $@\n"
+	@mkdir -p $(dir $@)
 	$(__v__)$(CXX) $(strip $(__cxxFlags__) -MMD -MP $(CXXFLAGS) $(__includeFlags__) -c $< -o $@)
 
 $(fullBuildDir)/%.S$(__objSuffix__): __nl__           := $(__nl__)
@@ -352,8 +352,8 @@ $(fullBuildDir)/%.S$(__objSuffix__): __v__            := $(__v__)
 $(fullBuildDir)/%.S$(__objSuffix__): __asFlags__      := $(__asFlags__)
 $(fullBuildDir)/%.S$(__objSuffix__): __includeFlags__ := $(__includeFlags__)
 $(fullBuildDir)/%.S$(__objSuffix__): %.S
-	@mkdir -p $(dir $@)
 	@printf "$(__nl__)[AS] $@\n"
+	@mkdir -p $(dir $@)
 	$(__v__)$(AS) $(strip $(__asFlags__) -MMD $(ASFLAGS) $(__includeFlags__) -c $< -o $@)
 
 -include $(__deps__)

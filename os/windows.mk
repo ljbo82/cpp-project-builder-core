@@ -30,30 +30,30 @@ endif
 
 ifeq ($(PROJ_TYPE), app)
     artifactName     := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix__)
-    __postDistDeps__ += $(fullDistDir)/bin/$(artifactName)
+    __postDistDeps__ := $(__postDistDeps__) $(fullDistDir)/bin/$(artifactName)
 else
     ifeq ($(LIB_TYPE), static)
-        artifactName := $(__libPrefix__)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix__).$(__staticLibSuffix__)
+        artifactName := $(__libPrefix__)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix__)$(__staticLibSuffix__)
     else
-        artifactName     := $(__libPrefix__)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix__).$(__sharedLibSuffix__)
+        artifactName     := $(__libPrefix__)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix__)$(__sharedLibSuffix__)
         __ldFlags__      += -Wl,--out-implib,$(__artifactName__).lib
         __ldFlags__      += -Wl,--output-def,$(__artifactName__).def
-        __postDistDeps__ += $(fullDistDir)/lib/$(artifactName) $(__postDistDeps__)
+        __postDistDeps__ := $(__postDistDeps__) $(fullDistDir)/lib/$(artifactName) $(__postDistDeps__)
     endif
 endif
 
 $(fullDistDir)/bin/$(artifactName): __nl__ := $(__nl__)
 $(fullDistDir)/bin/$(artifactName): __v__  := $(__v__)
 $(fullDistDir)/bin/$(artifactName): $(fullBuildDir)/$(artifactName)
-	@mkdir -p $(fullDistDir)/bin
 	@printf "$(__nl__)[DIST] $@\n"
+	@mkdir -p $(fullDistDir)/bin
 	$(__v__)ln $(fullBuildDir)/$(artifactName) $(fullDistDir)/bin
 
 $(fullDistDir)/lib/$(artifactName): __nl__ := $(__nl__)
 $(fullDistDir)/lib/$(artifactName): __v__  := $(__v__)
 $(fullDistDir)/lib/$(artifactName): $(fullBuildDir)/$(artifactName)
-	@mkdir -p $(fullDistDir)/lib
 	@printf "$(__nl__)[DIST] $@\n"
+	@mkdir -p $(fullDistDir)/lib
 	$(__v__)ln $(fullBuildDir)/$(artifactName) $(fullDistDir)/lib/$(artifactName)
 
 undefine __selfDir__

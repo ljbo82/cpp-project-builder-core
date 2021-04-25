@@ -1,7 +1,6 @@
 gcc-project-builder TODO
 
 * Documentation
-* Demo for libraries
 * Test windows hosts
 * Cross-compilation tests
 * Utility Makefile to collect information about git repository
