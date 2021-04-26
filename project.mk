@@ -51,9 +51,9 @@ depFiles := $(objFiles:.o=.d)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifneq ($(wildcard include), )
+ifneq ($(wildcard $(defaultIncludeDir)), )
     ifeq ($(PROJ_TYPE), lib)
-        _postDistDeps += $(foreach distHeader, $(shell find include -type f -name *.h -or -name *.hpp 2> /dev/null), $(distDir)/$(distHeader))
+        _postDistDeps += $(foreach distHeader, $(shell find $(defaultIncludeDir) -type f -name *.h -or -name *.hpp 2> /dev/null), $(DIST_DIR_BASE)/$(distHeader))
     endif
 endif
 INCLUDE_DIRS := $(sort $(INCLUDE_DIRS))
@@ -168,6 +168,13 @@ post-dist: pre-dist $(DIST_DEPS) build $(_postDistDeps) $(POST_DIST_DEPS)
     endif
 # ==============================================================================
 
+# _postDistDeps ================================================================
+$(DIST_DIR_BASE)/$(defaultIncludeDir)/%.h : $(defaultIncludeDir)/%.h
+	@printf "$(nl)[DIST] $@\n"
+	@mkdir -p $(dir $@)
+	$(v)ln $< $@
+# ==============================================================================
+
 # ==============================================================================
 $(buildDir)/$(_artifactName): $(objFiles)
     ifeq ($(PROJ_TYPE), lib)
@@ -182,13 +189,6 @@ $(buildDir)/$(_artifactName): $(objFiles)
 	    @printf "$(nl)[LD] $@\n"
 	    $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(_ldFlags) $(LDFLAGS))
     endif
-# ==============================================================================
-
-# ==============================================================================
-$(distDir)/include/%.h : include/%.h
-	@printf "$(nl)[DIST] $@\n"
-	@mkdir -p $(dir $@)
-	$(v)ln $< $@
 # ==============================================================================
 
 # ==============================================================================
