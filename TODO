@@ -1,5 +1,5 @@
 gcc-project-builder TODO
 
 * Documentation
-* Utitlity Makefile to expose a target for doxygen-based documentation build
+* Text doxygen.mk
 * Use gcc-project-builder to build arduino projects

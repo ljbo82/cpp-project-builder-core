@@ -14,9 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-#$(error doxygen.mk)
-#$(error git.mk)
-
 ifndef _include_project_mk
 _include_project_mk := 1
 
@@ -154,14 +151,14 @@ build: post-build
 .PHONY: pre-build
 pre-build: $(PRE_BUILD_DEPS)
     ifneq ($(PRE_BUILD), )
-	    @printf "$(nl)[PRE_BUILD]\n"
+	    @printf "$(nl)[PRE-BUILD]\n"
 	    $(v)$(PRE_BUILD)
     endif
 
 .PHONY: post-build
 post-build: pre-build $(BUILD_DEPS) $(buildDir)/$(_artifactName) $(_postBuildDeps) $(POST_BUILD_DEPS)
     ifneq ($(POST_BUILD), )
-	    @printf "$(nl)[POST_BUILD]\n"
+	    @printf "$(nl)[POST-BUILD]\n"
 	    $(v)$(POST_BUILD)
     endif
 # ==============================================================================
@@ -173,7 +170,7 @@ clean: post-clean
 .PHONY: pre-clean
 pre-clean:
     ifneq ($(PRE_CLEAN), )
-	    @printf "$(nl)[PRE_CLEAN]\n"
+	    @printf "$(nl)[PRE-CLEAN]\n"
 	    $(v)$(PRE_CLEAN)
     endif
 
@@ -182,7 +179,7 @@ post-clean: pre-clean
 	@printf "$(nl)[CLEAN]\n"
 	$(v)rm -rf $(BUILD_DIR_BASE) $(DIST_DIR_BASE)
     ifneq ($(POST_CLEAN), )
-	    @printf "$(nl)[POST_CLEAN]\n"
+	    @printf "$(nl)[POST-CLEAN]\n"
 	    $(v)$(POST_CLEAN)
     endif
 # ==============================================================================
@@ -194,14 +191,14 @@ dist: post-dist
 .PHONY: pre-dist
 pre-dist: $(PRE_DIST_DEPS)
     ifneq ($(PRE_DIST), )
-	    @printf "$(nl)[PRE_DIST]\n"
+	    @printf "$(nl)[PRE-DIST]\n"
 	    $(v)$(PRE_DIST)
     endif
 
 .PHONY: post-dist
 post-dist: pre-dist $(DIST_DEPS) build $(_postDistDeps) $(POST_DIST_DEPS)
     ifneq ($(POST_DIST), )
-	    @printf "$(nl)[POST_DIST]\n"
+	    @printf "$(nl)[POST-DIST]\n"
 	    $(v)$(POST_DIST)
     endif
 # ==============================================================================
