@@ -14,69 +14,79 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-ifndef __include_os_linux_mk__
-__include_os_linux__ := 1
+ifndef _include_os_linux_mk
+_include_os_linux_mk := 1
 
-__selfDir__ := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(__selfDir__)../project.mk
+__selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(__selfDir)../defs.mk
 
-__libPrefix__       = lib
-__sharedLibSuffix__ :=.so
-__staticLibSuffix__ := .a
+# ------------------------------------------------------------------------------
+ifeq ($(PROJ_NAME),  )
+    $(error Missing PROJ_NAME)
+endif
+
+ifneq (1, $(words $(PROJ_NAME)))
+    $(error PROJ_NAME cannot have spaces)
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+__libPrefix       = lib
+__sharedLibSuffix :=.so
+__staticLibSuffix := .a
 
 ifeq ($(DEBUG), 1)
-    __debugSuffix__ := _d
+    __debugSuffix := _d
 endif
 
 ifeq ($(PROJ_TYPE), app)
-    artifactName     := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix__)
-    __postDistDeps__ := $(__postDistDeps__) $(fullDistDir)/bin/$(artifactName)
+    _artifactName := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)
+    _postDistDeps += $(distDir)/bin/$(_artifactName)
 else
     ifeq ($(LIB_TYPE), static)
-        artifactName := $(__libPrefix__)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix__)$(__staticLibSuffix__)
+        _artifactName := $(__libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(__staticLibSuffix)
+        _postDistDeps += $(distDir)/lib/$(_artifactName)
     else
-        __artifactBaseName__ := $(__libPrefix__)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix__)$(__sharedLibSuffix__)
-        artifactName         := $(__artifactBaseName__).$(projVersionMinor).$(projVersionPatch)
-        __postBuildDeps__    := $(__postBuildDeps__) $(fullBuildDir)/$(__artifactBaseName__)
-        __postDistDeps__     := $(__postDistDeps__) $(fullDistDir)/lib/$(__artifactBaseName__) $(fullDistDir)/lib/$(artifactName) $(__postDistDeps__)
+        _artifactBaseName := $(__libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(__sharedLibSuffix)
+        _artifactName      := $(_artifactBaseName).$(projVersionMinor).$(projVersionPatch)
+        _postBuildDeps     += $(buildDir)/$(_artifactBaseName)
+        _postDistDeps      += $(distDir)/lib/$(_artifactName) $(distDir)/lib/$(_artifactBaseName)
     endif
 endif
+# ------------------------------------------------------------------------------
 
-$(fullDistDir)/bin/$(artifactName): __nl__ := $(__nl__)
-$(fullDistDir)/bin/$(artifactName): __v__  := $(__v__)
-$(fullDistDir)/bin/$(artifactName): $(fullBuildDir)/$(artifactName)
-	@printf "$(__nl__)[DIST] $@\n"
-	@mkdir -p $(fullDistDir)/bin
-	$(__v__)ln $(fullBuildDir)/$(artifactName) $(fullDistDir)/bin
+# ==============================================================================
+$(distDir)/bin/$(_artifactName): $(buildDir)/$(_artifactName)
+	@printf "$(nl)[DIST] $@\n"
+	@mkdir -p $(distDir)/bin
+	$(v)ln $< $@
+# ==============================================================================
 
-$(fullBuildDir)/$(__artifactBaseName__): __nl__                := $(__nl__)
-$(fullBuildDir)/$(__artifactBaseName__): __v__                 := $(__v__)
-$(fullBuildDir)/$(__artifactBaseName__): __artifactBaseName__  := $(__artifactBaseName__)
-$(fullBuildDir)/$(__artifactBaseName__): $(fullBuildDir)/$(artifactName)
-	@printf "$(__nl__)[BUILD] $@\n"
-	$(__v__)cd $(fullBuildDir); ln -sf $(artifactName) $(__artifactBaseName__)
+# ==============================================================================
+$(buildDir)/$(_artifactBaseName): $(buildDir)/$(_artifactName)
+	@printf "$(nl)[BUILD] $@\n"
+	$(v)ln -sf $(notdir $<) $@
+# ==============================================================================
 
-$(fullDistDir)/lib/$(__artifactBaseName__): __nl__                := $(__nl__)
-$(fullDistDir)/lib/$(__artifactBaseName__): __v__                 := $(__v__)
-$(fullDistDir)/lib/$(__artifactBaseName__): __artifactBaseName__  := $(__artifactBaseName__)
-$(fullDistDir)/lib/$(__artifactBaseName__): $(fullBuildDir)/$(__artifactBaseName__)
-	@printf "$(__nl__)[DIST] $@\n"
-	@mkdir -p $(fullDistDir)/lib
-	$(__v__)ln $(fullBuildDir)/$(__artifactBaseName__) $(fullDistDir)/lib/$(__artifactBaseName__)
+# ==============================================================================
+$(distDir)/lib/$(_artifactBaseName): $(buildDir)/$(_artifactBaseName)
+	@printf "$(nl)[DIST] $@\n"
+	@mkdir -p $(distDir)/lib
+	$(v)ln $< $@
+# ==============================================================================
 
-$(fullDistDir)/lib/$(artifactName): __nl__ := $(__nl__)
-$(fullDistDir)/lib/$(artifactName): __v__  := $(__v__)
-$(fullDistDir)/lib/$(artifactName): $(fullBuildDir)/$(artifactName)
-	@printf "$(__nl__)[DIST] $@\n"
-	@mkdir -p $(fullDistDir)/lib
-	$(__v__)ln $(fullBuildDir)/$(artifactName) $(fullDistDir)/lib/$(artifactName)
+# ==============================================================================
+$(distDir)/lib/$(_artifactName): $(buildDir)/$(_artifactName)
+	@printf "$(nl)[DIST] $@\n"
+	@mkdir -p $(distDir)/lib
+	$(v)ln $< $@
+# ==============================================================================
 
-undefine __selfDir__
-undefine __libPrefix__
-undefine __sharedLibSuffix__
-undefine __staticLibSuffix__
-undefine __debugSuffix__
-undefine __artifactBaseName__
+undefine __selfDir
+undefine __libPrefix
+undefine __sharedLibSuffix
+undefine __staticLibSuffix
+undefine __debugSuffix
 
-endif #__include_os_linux_mk__
+endif #_include_os_linux_mk
 

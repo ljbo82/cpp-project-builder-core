@@ -14,11 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-ifndef __include_git_mk__
-__include_git_mk__ := 1
+ifndef _include_git_mk
+_include_git_mk := 1
 
-__gitRepoAvailable__ := $(shell git status > /dev/null 2>&1; echo $$?)
-ifeq ($(__gitRepoAvailable__), 0)
+__gitRepoAvailable := $(shell git status > /dev/null 2>&1; echo $$?)
+ifeq ($(__gitRepoAvailable), 0)
     gitCommit := $(shell git rev-parse HEAD > /dev/null 2>&1; echo $$?)
     ifeq ($(gitCommit), 0)
         gitCommit := $(shell git rev-parse HEAD)
@@ -40,7 +40,7 @@ ifeq ($(__gitRepoAvailable__), 0)
         gitCommit :=
     endif    
 endif
-undefine __gitRepoAvailable__
+undefine __gitRepoAvailable
 
-endif # __include_git_mk__
+endif # _include_git_mk
 

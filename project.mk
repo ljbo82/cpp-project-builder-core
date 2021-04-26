@@ -17,8 +17,21 @@
 #$(error doxygen.mk)
 #$(error git.mk)
 
-ifndef __include_project_mk__
-__include_project_mk__ := 1
+ifndef _include_project_mk
+_include_project_mk := 1
+
+# ------------------------------------------------------------------------------
+__selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(__selfDir)defs.mk
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+__selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
+ifeq ($(wildcard $(__selfDir)os/$(hostOS).mk), )
+    $(error Unsupported host OS: $(hostOS))
+endif
+include $(__selfDir)os/$(hostOS).mk
+# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 ifeq ($(PROJ_NAME),  )
@@ -38,9 +51,6 @@ ifneq ($(PROJ_TYPE), app)
     ifneq ($(PROJ_TYPE), lib)
         $(error Unsupported PROJ_TYPE: $(PROJ_TYPE))
     else
-        ifeq ($(LIB_TYPE), )
-            LIB_TYPE := shared
-        endif
         ifneq ($(LIB_TYPE), shared)
             ifneq ($(LIB_TYPE), static)
                 $(error Unsupported LIB_TYPE: $(LIB_TYPE))
@@ -51,167 +61,69 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(PROJ_VERSION), )
-    PROJ_VERSION := 0.1.0
-endif
-
-ifeq ($(shell sh -c "echo $(PROJ_VERSION) | grep -oP '[0-9]+\.[0-9]+\.[0-9]+.*'"), )
-    $(error Invalid PROJ_VERSION: $(PROJ_VERSION))
-endif
-projVersionMajor := $(shell echo $(PROJ_VERSION) | cut -d'.' -f1)
-projVersionMinor := $(shell echo $(PROJ_VERSION) | cut -d'.' -f2)
-projVersionPatch := $(shell echo $(PROJ_VERSION) | cut -d'.' -f3-)
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifeq ($(DEBUG), )
-    DEBUG := 0
-endif
-ifneq ($(DEBUG), 0)
-    ifneq ($(DEBUG), 1)
-        $(error Invalid value for DEBUG: $(DEBUG))
-    endif
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifeq ($(V), )
-    V := 0
-endif
-ifneq ($(V), 0)
-    ifneq ($(V), 1)
-        $(error ERROR: Invalid value for V: $(V))
-    endif
-endif
-
-ifeq ($(V), 0)
-    __v__  := @
-    __nl__ :=
-else
-    __v__  :=
-    __nl__ := \n
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-__selfDir__ := $(dir $(lastword $(MAKEFILE_LIST)))
-ifeq ($(HOST), )
-    include $(__selfDir__)native_host.mk
-else
-    ifeq ($(shell sh -c "echo $(HOST) | grep -oP '[a-zA-Z0-9]+\-[a-zA-Z0-9]+.*'"), )
-        $(error Invalid HOST: $(HOST))
-    endif
-
-    hostOS := $(shell echo $(HOST) | cut -d'.' -f1)
-    hostArch := $(shell echo $(HOST) | cut -d'.' -f2-)
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifeq ($(BUILD_DIR_BASE), )
-    BUILD_DIR_BASE := build
-endif
-ifeq ($(BUILD_DIR), )
-    fullBuildDir := $(BUILD_DIR_BASE)/$(host)
-else
-    fullBuildDir := $(BUILD_DIR_BASE)/$(BUILD_DIR)
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifeq ($(DIST_DIR_BASE), )
-    DIST_DIR_BASE := dist
-endif
-ifeq ($(DIST_DIR), )
-    fullDistDir := $(DIST_DIR_BASE)/$(host)
-else
-    fullDistDir := $(DIST_DIR_BASE)/$(DIST_DIR)
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-__selfDir__ := $(dir $(lastword $(MAKEFILE_LIST)))
-ifeq ($(wildcard $(__selfDir__)os/$(hostOS).mk), )
-    $(error Unsupported host OS: $(hostOS))
-endif
-
-include $(__selfDir__)os/$(hostOS).mk
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifneq ($(wildcard src), )
-    srcDirs += src
-endif
-srcDirs += $(SRC_DIRS)
-srcDirs := $(sort $(srcDirs))
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-__srcFiles__ := $(sort $(strip $(foreach srcDir, $(srcDirs), $(shell find $(srcDir) -type f -name *.c -or -name *.cpp -or -name *.S 2> /dev/null))))
+SRC_DIRS := $(sort $(SRC_DIRS))
+srcFiles := $(sort $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir) -type f -name *.c -or -name *.cpp -or -name *.S 2> /dev/null))))
 ifeq ($(DEBUG), 1)
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
-            __objSuffix__ := .pic.dbg.o
+            objSuffix := .pic.dbg.o
         else
-            __objSuffix__ := .dbg.o
+            objSuffix := .dbg.o
         endif
     else
-        __objSuffix__ := .dbg.o
+        objSuffix := .dbg.o
     endif
 else
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
-            __objSuffix__ := .pic.o
+            objSuffix := .pic.o
         else
-            __objSuffix__ := .o
+            objSuffix := .o
         endif
     else
-        __objSuffix__ := .o
+        objSuffix := .o
     endif
 endif
-__objFiles__ := $(__srcFiles__:%=$(fullBuildDir)/%$(__objSuffix__))
-__deps__     := $(__objFiles__:.o=.d)
+objFiles := $(srcFiles:%=$(buildDir)/%$(objSuffix))
+depFiles := $(objFiles:.o=.d)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 ifneq ($(wildcard include), )
-    includeDirs  += include
     ifeq ($(PROJ_TYPE), lib)
-        __libDistHeaders__ := $(shell find include -type f -name *.h -or -name *.hpp 2> /dev/null)
-        __postDistDeps__   := $(__postDistDeps__) $(foreach libDistHeader, $(__libDistHeaders__), $(fullDistDir)/$(libDistHeader))
+        _postDistDeps += $(foreach distHeader, $(shell find include -type f -name *.h -or -name *.hpp 2> /dev/null), $(distDir)/$(distHeader))
     endif
 endif
-includeDirs += $(INCLUDE_DIRS)
-includeDirs := $(sort $(includeDirs))
+INCLUDE_DIRS := $(sort $(INCLUDE_DIRS))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-__cFlags__   += -Wall
-__cxxFlags__ += -Wall
+_cFlags   += -Wall
+_cxxFlags += -Wall
 ifeq ($(DEBUG), 1)
-    __cFlags__   += -g3
-    __cxxFlags__ += -g3
-    __asFlags__  += -g3
+    _cFlags   += -g3
+    _cxxFlags += -g3
+    _asFlags  += -g3
 endif
 
-__includeFlags__ += $(strip $(foreach srcDir, $(srcDirs), -I$(srcDir)))
-__includeFlags__ += $(strip $(foreach includeDir, $(includeDirs), -I$(includeDir)))
+_includeFlags += $(strip $(foreach srcDir, $(SRC_DIRS), -I$(srcDir)))
+_includeFlags += $(strip $(foreach includeDir, $(INCLUDE_DIRS), -I$(includeDir)))
 
 ifeq ($(PROJ_TYPE), lib)
     ifeq ($(LIB_TYPE), shared)
-        __cFlags__   += -fPIC
-        __cxxFlags__ += -fPIC
-        __ldFlags__  += -shared
+        _cFlags   += -fPIC
+        _cxxFlags += -fPIC
+        _ldFlags  += -shared
     endif
 endif
 
-__arFlags__ += rcs
+_arFlags += rcs
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-isCppProject := $(strip $(foreach srcDir, $(srcDirs), $(shell find $(srcDir) -type f -name *.cpp 2> /dev/null)))
+isCppProject := $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir) -type f -name *.cpp 2> /dev/null)))
 ifeq ($(isCppProject), )
-    isCppProject = $(strip $(foreach includeDir, $(includeDirs), $(shell find $(includeDir) -type f -name *.hpp 2> /dev/null)))
+    isCppProject = $(strip $(foreach includeDir, $(INCLUDE_DIRS), $(shell find $(includeDir) -type f -name *.hpp 2> /dev/null)))
 endif
 
 ifeq ($(isCppProject), )
@@ -229,42 +141,27 @@ else
 endif
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------
-ifneq ($(GCC_PREFIX), )
-    __gccPrefix__ := $(GCC_PREFIX)-
-endif
-CC  := $(__gccPrefix__)$(CC)
-CXX := $(__gccPrefix__)$(CXX)
-AS  := $(__gccPrefix__)$(AS)
-AR  := $(__gccPrefix__)$(AR)
-LD  := $(__gccPrefix__)$(LD)
-# ------------------------------------------------------------------------------
-
-.DEFAULT_GOAL := all
-
+# ALL ==========================================================================
 .PHONY: all
 all: dist
+# ==============================================================================
 
 # BUILD ========================================================================
 .PHONY: build
 build: post-build
 
 .PHONY: pre-build
-pre-build: __nl__ := $(__nl__)
-pre-build: __v__  := $(__v__)
 pre-build: $(PRE_BUILD_DEPS)
     ifneq ($(PRE_BUILD), )
-	    @printf "$(__nl__)[PRE_BUILD]\n"
-	    $(__v__)$(PRE_BUILD)
+	    @printf "$(nl)[PRE_BUILD]\n"
+	    $(v)$(PRE_BUILD)
     endif
 
 .PHONY: post-build
-post-build: __nl__ := $(__nl__)
-post-build: __v__  := $(__v__)
-post-build: pre-build $(BUILD_DEPS) $(fullBuildDir)/$(artifactName) $(__postBuildDeps__) $(POST_BUILD_DEPS)
+post-build: pre-build $(BUILD_DEPS) $(buildDir)/$(_artifactName) $(_postBuildDeps) $(POST_BUILD_DEPS)
     ifneq ($(POST_BUILD), )
-	    @printf "$(__nl__)[POST_BUILD]\n"
-	    $(__v__)$(POST_BUILD)
+	    @printf "$(nl)[POST_BUILD]\n"
+	    $(v)$(POST_BUILD)
     endif
 # ==============================================================================
 
@@ -273,23 +170,19 @@ post-build: pre-build $(BUILD_DEPS) $(fullBuildDir)/$(artifactName) $(__postBuil
 clean: post-clean
 
 .PHONY: pre-clean
-pre-clean: __nl__ := $(__nl__)
-pre-clean: __v__  := $(__v__)
 pre-clean:
     ifneq ($(PRE_CLEAN), )
-	    @printf "$(__nl__)[PRE_CLEAN]\n"
-	    $(__v__)$(PRE_CLEAN)
+	    @printf "$(nl)[PRE_CLEAN]\n"
+	    $(v)$(PRE_CLEAN)
     endif
 
 .PHONY: post-clean
-post-clean: __nl__ := $(__nl__)
-post-clean: __v__  := $(__v__)
 post-clean: pre-clean
-	@printf "$(__nl__)[CLEAN]\n"
-	$(__v__)rm -rf $(BUILD_DIR_BASE) $(DIST_DIR_BASE)
+	@printf "$(nl)[CLEAN]\n"
+	$(v)rm -rf $(BUILD_DIR_BASE) $(DIST_DIR_BASE)
     ifneq ($(POST_CLEAN), )
-	    @printf "$(__nl__)[POST_CLEAN]\n"
-	    $(__v__)$(POST_CLEAN)
+	    @printf "$(nl)[POST_CLEAN]\n"
+	    $(v)$(POST_CLEAN)
     endif
 # ==============================================================================
 
@@ -298,96 +191,67 @@ post-clean: pre-clean
 dist: post-dist
 
 .PHONY: pre-dist
-pre-dist: __nl__ := $(__nl__)
-pre-dist: __v__ := $(__v__)
 pre-dist: $(PRE_DIST_DEPS)
     ifneq ($(PRE_DIST), )
-	    @printf "$(__nl__)[PRE_DIST]\n"
-	    $(__v__)$(PRE_DIST)
+	    @printf "$(nl)[PRE_DIST]\n"
+	    $(v)$(PRE_DIST)
     endif
 
 .PHONY: post-dist
-post-dist: __nl__ := $(__nl__)
-post-dist: __v__  := $(__v__)
-post-dist: pre-dist $(DIST_DEPS) build $(__postDistDeps__) $(POST_DIST_DEPS)
+post-dist: pre-dist $(DIST_DEPS) build $(_postDistDeps) $(POST_DIST_DEPS)
     ifneq ($(POST_DIST), )
-	    @printf "$(__nl__)[POST_DIST]\n"
-	    $(__v__)$(POST_DIST)
+	    @printf "$(nl)[POST_DIST]\n"
+	    $(v)$(POST_DIST)
     endif
 # ==============================================================================
 
-$(fullBuildDir)/$(artifactName): __objFiles__ := $(__objFiles__)
-$(fullBuildDir)/$(artifactName): __nl__  := $(__nl__)
-$(fullBuildDir)/$(artifactName): __v__ := $(__v__)
-$(fullBuildDir)/$(artifactName): __ldFlags__ := $(__ldFlags__)
-$(fullBuildDir)/$(artifactName): __arFlags__ := $(__arFlags__)
-$(fullBuildDir)/$(artifactName):  $(__objFiles__)
+# ==============================================================================
+$(buildDir)/$(_artifactName): $(objFiles)
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
-	        @printf "$(__nl__)[LD] $@\n"
-	        $(__v__)$(LD) $(strip -o $@ $(__objFiles__) $(__ldFlags__) $(LDFLAGS))
+	        @printf "$(nl)[LD] $@\n"
+	        $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(_ldFlags) $(LDFLAGS))
         else
-	        @printf "$(__nl__)[AR] $@\n"
-	        $(__v__)$(AR) $(strip $(__arFlags__) $@ $(__objFiles__))
+	        @printf "$(nl)[AR] $@\n"
+	        $(v)$(CROSS_COMPILE)$(AR) $(strip $(_arFlags) $@ $(objFiles))
         endif
     else
-	    @printf "$(__nl__)[LD] $@\n"
-	    $(__v__)$(LD) $(strip -o $@ $(__objFiles__) $(__ldFlags__) $(LDFLAGS))
+	    @printf "$(nl)[LD] $@\n"
+	    $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(_ldFlags) $(LDFLAGS))
     endif
+# ==============================================================================
 
-$(fullDistDir)/include/%.h: __nl__ := $(__nl__)
-$(fullDistDir)/include/%.h: __v__  := $(__v__)
-$(fullDistDir)/include/%.h : include/%.h
-	@printf "$(__nl__)[DIST] $@\n"
+# ==============================================================================
+$(distDir)/include/%.h : include/%.h
+	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(dir $@)
-	$(__v__)ln $< $@
+	$(v)ln $< $@
+# ==============================================================================
 
-$(fullBuildDir)/%.c$(__objSuffix__): __nl__           := $(__nl__)
-$(fullBuildDir)/%.c$(__objSuffix__): __v__            := $(__v__)
-$(fullBuildDir)/%.c$(__objSuffix__): __cFlags__       := $(__cFlags__)
-$(fullBuildDir)/%.c$(__objSuffix__): __includeFlags__ := $(__includeFlags__)
-$(fullBuildDir)/%.c$(__objSuffix__): %.c
-	@printf "$(__nl__)[CC] $@\n"
+# ==============================================================================
+$(buildDir)/%.c$(objSuffix): %.c
+	@printf "$(nl)[CC] $@\n"
 	@mkdir -p $(dir $@)
-	$(__v__)$(CC) $(strip $(__cFlags__) -MMD $(CFLAGS) $(__includeFlags__) -c $< -o $@)
+	$(v)$(CROSS_COMPILE)$(CC) $(strip $(_cFlags) -MMD $(CFLAGS) $(_includeFlags) -c $< -o $@)
+# ==============================================================================
 
-$(fullBuildDir)/%.cpp$(__objSuffix__): __nl__           := $(__nl__)
-$(fullBuildDir)/%.cpp$(__objSuffix__): __v__            := $(__v__)
-$(fullBuildDir)/%.cpp$(__objSuffix__): __cxxFlags__     := $(__cxxFlags__)
-$(fullBuildDir)/%.cpp$(__objSuffix__): __includeFlags__ := $(__includeFlags__)
-$(fullBuildDir)/%.cpp$(__objSuffix__): %.cpp
-	@printf "$(__nl__)[CXX] $@\n"
+# ==============================================================================
+$(buildDir)/%.cpp$(objSuffix): %.cpp
+	@printf "$(nl)[CXX] $@\n"
 	@mkdir -p $(dir $@)
-	$(__v__)$(CXX) $(strip $(__cxxFlags__) -MMD -MP $(CXXFLAGS) $(__includeFlags__) -c $< -o $@)
+	$(v)$(CROSS_COMPILE)$(CXX) $(strip $(_cxxFlags) -MMD -MP $(CXXFLAGS) $(_includeFlags) -c $< -o $@)
+# ==============================================================================
 
-$(fullBuildDir)/%.S$(__objSuffix__): __nl__           := $(__nl__)
-$(fullBuildDir)/%.S$(__objSuffix__): __v__            := $(__v__)
-$(fullBuildDir)/%.S$(__objSuffix__): __asFlags__      := $(__asFlags__)
-$(fullBuildDir)/%.S$(__objSuffix__): __includeFlags__ := $(__includeFlags__)
-$(fullBuildDir)/%.S$(__objSuffix__): %.S
-	@printf "$(__nl__)[AS] $@\n"
+# ==============================================================================
+$(buildDir)/%.S$(objSuffix): %.S
+	@printf "$(nl)[AS] $@\n"
 	@mkdir -p $(dir $@)
-	$(__v__)$(AS) $(strip $(__asFlags__) -MMD $(ASFLAGS) $(__includeFlags__) -c $< -o $@)
+	$(v)$(CROSS_COMPILE)$(AS) $(strip $(_asFlags) -MMD $(ASFLAGS) $(_includeFlags) -c $< -o $@)
+# ==============================================================================
 
--include $(__deps__)
+-include $(_deps)
 
-undefine __v__
-undefine __nl__
-undefine __srcFiles__
-undefine __objSuffix__
-undefine __objFiles__
-undefine __deps__
-undefine __selfDir__
-undefine __libDistHeaders__
-undefine __postBuildDeps__
-undefine __postDistDeps__
-undefine __cFlags__
-undefine __cxxFlags__
-undefine __asFlags__
-undefine __includeFlags__
-undefine __ldFlags__
-undefine __arFlags__
-undefine __gccPrefix__
+undefine __selfDir
 
-endif # __include_project_mk__
+endif # _include_project_mk
 
