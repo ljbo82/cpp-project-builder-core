@@ -43,7 +43,6 @@ $(distDir)/bin/$(libPrefix)$(__mylib)$(sharedLibSuffix): ../lib/$(buildDir)/$(li
 	$(v)cp $< $@
 # ==============================================================================
 
-undefine __debugSuffix
-undefine __libSuffix
+undefine __mylib
 
 include ../../project.mk
