@@ -17,11 +17,17 @@
 PROJ_NAME := app_lib
 PROJ_TYPE := app
 
-include ../../native_host.mk
+ifeq ($(HOST), )
+    include ../../native_host.mk
+endif
+
+ifeq ($(DEBUG), 1)
+  __libSuffix__ := _d
+endif
 
 PRE_BUILD := make -C ../lib
-POST_DIST := ln -sf ../../../../lib/build/$(host)/libmylib0.so dist/$(host)/bin/libmylib0.so
+POST_DIST := ln -sf ../../../../lib/build/$(host)/libmylib0$(__libSuffix__).so dist/$(host)/bin/libmylib0$(__libSuffix__).so
 INCLUDE_DIRS += ../lib/include
-LDFLAGS += -Wl,-rpath,./ -L../lib/build/$(host) -lmylib0
+LDFLAGS += -Wl,-rpath,./ -L../lib/build/$(host) -lmylib0$(__libSuffix__)
 
 include ../../project.mk
