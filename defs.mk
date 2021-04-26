@@ -82,12 +82,12 @@ __selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
 ifeq ($(HOST), )
     include $(__selfDir)native_host.mk
 else
-    ifeq ($(shell sh -c "echo $(HOST) | grep -oP '[a-zA-Z0-9]+\-[a-zA-Z0-9]+.*'"), )
+    ifeq ($(shell echo $(HOST) | grep -oP '[a-zA-Z0-9]+\-[a-zA-Z0-9]+.*'), )
         $(error Invalid HOST: $(HOST))
     endif
 
-    hostOS := $(shell echo $(HOST) | cut -d'.' -f1)
-    hostArch := $(shell echo $(HOST) | cut -d'.' -f2-)
+    hostOS := $(shell echo $(HOST) | cut -d'-' -f1)
+    hostArch := $(shell echo $(HOST) | cut -d'-' -f2-)
 endif
 HOST := $(hostOS)-$(hostArch)
 # ------------------------------------------------------------------------------

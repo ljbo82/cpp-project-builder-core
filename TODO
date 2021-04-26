@@ -1,7 +1,5 @@
 gcc-project-builder TODO
 
 * Documentation
-* Test windows hosts
-* Cross-compilation tests
 * Utitlity Makefile to expose a target for doxygen-based documentation build
 * Use gcc-project-builder to build arduino projects

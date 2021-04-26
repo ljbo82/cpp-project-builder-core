@@ -132,9 +132,10 @@ else
     isCppProject := 1
 endif
 
+CC := gcc
 ifeq ($(isCppProject), 0)
     # Pure C project
-    LD := $(CC)
+    LD := gcc
 else
     # C/C++ project
     LD := $(CXX)

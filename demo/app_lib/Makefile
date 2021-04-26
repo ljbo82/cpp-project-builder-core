@@ -20,27 +20,34 @@ PROJ_TYPE := app
 include ../../defs.mk
 
 ifeq ($(DEBUG), 1)
-  __artifactSuffix := _d
+  __debugSuffix := _d
 endif
 
-BUILD_DEPS     := ../lib/$(buildDir)/libmylib0$(__artifactSuffix).so
-POST_DIST_DEPS := $(distDir)/bin/libmylib0$(__artifactSuffix).so
+ifeq ($(hostOS), windows)
+    __libSuffix := .dll
+else
+    __libSuffix := .so
+endif
+
+BUILD_DEPS     := ../lib/$(buildDir)/libmylib0$(__debugSuffix)$(__libSuffix)
+POST_DIST_DEPS := $(distDir)/bin/libmylib0$(__debugSuffix)$(__libSuffix)
 INCLUDE_DIRS   += ../lib/include
-LDFLAGS        += -Wl,-rpath,./ -L../lib/$(buildDir) -lmylib0$(__artifactSuffix)
+LDFLAGS        := -Wl,-rpath,./ -L../lib/$(buildDir) -lmylib0$(__debugSuffix)
 
 # ==============================================================================
-../lib/$(buildDir)/libmylib0$(__artifactSuffix).so:
+../lib/$(buildDir)/libmylib0$(__debugSuffix)$(__libSuffix):
 	@printf "$(nl)[BUILD] $@\n"
 	@$(MAKE) clean > /dev/null
 	$(v)$(MAKE) -C ../lib
 # ==============================================================================
 
 # ==============================================================================
-$(distDir)/bin/libmylib0$(__artifactSuffix).so: ../lib/$(buildDir)/libmylib0$(__artifactSuffix).so
+$(distDir)/bin/libmylib0$(__debugSuffix)$(__libSuffix): ../lib/$(buildDir)/libmylib0$(__debugSuffix)$(__libSuffix)
 	@printf "$(nl)[DIST] $@\n"
-	$(v)ln -sf ../../../../lib/$(buildDir)/libmylib0$(__artifactSuffix).so $@
+	$(v)cp $< $@
 # ==============================================================================
 
-undefine __artifactSuffix
+undefine __debugSuffix
+undefine __libSuffix
 
 include ../../project.mk

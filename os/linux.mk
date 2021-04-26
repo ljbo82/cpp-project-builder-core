@@ -31,9 +31,9 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-__libPrefix       = lib
-__sharedLibSuffix :=.so
-__staticLibSuffix := .a
+libPrefix       := lib
+sharedLibSuffix := .so
+staticLibSuffix := .a
 
 ifeq ($(DEBUG), 1)
     __debugSuffix := _d
@@ -44,13 +44,13 @@ ifeq ($(PROJ_TYPE), app)
     _postDistDeps += $(distDir)/bin/$(_artifactName)
 else
     ifeq ($(LIB_TYPE), static)
-        _artifactName := $(__libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(__staticLibSuffix)
+        _artifactName := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(staticLibSuffix)
         _postDistDeps += $(distDir)/lib/$(_artifactName)
     else
-        _artifactBaseName := $(__libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(__sharedLibSuffix)
-        _artifactName      := $(_artifactBaseName).$(projVersionMinor).$(projVersionPatch)
-        _postBuildDeps     += $(buildDir)/$(_artifactBaseName)
-        _postDistDeps      += $(distDir)/lib/$(_artifactName) $(distDir)/lib/$(_artifactBaseName)
+        _artifactBaseName := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(sharedLibSuffix)
+        _artifactName     := $(_artifactBaseName).$(projVersionMinor).$(projVersionPatch)
+        _postBuildDeps    += $(buildDir)/$(_artifactBaseName)
+        _postDistDeps     += $(distDir)/lib/$(_artifactName) $(distDir)/lib/$(_artifactBaseName)
     endif
 endif
 # ------------------------------------------------------------------------------
@@ -83,9 +83,6 @@ $(distDir)/lib/$(_artifactName): $(buildDir)/$(_artifactName)
 # ==============================================================================
 
 undefine __selfDir
-undefine __libPrefix
-undefine __sharedLibSuffix
-undefine __staticLibSuffix
 undefine __debugSuffix
 
 endif #_include_os_linux_mk
