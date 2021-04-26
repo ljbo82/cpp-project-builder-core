@@ -20,29 +20,27 @@ PROJ_TYPE := app
 include ../../defs.mk
 
 ifeq ($(DEBUG), 0)
-    __mylib := mylib0
+    mylib := mylib0
 else
-    __mylib := mylib0_d
+    mylib := mylib0_d
 endif
 
-BUILD_DEPS     := ../lib/$(buildDir)/$(libPrefix)$(__mylib)$(sharedLibSuffix)
-POST_DIST_DEPS := $(distDir)/bin/$(libPrefix)$(__mylib)$(sharedLibSuffix)
+BUILD_DEPS     := ../lib/$(buildDir)/$(libPrefix)$(mylib)$(sharedLibSuffix)
+POST_DIST_DEPS := $(distDir)/bin/$(libPrefix)$(mylib)$(sharedLibSuffix)
 INCLUDE_DIRS   += ../lib/include
-LDFLAGS        := -Wl,-rpath,./ -L../lib/$(buildDir) -l$(__mylib)
+LDFLAGS        := -Wl,-rpath,./ -L../lib/$(buildDir) -l$(mylib)
 
 # ==============================================================================
-../lib/$(buildDir)/$(libPrefix)$(__mylib)$(sharedLibSuffix):
+../lib/$(buildDir)/$(libPrefix)$(mylib)$(sharedLibSuffix):
 	@printf "$(nl)[BUILD] $@\n"
 	@$(MAKE) clean > /dev/null
 	$(v)$(MAKE) -C ../lib LIB_TYPE=shared
 # ==============================================================================
 
 # ==============================================================================
-$(distDir)/bin/$(libPrefix)$(__mylib)$(sharedLibSuffix): ../lib/$(buildDir)/$(libPrefix)$(__mylib)$(sharedLibSuffix)
+$(distDir)/bin/$(libPrefix)$(mylib)$(sharedLibSuffix): ../lib/$(buildDir)/$(libPrefix)$(mylib)$(sharedLibSuffix)
 	@printf "$(nl)[DIST] $@\n"
 	$(v)cp $< $@
 # ==============================================================================
-
-undefine __mylib
 
 include ../../project.mk
