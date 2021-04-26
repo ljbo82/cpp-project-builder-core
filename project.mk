@@ -23,41 +23,6 @@ include $(__selfDir)defs.mk
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-__selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
-ifeq ($(wildcard $(__selfDir)os/$(hostOS).mk), )
-    $(error Unsupported host OS: $(hostOS))
-endif
-include $(__selfDir)os/$(hostOS).mk
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifeq ($(PROJ_NAME),  )
-    $(error Missing PROJ_NAME)
-endif
-
-ifneq (1, $(words $(PROJ_NAME)))
-    $(error PROJ_NAME cannot have spaces)
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifeq ($(PROJ_TYPE), )
-    $(error Missing PROJ_TYPE)
-endif
-ifneq ($(PROJ_TYPE), app)
-    ifneq ($(PROJ_TYPE), lib)
-        $(error Unsupported PROJ_TYPE: $(PROJ_TYPE))
-    else
-        ifneq ($(LIB_TYPE), shared)
-            ifneq ($(LIB_TYPE), static)
-                $(error Unsupported LIB_TYPE: $(LIB_TYPE))
-            endif
-        endif
-    endif
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
 SRC_DIRS := $(sort $(SRC_DIRS))
 srcFiles := $(sort $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir) -type f -name *.c -or -name *.cpp -or -name *.S 2> /dev/null))))
 ifeq ($(DEBUG), 1)

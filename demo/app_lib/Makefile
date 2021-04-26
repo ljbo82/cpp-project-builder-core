@@ -19,30 +19,26 @@ PROJ_TYPE := app
 
 include ../../defs.mk
 
-ifeq ($(DEBUG), 1)
-  __debugSuffix := _d
-endif
-
-ifeq ($(hostOS), windows)
-    __libSuffix := .dll
+ifeq ($(DEBUG), 0)
+    __mylib := mylib0
 else
-    __libSuffix := .so
+    __mylib := mylib0_d
 endif
 
-BUILD_DEPS     := ../lib/$(buildDir)/libmylib0$(__debugSuffix)$(__libSuffix)
-POST_DIST_DEPS := $(distDir)/bin/libmylib0$(__debugSuffix)$(__libSuffix)
+BUILD_DEPS     := ../lib/$(buildDir)/$(libPrefix)$(__mylib)$(sharedLibSuffix)
+POST_DIST_DEPS := $(distDir)/bin/$(libPrefix)$(__mylib)$(sharedLibSuffix)
 INCLUDE_DIRS   += ../lib/include
-LDFLAGS        := -Wl,-rpath,./ -L../lib/$(buildDir) -lmylib0$(__debugSuffix)
+LDFLAGS        := -Wl,-rpath,./ -L../lib/$(buildDir) -l$(__mylib)
 
 # ==============================================================================
-../lib/$(buildDir)/libmylib0$(__debugSuffix)$(__libSuffix):
+../lib/$(buildDir)/$(libPrefix)$(__mylib)$(sharedLibSuffix):
 	@printf "$(nl)[BUILD] $@\n"
 	@$(MAKE) clean > /dev/null
-	$(v)$(MAKE) -C ../lib
+	$(v)$(MAKE) -C ../lib LIB_TYPE=shared
 # ==============================================================================
 
 # ==============================================================================
-$(distDir)/bin/libmylib0$(__debugSuffix)$(__libSuffix): ../lib/$(buildDir)/libmylib0$(__debugSuffix)$(__libSuffix)
+$(distDir)/bin/$(libPrefix)$(__mylib)$(sharedLibSuffix): ../lib/$(buildDir)/$(libPrefix)$(__mylib)$(sharedLibSuffix)
 	@printf "$(nl)[DIST] $@\n"
 	$(v)cp $< $@
 # ==============================================================================

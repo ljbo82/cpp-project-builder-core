@@ -27,9 +27,31 @@ defaultSrcDir       := src
 defaultIncludeDir   := include
 
 # ------------------------------------------------------------------------------
-ifeq ($(PROJ_TYPE), lib)
-    ifeq ($(LIB_TYPE), )
-        LIB_TYPE := $(defaultLibType)
+ifeq ($(PROJ_NAME),  )
+    $(error Missing PROJ_NAME)
+endif
+
+ifneq (1, $(words $(PROJ_NAME)))
+    $(error PROJ_NAME cannot have spaces)
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(PROJ_TYPE), )
+    $(error Missing PROJ_TYPE)
+endif
+ifneq ($(PROJ_TYPE), app)
+    ifneq ($(PROJ_TYPE), lib)
+        $(error Unsupported PROJ_TYPE: $(PROJ_TYPE))
+    else
+        ifeq ($(LIB_TYPE), )
+            LIB_TYPE := $(defaultLibType)
+        endif
+        ifneq ($(LIB_TYPE), shared)
+            ifneq ($(LIB_TYPE), static)
+                $(error Unsupported LIB_TYPE: $(LIB_TYPE))
+            endif
+        endif
     endif
 endif
 # ------------------------------------------------------------------------------
@@ -122,6 +144,14 @@ endif
 ifneq ($(wildcard $(defaultIncludeDir)), )
     INCLUDE_DIRS += $(defaultIncludeDir)
 endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+__selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
+ifeq ($(wildcard $(__selfDir)os/$(hostOS).mk), )
+    $(error Unsupported host OS: $(hostOS))
+endif
+include $(__selfDir)os/$(hostOS).mk
 # ------------------------------------------------------------------------------
 
 .DEFAULT_GOAL := all

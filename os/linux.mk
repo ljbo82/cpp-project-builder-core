@@ -21,16 +21,6 @@ __selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
 include $(__selfDir)../defs.mk
 
 # ------------------------------------------------------------------------------
-ifeq ($(PROJ_NAME),  )
-    $(error Missing PROJ_NAME)
-endif
-
-ifneq (1, $(words $(PROJ_NAME)))
-    $(error PROJ_NAME cannot have spaces)
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
 libPrefix       := lib
 sharedLibSuffix := .so
 staticLibSuffix := .a
