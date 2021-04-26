@@ -19,23 +19,27 @@ __include_git_mk__ := 1
 
 __gitRepoAvailable__ := $(shell git status > /dev/null 2>&1; echo $$?)
 ifeq ($(__gitRepoAvailable__), 0)
-    gitCommit := $(shell git rev-parse HEAD)
-    gitStatus := $(shell git status -s)
-    ifeq ($(gitStatus),)
-        # Clean tree
-        gitStatus := 0
+    gitCommit := $(shell git rev-parse HEAD > /dev/null 2>&1; echo $$?)
+    ifeq ($(gitCommit), 0)
+        gitCommit := $(shell git rev-parse HEAD)
+        gitStatus := $(shell git status -s)
+        ifeq ($(gitStatus),)
+            # Clean tree
+            gitStatus := 0
+        else
+            # Dirty tree
+            gitStatus := 1
+        endif
+        gitTag := $(shell git describe --tags > /dev/null 2>&1; echo $$?)
+        ifeq ($(gitTag), 0)
+            gitTag := $(shell git describe --tags)
+        else
+            gitTag :=
+        endif
     else
-        # Dirty tree
-        gitStatus := 1
-    endif
-    gitTag := $(shell git describe --tags > /dev/null 2>&1; echo $$?)
-    ifeq ($(gitTag), 0)
-        gitTag := $(shell git describe --tags)
-    else
-        gitTag :=
-    endif
+        gitCommit :=
+    endif    
 endif
-
 undefine __gitRepoAvailable__
 
 endif # __include_git_mk__
