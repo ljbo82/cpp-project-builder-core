@@ -25,6 +25,7 @@ defaultBuildDirBase := build
 defaultDistDirBase  := dist
 defaultSrcDir       := src
 defaultIncludeDir   := include
+defaultOsDir        := os
 
 # ------------------------------------------------------------------------------
 ifeq ($(PROJ_NAME),  )
@@ -147,11 +148,15 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+ifeq ($(OS_DIR), )
+    OS_DIR := $(defaultOsDir)
+endif
+
 __selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
-ifeq ($(wildcard $(__selfDir)os/$(hostOS).mk), )
+ifeq ($(wildcard $(__selfDir)$(OS_DIR)/$(hostOS).mk), )
     $(error Unsupported host OS: $(hostOS))
 endif
-include $(__selfDir)os/$(hostOS).mk
+include $(__selfDir)$(OS_DIR)/$(hostOS).mk
 # ------------------------------------------------------------------------------
 
 .DEFAULT_GOAL := all
