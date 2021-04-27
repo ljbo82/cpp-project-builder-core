@@ -17,8 +17,8 @@
 ifndef _include_os_windows_mk
 _include_os_windows_mk := 1
 
-__selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(__selfDir)../defs.mk
+__os_windows_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(__os_windows_mk_dir)../defs.mk
 
 # ------------------------------------------------------------------------------
 appSuffix       := .exe
@@ -57,7 +57,7 @@ $(distDir)/lib/$(artifactName).def: $(buildDir)/$(artifactName).def
 	$(v)ln $< $@
 # ==============================================================================
 
-undefine __selfDir
+undefine __os_windows_mk_dir
 undefine __debugSuffix
 
 endif #_include_os_windows_mk

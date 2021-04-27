@@ -17,6 +17,8 @@
 ifndef _include_defs_mk
 _include_defs_mk := 1
 
+__defs_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+
 defaultLibType      := shared
 defaultProjVersion  := 0.1.0
 defaultDebug        := 0
@@ -101,9 +103,8 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-__selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
 ifeq ($(HOST), )
-    include $(__selfDir)native_host.mk
+    include $(__defs_mk_dir)native_host.mk
 else
     ifeq ($(shell echo $(HOST) | grep -oP '[a-zA-Z0-9]+\-[a-zA-Z0-9]+.*'), )
         $(error Invalid HOST: $(HOST))
@@ -152,16 +153,15 @@ ifeq ($(OS_DIR), )
     OS_DIR := $(defaultOsDir)
 endif
 
-__selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
-ifeq ($(wildcard $(__selfDir)$(OS_DIR)/$(hostOS).mk), )
+ifeq ($(wildcard $(__defs_mk_dir)$(OS_DIR)/$(hostOS).mk), )
     $(error Unsupported host OS: $(hostOS))
 endif
-include $(__selfDir)$(OS_DIR)/$(hostOS).mk
+include $(__defs_mk_dir)$(OS_DIR)/$(hostOS).mk
 # ------------------------------------------------------------------------------
 
 .DEFAULT_GOAL := all
 
-undefine __selfDir
+undefine __defs_mk_dir
 
 endif # _include_defs_mk
 

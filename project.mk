@@ -18,8 +18,8 @@ ifndef _include_project_mk
 _include_project_mk := 1
 
 # ------------------------------------------------------------------------------
-__selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(__selfDir)defs.mk
+__project_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(__project_mk_dir)defs.mk
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -236,7 +236,7 @@ $(buildDir)/%.S$(objSuffix): %.S
 
 -include $(_deps)
 
-undefine __selfDir
+undefine __project_mk_dir
 
 endif # _include_project_mk
 

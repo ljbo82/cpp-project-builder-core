@@ -17,8 +17,8 @@
 ifndef _include_doxygen_mk
 _include_doxygen_mk := 1
 
-__selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(__selfDir)defs.mk
+__doxygen_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(__doxygen_mk_dir)defs.mk
 
 docBuildDir := $(distDir)/doc
 ifeq ($(DOXYFILE), )
@@ -50,7 +50,7 @@ post-doc: pre-doc $(DOC_DEPS)
     endif
 # ==============================================================================
 
-undefine __selfDir
+undefine __doxygen_mk_dir
 
 endif # _include_doxygen_mk
 

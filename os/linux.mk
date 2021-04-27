@@ -17,8 +17,8 @@
 ifndef _include_os_linux_mk
 _include_os_linux_mk := 1
 
-__selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(__selfDir)../defs.mk
+__os_linux_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(__os_linux_mk_dir)../defs.mk
 
 # ------------------------------------------------------------------------------
 libPrefix       := lib
@@ -56,7 +56,7 @@ $(distDir)/lib/$(_artifactBaseName): $(buildDir)/$(_artifactBaseName)
 	$(v)ln $< $@
 # ==============================================================================
 
-undefine __selfDir
+undefine __os_linux_mk_dir
 undefine __debugSuffix
 
 endif #_include_os_linux_mk
