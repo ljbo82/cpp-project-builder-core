@@ -31,42 +31,29 @@ endif
 
 ifeq ($(PROJ_TYPE), app)
     artifactName  := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)
-    _postDistDeps += $(distDir)/bin/$(artifactName)
 else
     ifeq ($(LIB_TYPE), static)
         artifactName  := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(staticLibSuffix)
-        _postDistDeps += $(distDir)/lib/$(artifactName)
     else
         _artifactBaseName := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(sharedLibSuffix)
         artifactName      := $(_artifactBaseName).$(projVersionMinor).$(projVersionPatch)
         _postBuildDeps    += $(buildDir)/$(_artifactBaseName)
-        _postDistDeps     += $(distDir)/lib/$(artifactName)
         _postDistDeps     += $(distDir)/lib/$(_artifactBaseName)
     endif
 endif
 # ------------------------------------------------------------------------------
 
+# _postBuildDeps ===============================================================
+$(buildDir)/$(_artifactBaseName): $(buildDir)/$(artifactName)
+	@printf "$(nl)[BUILD] $@\n"
+	$(v)ln -sf $(notdir $<) $@
+# ==============================================================================
+
 # _postDistDeps ================================================================
-$(distDir)/bin/$(artifactName): $(buildDir)/$(artifactName)
-	@printf "$(nl)[DIST] $@\n"
-	@mkdir -p $(distDir)/bin
-	$(v)ln $< $@
-
-$(distDir)/lib/$(artifactName): $(buildDir)/$(artifactName)
-	@printf "$(nl)[DIST] $@\n"
-	@mkdir -p $(distDir)/lib
-	$(v)ln $< $@
-
 $(distDir)/lib/$(_artifactBaseName): $(buildDir)/$(_artifactBaseName)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
 	$(v)ln $< $@
-# ==============================================================================
-
-# _postBuildDeps ===============================================================
-$(buildDir)/$(_artifactBaseName): build $(buildDir)/$(artifactName)
-	@printf "$(nl)[BUILD] $@\n"
-	$(v)ln -sf $(notdir $<) $@
 # ==============================================================================
 
 undefine __selfDir

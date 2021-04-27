@@ -51,6 +51,18 @@ depFiles := $(objFiles:.o=.d)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+ifeq ($(PROJ_TYPE), app)
+    _postDistDeps += $(distDir)/bin/$(artifactName)
+else
+    ifeq ($(LIB_TYPE), static)
+        _postDistDeps += $(distDir)/lib/$(artifactName)
+    else
+        _postDistDeps += $(distDir)/lib/$(artifactName)
+    endif
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 ifneq ($(wildcard $(defaultIncludeDir)), )
     ifeq ($(PROJ_TYPE), lib)
         _postDistDeps += $(foreach distHeader, $(shell find $(defaultIncludeDir) -type f -name *.h -or -name *.hpp 2> /dev/null), $(distDir)/$(distHeader))
@@ -173,9 +185,19 @@ $(distDir)/$(defaultIncludeDir)/%.h : $(defaultIncludeDir)/%.h
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(dir $@)
 	$(v)ln $< $@
+
+$(distDir)/bin/$(artifactName): $(buildDir)/$(artifactName)
+	@printf "$(nl)[DIST] $@\n"
+	@mkdir -p $(distDir)/bin
+	$(v)ln $< $@
+
+$(distDir)/lib/$(artifactName): $(buildDir)/$(artifactName)
+	@printf "$(nl)[DIST] $@\n"
+	@mkdir -p $(distDir)/lib
+	$(v)ln $< $@
 # ==============================================================================
 
-# ==============================================================================
+# Build artifact ===============================================================
 $(buildDir)/$(artifactName): $(objFiles)
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
@@ -191,21 +213,21 @@ $(buildDir)/$(artifactName): $(objFiles)
     endif
 # ==============================================================================
 
-# ==============================================================================
+# C sources ====================================================================
 $(buildDir)/%.c$(objSuffix): %.c
 	@printf "$(nl)[CC] $@\n"
 	@mkdir -p $(dir $@)
 	$(v)$(CROSS_COMPILE)$(CC) $(strip $(_cFlags) -MMD $(CFLAGS) $(_includeFlags) -c $< -o $@)
 # ==============================================================================
 
-# ==============================================================================
+# C++ sources ==================================================================
 $(buildDir)/%.cpp$(objSuffix): %.cpp
 	@printf "$(nl)[CXX] $@\n"
 	@mkdir -p $(dir $@)
 	$(v)$(CROSS_COMPILE)$(CXX) $(strip $(_cxxFlags) -MMD -MP $(CXXFLAGS) $(_includeFlags) -c $< -o $@)
 # ==============================================================================
 
-# ==============================================================================
+# Assembly sources =============================================================
 $(buildDir)/%.S$(objSuffix): %.S
 	@printf "$(nl)[AS] $@\n"
 	@mkdir -p $(dir $@)
