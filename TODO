@@ -1,5 +1,4 @@
 gcc-project-builder TODO
 
 * Documentation
-* Text doxygen.mk
 * Use gcc-project-builder to build arduino projects
