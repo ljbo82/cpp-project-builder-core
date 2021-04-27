@@ -121,7 +121,7 @@ pre-build: $(PRE_BUILD_DEPS)
     endif
 
 .PHONY: post-build
-post-build: pre-build $(BUILD_DEPS) $(buildDir)/$(_artifactName) $(_postBuildDeps) $(POST_BUILD_DEPS)
+post-build: pre-build $(BUILD_DEPS) $(buildDir)/$(artifactName) $(_postBuildDeps) $(POST_BUILD_DEPS)
     ifneq ($(POST_BUILD), )
 	    @printf "$(nl)[POST-BUILD]\n"
 	    $(v)$(POST_BUILD)
@@ -176,7 +176,7 @@ $(distDir)/$(defaultIncludeDir)/%.h : $(defaultIncludeDir)/%.h
 # ==============================================================================
 
 # ==============================================================================
-$(buildDir)/$(_artifactName): $(objFiles)
+$(buildDir)/$(artifactName): $(objFiles)
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
 	        @printf "$(nl)[LD] $@\n"

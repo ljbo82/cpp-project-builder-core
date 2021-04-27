@@ -31,44 +31,44 @@ ifeq ($(DEBUG), 1)
 endif
 
 ifeq ($(PROJ_TYPE), app)
-    _artifactName := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(appSuffix)
-    _postDistDeps += $(distDir)/bin/$(_artifactName)
+    artifactName  := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(appSuffix)
+    _postDistDeps += $(distDir)/bin/$(artifactName)
 else
     ifeq ($(LIB_TYPE), static)
-        _artifactName := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(staticLibSuffix)
-        _postDistDeps += $(distDir)/lib/$(_artifactName)
+        artifactName  := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(staticLibSuffix)
+        _postDistDeps += $(distDir)/lib/$(artifactName)
     else
-        _artifactName := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(sharedLibSuffix)
-        _ldFlags      += -Wl,--out-implib,$(buildDir)/$(_artifactName).lib
-        _ldFlags      += -Wl,--output-def,$(buildDir)/$(_artifactName).def
-        _postDistDeps += $(distDir)/lib/$(_artifactName) $(distDir)/lib/$(_artifactName).lib $(distDir)/lib/$(_artifactName).def
+        artifactName  := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(sharedLibSuffix)
+        _ldFlags      += -Wl,--out-implib,$(buildDir)/$(artifactName).lib
+        _ldFlags      += -Wl,--output-def,$(buildDir)/$(artifactName).def
+        _postDistDeps += $(distDir)/lib/$(artifactName) $(distDir)/lib/$(artifactName).lib $(distDir)/lib/$(artifactName).def
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # ==============================================================================
-$(distDir)/bin/$(_artifactName): $(buildDir)/$(_artifactName)
+$(distDir)/bin/$(artifactName): $(buildDir)/$(artifactName)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/bin
 	$(v)ln $< $@
 # ==============================================================================
 
 # ==============================================================================
-$(distDir)/lib/$(_artifactName): $(buildDir)/$(_artifactName)
+$(distDir)/lib/$(artifactName): $(buildDir)/$(artifactName)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
 	$(v)ln $< $@
 # ==============================================================================
 
 # ==============================================================================
-$(distDir)/lib/$(_artifactName).lib: $(buildDir)/$(_artifactName).lib
+$(distDir)/lib/$(artifactName).lib: $(buildDir)/$(artifactName).lib
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
 	$(v)ln $< $@
 # ==============================================================================
 
 # ==============================================================================
-$(distDir)/lib/$(_artifactName).def: $(buildDir)/$(_artifactName).def
+$(distDir)/lib/$(artifactName).def: $(buildDir)/$(artifactName).def
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
 	$(v)ln $< $@

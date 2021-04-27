@@ -30,30 +30,30 @@ ifeq ($(DEBUG), 1)
 endif
 
 ifeq ($(PROJ_TYPE), app)
-    _artifactName := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)
-    _postDistDeps += $(distDir)/bin/$(_artifactName)
+    artifactName  := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)
+    _postDistDeps += $(distDir)/bin/$(artifactName)
 else
     ifeq ($(LIB_TYPE), static)
-        _artifactName := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(staticLibSuffix)
-        _postDistDeps += $(distDir)/lib/$(_artifactName)
+        artifactName  := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(staticLibSuffix)
+        _postDistDeps += $(distDir)/lib/$(artifactName)
     else
         _artifactBaseName := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(sharedLibSuffix)
-        _artifactName     := $(_artifactBaseName).$(projVersionMinor).$(projVersionPatch)
+        artifactName      := $(_artifactBaseName).$(projVersionMinor).$(projVersionPatch)
         _postBuildDeps    += $(buildDir)/$(_artifactBaseName)
-        _postDistDeps     += $(distDir)/lib/$(_artifactName) $(distDir)/lib/$(_artifactBaseName)
+        _postDistDeps     += $(distDir)/lib/$(artifactName) $(distDir)/lib/$(_artifactBaseName)
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # ==============================================================================
-$(distDir)/bin/$(_artifactName): $(buildDir)/$(_artifactName)
+$(distDir)/bin/$(artifactName): $(buildDir)/$(artifactName)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/bin
 	$(v)ln $< $@
 # ==============================================================================
 
 # ==============================================================================
-$(buildDir)/$(_artifactBaseName): $(buildDir)/$(_artifactName)
+$(buildDir)/$(_artifactBaseName): $(buildDir)/$(artifactName)
 	@printf "$(nl)[BUILD] $@\n"
 	$(v)ln -sf $(notdir $<) $@
 # ==============================================================================
@@ -66,7 +66,7 @@ $(distDir)/lib/$(_artifactBaseName): $(buildDir)/$(_artifactBaseName)
 # ==============================================================================
 
 # ==============================================================================
-$(distDir)/lib/$(_artifactName): $(buildDir)/$(_artifactName)
+$(distDir)/lib/$(artifactName): $(buildDir)/$(artifactName)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
 	$(v)ln $< $@
