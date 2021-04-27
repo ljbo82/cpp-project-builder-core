@@ -20,7 +20,7 @@ _include_doxygen_mk := 1
 __selfDir := $(dir $(lastword $(MAKEFILE_LIST)))
 include $(__selfDir)defs.mk
 
-docBuildDir := $(DIST_DIR_BASE)/doc
+docBuildDir := $(distDir)/doc
 ifeq ($(DOXYFILE), )
     DOXYFILE := Doxyfile
 endif
