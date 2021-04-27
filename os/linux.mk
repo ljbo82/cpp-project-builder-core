@@ -40,36 +40,33 @@ else
         _artifactBaseName := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(sharedLibSuffix)
         artifactName      := $(_artifactBaseName).$(projVersionMinor).$(projVersionPatch)
         _postBuildDeps    += $(buildDir)/$(_artifactBaseName)
-        _postDistDeps     += $(distDir)/lib/$(artifactName) $(distDir)/lib/$(_artifactBaseName)
+        _postDistDeps     += $(distDir)/lib/$(artifactName)
+        _postDistDeps     += $(distDir)/lib/$(_artifactBaseName)
     endif
 endif
 # ------------------------------------------------------------------------------
 
-# ==============================================================================
+# _postDistDeps ================================================================
 $(distDir)/bin/$(artifactName): $(buildDir)/$(artifactName)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/bin
 	$(v)ln $< $@
-# ==============================================================================
 
-# ==============================================================================
-$(buildDir)/$(_artifactBaseName): $(buildDir)/$(artifactName)
-	@printf "$(nl)[BUILD] $@\n"
-	$(v)ln -sf $(notdir $<) $@
-# ==============================================================================
+$(distDir)/lib/$(artifactName): $(buildDir)/$(artifactName)
+	@printf "$(nl)[DIST] $@\n"
+	@mkdir -p $(distDir)/lib
+	$(v)ln $< $@
 
-# ==============================================================================
 $(distDir)/lib/$(_artifactBaseName): $(buildDir)/$(_artifactBaseName)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
 	$(v)ln $< $@
 # ==============================================================================
 
-# ==============================================================================
-$(distDir)/lib/$(artifactName): $(buildDir)/$(artifactName)
-	@printf "$(nl)[DIST] $@\n"
-	@mkdir -p $(distDir)/lib
-	$(v)ln $< $@
+# _postBuildDeps ===============================================================
+$(buildDir)/$(_artifactBaseName): build $(buildDir)/$(artifactName)
+	@printf "$(nl)[BUILD] $@\n"
+	$(v)ln -sf $(notdir $<) $@
 # ==============================================================================
 
 undefine __selfDir
