@@ -1,11 +1,11 @@
---- A note on GPL versions
+--- General license notes
 
-gcc-project-builder is distributed under version 2 of the General Public 
+'gcc-project-builder' is distributed under version 2 of the General Public 
 License (included in its entirety, below).  Version 2 is the only version of
-this license which this version of gcc-project-builder (or modified versions
+this license which this version of 'gcc-project-builder' (or modified versions
 derived from this one) may be distributed under.
 
-A project using gcc-project-builder in order to compile its source files
+A project using 'gcc-project-builder' in order to compile its source files
 is NOT considered a derivative work, therefore it is not obligated to
 comply with GPL V2 terms.
 
