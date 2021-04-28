@@ -17,8 +17,6 @@
 PROJ_NAME := app_lib
 PROJ_TYPE := app
 
-include ../../defs.mk
-
 ifeq ($(DEBUG), 0)
     mylib := mylib0
 else
