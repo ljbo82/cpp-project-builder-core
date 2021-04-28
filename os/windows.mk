@@ -49,12 +49,12 @@ endif
 $(distDir)/lib/$(artifactName).lib: $(buildDir)/$(artifactName).lib
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
-	$(v)ln $< $@
+	$(v)ln -f $< $@
 
 $(distDir)/lib/$(artifactName).def: $(buildDir)/$(artifactName).def
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
-	$(v)ln $< $@
+	$(v)ln -f $< $@
 # ==============================================================================
 
 undefine __os_windows_mk_dir

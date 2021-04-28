@@ -184,17 +184,17 @@ post-dist: pre-dist $(DIST_DEPS) build $(_postDistDeps) $(POST_DIST_DEPS)
 $(distDir)/$(defaultIncludeDir)/%.h : $(defaultIncludeDir)/%.h
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(dir $@)
-	$(v)ln $< $@
+	$(v)ln -f $< $@
 
 $(distDir)/bin/$(artifactName): $(buildDir)/$(artifactName)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/bin
-	$(v)ln $< $@
+	$(v)ln -f $< $@
 
 $(distDir)/lib/$(artifactName): $(buildDir)/$(artifactName)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
-	$(v)ln $< $@
+	$(v)ln -f $< $@
 # ==============================================================================
 
 # Build artifact ===============================================================
