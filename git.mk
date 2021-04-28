@@ -17,12 +17,16 @@
 ifndef _include_git_mk
 _include_git_mk := 1
 
-__gitRepoAvailable := $(shell git status > /dev/null 2>&1; echo $$?)
+ifeq ($(REPO_DIR), )
+    REPO_DIR := .
+endif 
+
+__gitRepoAvailable := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1; echo $$?)
 ifeq ($(__gitRepoAvailable), 0)
-    gitCommit := $(shell git rev-parse HEAD > /dev/null 2>&1; echo $$?)
+    gitCommit := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD > /dev/null 2>&1; echo $$?)
     ifeq ($(gitCommit), 0)
-        gitCommit := $(shell git rev-parse HEAD)
-        gitStatus := $(shell git status -s)
+        gitCommit := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD)
+        gitStatus := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git status -s)
         ifeq ($(gitStatus),)
             # Clean tree
             gitStatus := 0
@@ -30,9 +34,9 @@ ifeq ($(__gitRepoAvailable), 0)
             # Dirty tree
             gitStatus := 1
         endif
-        gitTag := $(shell git describe --tags > /dev/null 2>&1; echo $$?)
+        gitTag := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git describe --tags > /dev/null 2>&1; echo $$?)
         ifeq ($(gitTag), 0)
-            gitTag := $(shell git describe --tags)
+            gitTag := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git describe --tags)
         else
             gitTag :=
         endif

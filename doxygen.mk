@@ -18,12 +18,13 @@ ifndef _include_doxygen_mk
 _include_doxygen_mk := 1
 
 __doxygen_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(__doxygen_mk_dir)defs.mk
 
-docBuildDir := $(distDir)/doc
+docBuildDir = $(distDir)/doc
 ifeq ($(DOXYFILE), )
     DOXYFILE := Doxyfile
 endif
+
+include $(__doxygen_mk_dir)defs.mk
 
 # DOC ==========================================================================
 .PHONY: doc 
