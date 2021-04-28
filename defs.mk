@@ -151,11 +151,6 @@ endif
 ifeq ($(OS_DIR), )
     OS_DIR := $(defaultOsDir)
 endif
-
-ifeq ($(wildcard $(__defs_mk_dir)$(OS_DIR)/$(hostOS).mk), )
-    $(error Unsupported host OS: $(hostOS))
-endif
-include $(__defs_mk_dir)$(OS_DIR)/$(hostOS).mk
 # ------------------------------------------------------------------------------
 
 .DEFAULT_GOAL := all

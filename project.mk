@@ -23,6 +23,13 @@ include $(__project_mk_dir)defs.mk
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+ifeq ($(wildcard $(__project_mk_dir)$(OS_DIR)/$(hostOS).mk), )
+    $(error Unsupported host OS: $(hostOS))
+endif
+include $(__project_mk_dir)$(OS_DIR)/$(hostOS).mk
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 SRC_DIRS := $(sort $(SRC_DIRS))
 srcFiles := $(sort $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir) -type f -name *.c -or -name *.cpp -or -name *.S 2> /dev/null))))
 ifeq ($(DEBUG), 1)

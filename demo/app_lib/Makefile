@@ -25,15 +25,17 @@ else
     mylib := mylib0_d
 endif
 
-BUILD_DEPS     := ../lib/$(buildDir)/$(libPrefix)$(mylib)$(sharedLibSuffix)
-POST_DIST_DEPS := $(distDir)/bin/$(libPrefix)$(mylib)$(sharedLibSuffix)
+BUILD_DEPS     += ../lib/$(buildDir)/$(libPrefix)$(mylib)$(sharedLibSuffix)
+POST_DIST_DEPS += $(distDir)/bin/$(libPrefix)$(mylib)$(sharedLibSuffix)
 INCLUDE_DIRS   += ../lib/include
-LDFLAGS        := -Wl,-rpath,./ -L../lib/$(buildDir) -l$(mylib)
+LDFLAGS        += -Wl,-rpath,./ -L../lib/$(buildDir) -l$(mylib)
+
+include ../../project.mk
 
 # ==============================================================================
 ../lib/$(buildDir)/$(libPrefix)$(mylib)$(sharedLibSuffix):
 	@printf "$(nl)[BUILD] $@\n"
-	@$(MAKE) clean > /dev/null
+	@rm -f $(buildDir)/$(artifactName) $(distDir)/bin/$(artifactName)
 	$(v)$(MAKE) -C ../lib LIB_TYPE=shared
 # ==============================================================================
 
@@ -42,5 +44,3 @@ $(distDir)/bin/$(libPrefix)$(mylib)$(sharedLibSuffix): ../lib/$(buildDir)/$(libP
 	@printf "$(nl)[DIST] $@\n"
 	$(v)cp $< $@
 # ==============================================================================
-
-include ../../project.mk
