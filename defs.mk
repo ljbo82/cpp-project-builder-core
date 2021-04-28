@@ -105,15 +105,14 @@ endif
 # ------------------------------------------------------------------------------
 ifeq ($(HOST), )
     include $(__defs_mk_dir)native_host.mk
+    HOST := $(hostOS)-$(hostArch)
 else
     ifeq ($(shell echo $(HOST) | grep -oP '[a-zA-Z0-9]+\-[a-zA-Z0-9]+.*'), )
         $(error Invalid HOST: $(HOST))
     endif
-
     hostOS := $(shell echo $(HOST) | cut -d'-' -f1)
     hostArch := $(shell echo $(HOST) | cut -d'-' -f2-)
 endif
-HOST := $(hostOS)-$(hostArch)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
