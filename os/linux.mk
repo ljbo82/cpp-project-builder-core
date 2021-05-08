@@ -20,6 +20,32 @@ _include_os_linux_mk := 1
 __os_linux_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 include $(__os_linux_mk_dir)../defs.mk
 
+ifeq ($(CROSS_COMPILE), )
+    ifeq ($(nativeArch), )
+        $(error Missing CROSS_COMPILE)
+    else
+        ifneq ($(hostArch), $(nativeArch))
+            ifeq ($(hostArch), x86)
+                ifeq ($(nativeArch), x64)
+                    _cFlags  += -m32
+                    _ldFlags += -m32
+                else
+                    $(error Missing CROSS_COMPILE)
+                endif
+            else ifeq ($(hostArch), x64)
+                ifeq ($(nativeArch), x86)
+                    _cFlags  += -m64
+                    _ldFlags += -m64
+                else
+                    $(error Missing CROSS_COMPILE)
+                endif
+            else
+                $(error Missing CROSS_COMPILE)
+            endif
+        endif
+    endif
+endif
+
 # ------------------------------------------------------------------------------
 libPrefix       := lib
 sharedLibSuffix := .so

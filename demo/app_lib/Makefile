@@ -17,10 +17,10 @@
 PROJ_NAME := app_lib
 PROJ_TYPE := app
 
-ifeq ($(DEBUG), 0)
-    mylib := mylib0
-else
+ifeq ($(DEBUG), 1)
     mylib := mylib0_d
+else
+    mylib := mylib0
 endif
 
 BUILD_DEPS     += ../lib/$(buildDir)/$(libPrefix)$(mylib)$(sharedLibSuffix)

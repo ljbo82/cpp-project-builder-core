@@ -20,6 +20,18 @@ _include_os_windows_mk := 1
 __os_windows_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 include $(__os_windows_mk_dir)../defs.mk
 
+ifeq ($(CROSS_COMPILE), )
+    ifeq ($(hostArch), x64)
+        CROSS_COMPILE := x86_64-w64-mingw32-
+    else
+        ifeq ($(hostArch), x86)
+            CROSS_COMPILE := i686-w64-mingw32-
+        else
+            $(error Missing CROSS_COMPILE)
+        endif
+    endif
+endif
+
 # ------------------------------------------------------------------------------
 appSuffix       := .exe
 libPrefix       := lib

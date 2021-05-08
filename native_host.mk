@@ -18,38 +18,34 @@ ifndef _include_native_host_mk
 _include_native_host_mk := 1
 
 ifeq ($(OS), Windows_NT)
-    hostOS := windows
+    nativeOS := windows
 else
-    __host_uname_s := $(shell uname -s)
-    ifeq ($(__host_uname_s), Linux)
-        hostOS := linux
-    else
-        $(error [ERROR] Unsupported host operating system: $(__host_uname_s))
+    __native_uname_s := $(shell uname -s)
+    ifeq ($(__native_uname_s), Linux)
+        nativeOS := linux
     endif
 endif
-undefine __host_uname_s
+undefine __native_uname_s
 
-ifeq ($(hostOS), windows)
+ifeq ($(nativeOS), windows)
     ifeq ($(PROCESSOR_ARCHITECTURE), AMD64)
-        hostArch := x64
-    else ifeq ($(PROCESSOR_ARCHITECTURE), x86)
-        hostArch := x86
+        nativeArch := x64
     else
-        $(error [ERROR] Unsupported architecture for host $(hostOS): $(PROCESSOR_ARCHITECTURE))
+        ifeq ($(PROCESSOR_ARCHITECTURE), x86)
+            nativeArch := x86
+        endif
     endif
 else
-    __host_uname_m := $(shell uname -m)
-    ifeq ($(__host_uname_m), x86_64)
-        hostArch := x64
+    __native_uname_m := $(shell uname -m)
+    ifeq ($(__native_uname_m), x86_64)
+        nativeArch := x64
     else
-        ifneq ($(filter %86, $(__host_uname_m)),)
-            hostArch := x86
-        else
-            $(error [ERROR] Unsupported architecture for host $(hostOS): $(__host_uname_m)
+        ifneq ($(filter %86, $(__native_uname_m)),)
+            nativeArch := x86
         endif
     endif
 endif
-undefine __host_uname_m
+undefine __native_uname_m
 
 endif # _include_native_host_mk
 

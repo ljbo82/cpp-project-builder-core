@@ -33,7 +33,6 @@ doc: post-doc
 .PHONY: pre-doc
 pre-doc: $(PRE_DOC_DEPS)
     ifneq ($(PRE_DOC), )
-	    @printf "$(nl)[PRE-DOC]\n"
 	    $(v)$(PRE_DOC)
     endif
 
@@ -45,7 +44,6 @@ post-doc: pre-doc $(DOC_DEPS)
 	    @mkdir -p $(docBuildDir)
 	    $(v)( cat $(DOXYFILE); echo OUTPUT_DIRECTORY = $(docBuildDir) ) | doxygen -
         ifneq ($(POST_DOC), )
-	        @printf "$(nl)[POST_DOC]\n"
 	        $(v)$(POST_DOC)
         endif
     endif
