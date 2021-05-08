@@ -27,15 +27,17 @@ ifeq ($(CROSS_COMPILE), )
         ifneq ($(hostArch), $(nativeArch))
             ifeq ($(hostArch), x86)
                 ifeq ($(nativeArch), x64)
-                    _cFlags  += -m32
-                    _ldFlags += -m32
+                    _cxxFlags += -m32
+                    _cFlags   += -m32
+                    _ldFlags  += -m32
                 else
                     $(error Missing CROSS_COMPILE)
                 endif
             else ifeq ($(hostArch), x64)
                 ifeq ($(nativeArch), x86)
-                    _cFlags  += -m64
-                    _ldFlags += -m64
+                    _cxxFlags += -m64
+                    _cFlags   += -m64
+                    _ldFlags  += -m64
                 else
                     $(error Missing CROSS_COMPILE)
                 endif
