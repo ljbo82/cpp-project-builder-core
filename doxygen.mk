@@ -17,14 +17,17 @@
 ifndef _include_doxygen_mk
 _include_doxygen_mk := 1
 
-__doxygen_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+# ------------------------------------------------------------------------------
+ifeq ($(DOC_BUILD_DIR), )
+    DOC_BUILD_DIR := dist/doc
+endif
+# ------------------------------------------------------------------------------
 
-docBuildDir = $(distDir)/doc
+# ------------------------------------------------------------------------------
 ifeq ($(DOXYFILE), )
     DOXYFILE := Doxyfile
 endif
-
-include $(__doxygen_mk_dir)defs.mk
+# ------------------------------------------------------------------------------
 
 # DOC ==========================================================================
 .PHONY: doc 
@@ -41,15 +44,13 @@ post-doc: pre-doc $(DOC_DEPS)
     ifeq ($(wildcard $(DOXYFILE)), )
 	    $(error [ERROR] $(DOXYFILE) not found)
     else
-	    @mkdir -p $(docBuildDir)
-	    $(v)( cat $(DOXYFILE); echo OUTPUT_DIRECTORY = $(docBuildDir) ) | doxygen -
+	    @mkdir -p $(DOC_BUILD_DIR)
+	    $(v)( cat $(DOXYFILE); echo OUTPUT_DIRECTORY = $(DOC_BUILD_DIR) ) | doxygen -
         ifneq ($(POST_DOC), )
 	        $(v)$(POST_DOC)
         endif
     endif
 # ==============================================================================
-
-undefine __doxygen_mk_dir
 
 endif # _include_doxygen_mk
 

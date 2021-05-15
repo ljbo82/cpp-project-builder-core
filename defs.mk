@@ -17,8 +17,13 @@
 ifndef _include_defs_mk
 _include_defs_mk := 1
 
-__defs_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+# ------------------------------------------------------------------------------
+ifeq ($(__project_mk_dir), )
+    $(error project.mk not included yet)
+endif
+# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 defaultLibType      := shared
 defaultProjVersion  := 0.1.0
 defaultDebug        := 0
@@ -28,6 +33,7 @@ defaultDistDirBase  := dist
 defaultSrcDir       := src
 defaultIncludeDir   := include
 defaultOsDir        := os
+# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 ifeq ($(PROJ_NAME),  )
@@ -103,7 +109,7 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-include $(__defs_mk_dir)native_host.mk
+include $(__project_mk_dir)native_host.mk
 ifeq ($(HOST), )
     ifeq ($(nativeOS), )
         $(error Cannot detect native operating system)
@@ -162,8 +168,6 @@ endif
 # ------------------------------------------------------------------------------
 
 .DEFAULT_GOAL := all
-
-undefine __defs_mk_dir
 
 endif # _include_defs_mk
 

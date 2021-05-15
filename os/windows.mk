@@ -17,9 +17,13 @@
 ifndef _include_os_windows_mk
 _include_os_windows_mk := 1
 
-__os_windows_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(__os_windows_mk_dir)../defs.mk
+# ------------------------------------------------------------------------------
+ifeq ($(__project_mk_dir), )
+    $(error project.mk not included yet)
+endif
+# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 ifeq ($(CROSS_COMPILE), )
     ifeq ($(hostArch), x64)
         CROSS_COMPILE := x86_64-w64-mingw32-
@@ -27,10 +31,11 @@ ifeq ($(CROSS_COMPILE), )
         ifeq ($(hostArch), x86)
             CROSS_COMPILE := i686-w64-mingw32-
         else
-            $(error Missing CROSS_COMPILE)
+            $(error Missing CROSS_COMPILE for arch '$(hostArch)')
         endif
     endif
 endif
+# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 appSuffix       := .exe
@@ -69,7 +74,6 @@ $(distDir)/lib/$(artifactName).def: $(buildDir)/$(artifactName).def
 	$(v)ln -f $< $@
 # ==============================================================================
 
-undefine __os_windows_mk_dir
 undefine __debugSuffix
 
 endif #_include_os_windows_mk

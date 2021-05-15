@@ -17,9 +17,13 @@
 ifndef _include_os_linux_mk
 _include_os_linux_mk := 1
 
-__os_linux_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(__os_linux_mk_dir)../defs.mk
+# ------------------------------------------------------------------------------
+ifeq ($(__project_mk_dir), )
+    $(error project.mk not included yet)
+endif
+# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 ifeq ($(CROSS_COMPILE), )
     ifeq ($(nativeArch), )
         $(error Missing CROSS_COMPILE)
@@ -31,7 +35,7 @@ ifeq ($(CROSS_COMPILE), )
                     _cFlags   += -m32
                     _ldFlags  += -m32
                 else
-                    $(error Missing CROSS_COMPILE)
+                    $(error Missing CROSS_COMPILE for arch '$(hostArch)')
                 endif
             else ifeq ($(hostArch), x64)
                 ifeq ($(nativeArch), x86)
@@ -39,14 +43,15 @@ ifeq ($(CROSS_COMPILE), )
                     _cFlags   += -m64
                     _ldFlags  += -m64
                 else
-                    $(error Missing CROSS_COMPILE)
+                    $(error Missing CROSS_COMPILE for arch '$(hostArch)')
                 endif
             else
-                $(error Missing CROSS_COMPILE)
+                $(error Missing CROSS_COMPILE for arch '$(hostArch)')
             endif
         endif
     endif
 endif
+# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 libPrefix       := lib
@@ -84,7 +89,6 @@ $(distDir)/lib/$(_artifactBaseName): $(buildDir)/$(_artifactBaseName)
 	$(v)ln -f $< $@
 # ==============================================================================
 
-undefine __os_linux_mk_dir
 undefine __debugSuffix
 
 endif #_include_os_linux_mk
