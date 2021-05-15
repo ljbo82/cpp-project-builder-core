@@ -14,8 +14,16 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-PROJ_NAME := hello
-PROJ_TYPE := app
+ifndef _include_functions_mk
+_include_functions_mk := 1
 
-include ../../project.mk
+fn_version_valid = $(shell sh -c "echo $(1) | grep -oP '^[0-9]+\.[0-9]+\.[0-9]+.*$$' > /dev/null && echo 1 || echo 0")
+fn_version_major = $(shell sh -c "echo $(1) | cut -d'.' -f1")
+fn_version_minor = $(shell sh -c "echo $(1) | cut -d'.' -f2")
+fn_version_patch = $(shell sh -c "echo $(1) | cut -d'.' -f3-")
 
+fn_host_valid = $(shell sh -c "echo $(1) | grep -oP '^[a-zA-Z0-9]+\-[a-zA-Z0-9]+.*$$' > /dev/null && echo 1 || echo 0")
+fn_host_os    = $(shell sh -c "echo $(1) | cut -d'-' -f1")
+fn_host_arch  = $(shell sh -c "echo $(1) | cut -d'-' -f2-")
+
+endif # _include_functions_mk

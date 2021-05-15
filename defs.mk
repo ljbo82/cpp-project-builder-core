@@ -24,6 +24,10 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+include $(__project_mk_dir)functions.mk
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 defaultLibType      := shared
 defaultProjVersion  := 0.1.0
 defaultDebug        := 0
@@ -70,12 +74,12 @@ ifeq ($(PROJ_VERSION), )
     PROJ_VERSION := $(defaultProjVersion)
 endif
 
-ifeq ($(shell sh -c "echo $(PROJ_VERSION) | grep -oP '[0-9]+\.[0-9]+\.[0-9]+.*'"), )
+ifeq ($(call fn_version_valid, $(PROJ_VERSION)), 0)
     $(error Invalid PROJ_VERSION: $(PROJ_VERSION))
 endif
-projVersionMajor := $(shell echo $(PROJ_VERSION) | cut -d'.' -f1)
-projVersionMinor := $(shell echo $(PROJ_VERSION) | cut -d'.' -f2)
-projVersionPatch := $(shell echo $(PROJ_VERSION) | cut -d'.' -f3-)
+projVersionMajor := $(call fn_version_major, $(PROJ_VERSION))
+projVersionMinor := $(call fn_version_minor, $(PROJ_VERSION))
+projVersionPatch := $(call fn_version_patch, $(PROJ_VERSION))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -121,11 +125,11 @@ ifeq ($(HOST), )
     hostArch := $(nativeArch)
     HOST     := $(hostOS)-$(hostArch)
 else
-    ifeq ($(shell echo $(HOST) | grep -oP '[a-zA-Z0-9]+\-[a-zA-Z0-9]+.*'), )
+    ifeq ($(call fn_host_valid, $(HOST)), 0)
         $(error Invalid HOST: $(HOST))
     endif
-    hostOS := $(shell echo $(HOST) | cut -d'-' -f1)
-    hostArch := $(shell echo $(HOST) | cut -d'-' -f2-)
+    hostOS   := $(call fn_host_os, $(HOST))
+    hostArch := $(call fn_host_arch, $(HOST))
 endif
 # ------------------------------------------------------------------------------
 
