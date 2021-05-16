@@ -123,6 +123,10 @@ else
 endif
 # ------------------------------------------------------------------------------
 
+ifeq ($(shell sh -c "$(CROSS_COMPILE)gcc -v > /dev/null 2>&1 && echo 1 || echo 0"), 0)
+    $(error $(CROSS_COMPILE)gcc is not int PATH)
+endif
+
 # ALL ==========================================================================
 .PHONY: all
 all: dist
