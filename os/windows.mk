@@ -18,7 +18,7 @@ ifndef _include_os_windows_mk
 _include_os_windows_mk := 1
 
 # ------------------------------------------------------------------------------
-ifeq ($(__project_mk_dir), )
+ifeq ($(_project_mk_dir), )
     $(error project.mk not included yet)
 endif
 # ------------------------------------------------------------------------------

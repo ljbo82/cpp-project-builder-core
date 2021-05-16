@@ -18,15 +18,15 @@ ifndef _include_project_mk
 _include_project_mk := 1
 
 # ------------------------------------------------------------------------------
-__project_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(__project_mk_dir)defs.mk
+_project_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(_project_mk_dir)defs.mk
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(wildcard $(__project_mk_dir)$(OS_DIR)/$(hostOS).mk), )
+ifeq ($(wildcard $(_project_mk_dir)$(OS_DIR)/$(hostOS).mk), )
     $(error Unsupported host OS: $(hostOS))
 endif
-include $(__project_mk_dir)$(OS_DIR)/$(hostOS).mk
+include $(_project_mk_dir)$(OS_DIR)/$(hostOS).mk
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -236,7 +236,7 @@ $(buildDir)/%.S$(objSuffix): %.S
 
 -include $(_deps)
 
-undefine __project_mk_dir
+undefine _project_mk_dir
 
 endif # _include_project_mk
 
