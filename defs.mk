@@ -36,7 +36,7 @@ defaultBuildDirBase := build
 defaultDistDirBase  := dist
 defaultSrcDir       := src
 defaultIncludeDir   := include
-defaultOsDir        := os
+defaultHostsDir     := hosts
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -161,13 +161,16 @@ endif
 
 # ------------------------------------------------------------------------------
 ifneq ($(wildcard $(defaultIncludeDir)), )
+    ifeq ($(PROJ_TYPE), lib)
+        DIST_INCLUDE_DIRS += $(defaultIncludeDir)
+    endif
     INCLUDE_DIRS += $(defaultIncludeDir)
 endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(OS_DIR), )
-    OS_DIR := $(defaultOsDir)
+ifeq ($(HOSTS_DIR), )
+    HOSTS_DIR := $(defaultHostsDir)
 endif
 # ------------------------------------------------------------------------------
 

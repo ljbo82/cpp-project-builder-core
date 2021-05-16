@@ -23,15 +23,23 @@ include $(_project_mk_dir)defs.mk
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(wildcard $(_project_mk_dir)$(OS_DIR)/$(hostOS).mk), )
-    $(error Unsupported host OS: $(hostOS))
+ifeq ($(wildcard $(_project_mk_dir)$(HOSTS_DIR)/$(HOST).mk), )
+    ifeq ($(wildcard $(_project_mk_dir)$(HOSTS_DIR)/$(hostOS).mk), )
+        $(error Unsupported HOST: $(HOST))
+    else
+        include $(_project_mk_dir)$(HOSTS_DIR)/$(hostOS).mk
+    endif
+else
+    include $(_project_mk_dir)$(HOSTS_DIR)/$(HOST).mk
 endif
-include $(_project_mk_dir)$(OS_DIR)/$(hostOS).mk
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 SRC_DIRS := $(sort $(SRC_DIRS))
-srcFiles := $(sort $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir) -type f -name *.c -or -name *.cpp -or -name *.S 2> /dev/null))))
+srcFiles := $(sort $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir) -type f -name '*.c' -or -name '*.cpp' -or -name '*.S' 2> /dev/null))))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 ifeq ($(DEBUG), 1)
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
@@ -54,6 +62,9 @@ else
     endif
 endif
 objFiles := $(srcFiles:%=$(buildDir)/%$(objSuffix))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 depFiles := $(objFiles:.o=.d)
 # ------------------------------------------------------------------------------
 
@@ -70,12 +81,15 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifneq ($(wildcard $(defaultIncludeDir)), )
-    ifeq ($(PROJ_TYPE), lib)
-        _postDistDeps += $(foreach distHeader, $(shell find $(defaultIncludeDir) -type f -name *.h -or -name *.hpp 2> /dev/null), $(distDir)/$(distHeader))
-    endif
-endif
 INCLUDE_DIRS := $(sort $(INCLUDE_DIRS))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(PROJ_TYPE), lib)
+    DIST_INCLUDE_DIRS := $(sort $(DIST_INCLUDE_DIRS))
+    distIncludeFiles := $(strip $(foreach distIncludeDir, $(DIST_INCLUDE_DIRS), $(shell find $(distIncludeDir) -type f -name '*.h' -or -name '*.hpp' 2> /dev/null)))
+    _postDistDeps += $(strip $(foreach distIncludeFile, $(distIncludeFiles), $(distDir)/$(distIncludeFile)))
+endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -86,10 +100,19 @@ ifeq ($(DEBUG), 1)
     _cxxFlags += -g3
     _asFlags  += -g3
 endif
+# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 _includeFlags += $(strip $(foreach srcDir, $(SRC_DIRS), -I$(srcDir)))
-_includeFlags += $(strip $(foreach includeDir, $(INCLUDE_DIRS), -I$(includeDir)))
+ifeq ($(PROJ_TYPE), lib)
+    _includeDirs = $(sort $(INCLUDE_DIRS) $(DIST_INCLUDE_DIRS))
+else
+    _includeDirs = $(INCLUDE_DIRS)
+endif
+_includeFlags += $(strip $(foreach includeDir, $(_includeDirs), -I$(includeDir)))
+# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 ifeq ($(PROJ_TYPE), lib)
     ifeq ($(LIB_TYPE), shared)
         _cFlags   += -fPIC
@@ -97,7 +120,9 @@ ifeq ($(PROJ_TYPE), lib)
         _ldFlags  += -shared
     endif
 endif
+# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 _arFlags += rcs
 # ------------------------------------------------------------------------------
 
@@ -123,9 +148,11 @@ else
 endif
 # ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 ifeq ($(shell sh -c "$(CROSS_COMPILE)gcc -v > /dev/null 2>&1 && echo 1 || echo 0"), 0)
     $(error $(CROSS_COMPILE)gcc is not int PATH)
 endif
+# ------------------------------------------------------------------------------
 
 # ALL ==========================================================================
 .PHONY: all
@@ -185,7 +212,7 @@ post-dist: pre-dist $(DIST_DEPS) build $(_postDistDeps) $(POST_DIST_DEPS)
 # ==============================================================================
 
 # _postDistDeps ================================================================
-$(distDir)/$(defaultIncludeDir)/%.h : $(defaultIncludeDir)/%.h
+$(distDir)/%.h : %.h
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(dir $@)
 	$(v)ln -f $< $@
