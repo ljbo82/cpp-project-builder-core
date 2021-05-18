@@ -150,7 +150,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(shell sh -c "$(CROSS_COMPILE)gcc -v > /dev/null 2>&1 && echo 1 || echo 0"), 0)
-    $(error $(CROSS_COMPILE)gcc is not int PATH)
+    $(error $(CROSS_COMPILE)gcc is not in PATH)
 endif
 # ------------------------------------------------------------------------------
 
@@ -266,8 +266,6 @@ $(buildDir)/%.S$(objSuffix): %.S
 # ==============================================================================
 
 -include $(_deps)
-
-undefine _project_mk_dir
 
 endif # _include_project_mk
 
