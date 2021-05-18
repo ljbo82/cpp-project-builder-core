@@ -176,5 +176,7 @@ endif
 
 .DEFAULT_GOAL := all
 
+.NOTPARALLEL:
+
 endif # _include_defs_mk
 
