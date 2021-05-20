@@ -19,18 +19,239 @@ _include_project_mk := 1
 
 # ------------------------------------------------------------------------------
 _project_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(_project_mk_dir)defs.mk
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(wildcard $(_project_mk_dir)$(HOSTS_DIR)/$(HOST).mk), )
-    ifeq ($(wildcard $(_project_mk_dir)$(HOSTS_DIR)/$(hostOS).mk), )
-        $(error Unsupported HOST: $(HOST))
+include $(_project_mk_dir)functions.mk
+include $(_project_mk_dir)native_host.mk
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+defaultLibType           := shared
+defaultProjVersion       := 0.1.0
+defaultDebug             := 0
+defaultV                 := 0
+defaultBuildDirBase      := build
+defaultDistDirBase       := dist
+defaultSrcDir            := src
+defaultIncludeDir        := include
+defaultHostsDir          := hosts
+defaultSkipHostMk        := 0
+defaultSkipBuilderHostMk := 0
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(PROJ_NAME),  )
+    $(error Missing PROJ_NAME)
+endif
+
+ifneq (1, $(words $(PROJ_NAME)))
+    $(error PROJ_NAME cannot have spaces)
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(PROJ_TYPE), )
+    $(error Missing PROJ_TYPE)
+endif
+ifneq ($(PROJ_TYPE), app)
+    ifneq ($(PROJ_TYPE), lib)
+        $(error Unsupported PROJ_TYPE: $(PROJ_TYPE))
     else
-        include $(_project_mk_dir)$(HOSTS_DIR)/$(hostOS).mk
+        ifeq ($(LIB_TYPE), )
+            LIB_TYPE := $(defaultLibType)
+        endif
+        ifneq ($(LIB_TYPE), shared)
+            ifneq ($(LIB_TYPE), static)
+                $(error Unsupported LIB_TYPE: $(LIB_TYPE))
+            endif
+        endif
+    endif
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(PROJ_VERSION), )
+    PROJ_VERSION := $(defaultProjVersion)
+endif
+
+ifeq ($(call fn_version_valid, $(PROJ_VERSION)), 0)
+    $(error Invalid PROJ_VERSION: $(PROJ_VERSION))
+endif
+
+projVersionMajor := $(call fn_version_major, $(PROJ_VERSION))
+projVersionMinor := $(call fn_version_minor, $(PROJ_VERSION))
+projVersionPatch := $(call fn_version_patch, $(PROJ_VERSION))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(DEBUG), )
+    DEBUG := $(defaultDebug)
+endif
+ifneq ($(DEBUG), 0)
+    ifneq ($(DEBUG), 1)
+        $(error Invalid value for DEBUG: $(DEBUG))
+    endif
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(V), )
+    V := $(defaultV)
+endif
+ifneq ($(V), 0)
+    ifneq ($(V), 1)
+        $(error ERROR: Invalid value for V: $(V))
+    endif
+endif
+
+ifeq ($(V), 0)
+    v  := @
+    nl :=
+else
+    v  :=
+    nl := \n
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(HOST), )
+    ifeq ($(nativeOS), )
+        $(error Cannot detect native operating system)
+    endif
+    ifeq ($(nativeArch), )
+        $(error Cannot detect native architecture)
+    endif
+    hostOS   := $(nativeOS)
+    hostArch := $(nativeArch)
+    HOST     := $(hostOS)-$(hostArch)
+else
+    ifeq ($(call fn_host_valid, $(HOST)), 0)
+        $(error Invalid HOST: $(HOST))
+    endif
+    hostOS   := $(call fn_host_os, $(HOST))
+    hostArch := $(call fn_host_arch, $(HOST))
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(BUILD_DIR_BASE), )
+    BUILD_DIR_BASE := $(defaultBuildDirBase)
+endif
+ifeq ($(BUILD_DIR_NAME), )
+    BUILD_DIR_NAME := $(HOST)
+endif
+buildDir := $(BUILD_DIR_BASE)/$(BUILD_DIR_NAME)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(DIST_DIR_BASE), )
+    DIST_DIR_BASE := $(defaultDistDirBase)
+endif
+ifeq ($(DIST_DIR_NAME), )
+    DIST_DIR_NAME := $(HOST)
+endif
+distDir := $(DIST_DIR_BASE)/$(DIST_DIR_NAME)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifneq ($(wildcard $(defaultSrcDir)), )
+    SRC_DIRS += $(defaultSrcDir)
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifneq ($(wildcard $(defaultIncludeDir)), )
+    ifeq ($(PROJ_TYPE), lib)
+        DIST_INCLUDE_DIRS += $(defaultIncludeDir)
+    endif
+    INCLUDE_DIRS += $(defaultIncludeDir)
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(HOSTS_DIR), )
+    HOSTS_DIR := $(defaultHostsDir)
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(SKIP_HOST_MK), )
+    SKIP_HOST_MK := $(defaultSkipHostMk)
+else
+    ifneq ($(SKIP_HOST_MK), 0)
+        ifneq ($(SKIP_HOST_MK), 1)
+            $(error Invalid value for SKIP_HOST_MK: $(SKIP_HOST_MK))
+        endif
+    endif
+endif
+
+ifeq ($(SKIP_HOST_MK), 0)
+    ifeq ($(HOST_MK), )
+        ifneq ($(wildcard $(HOSTS_DIR)/$(HOST).mk), )
+            HOST_MK := $(HOSTS_DIR)/$(HOST).mk
+        else
+            ifneq ($(wildcard $(HOSTS_DIR)/$(hostOS).mk), )
+                HOST_MK := $(HOSTS_DIR)/$(hostOS).mk
+            else
+                HOST_MK :=
+            endif
+        endif
+    else
+        ifeq ($(wildcard $(HOST_MK)), )
+            $(error [HOST_MK] No such file: $(HOST_MK))
+        endif
+    endif
+
+    ifneq ($(HOST_MK), )
+        include $(HOST_MK)
     endif
 else
-    include $(_project_mk_dir)$(HOSTS_DIR)/$(HOST).mk
+    HOST_MK :=
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(SKIP_BUILDER_HOST_MK), )
+    SKIP_BUILDER_HOST_MK := $(defaultSkipBuilderHostMk)
+else
+    ifneq ($(SKIP_BUILDER_HOST_MK), 0)
+        ifneq ($(SKIP_BUILDER_HOST_MK), 1)
+            $(error Invalid value for SKIP_BUILDER_HOST_MK: $(SKIP_BUILDER_HOST_MK))
+        endif
+    endif
+endif
+
+ifeq ($(SKIP_BUILDER_HOST_MK), 0)
+    ifeq ($(BUILDER_HOST_MK), )
+        ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk), )
+            BUILDER_HOST_MK := $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk
+        else
+            ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(hostOS).mk), )
+                BUILDER_HOST_MK := $(_project_mk_dir)$(defaultHostsDir)/$(hostOS).mk
+            else
+                BUILDER_HOST_MK :=
+            endif
+        endif
+    else
+        ifeq ($(wildcard $(BUILDER_HOST_MK)), )
+            $(error [BUILDER_HOST_MK] No such file: $(BUILDER_HOST_MK))
+        endif
+    endif
+
+    ifneq ($(BUILDER_HOST_MK), )
+        include $(BUILDER_HOST_MK)
+    endif
+else
+    BUILDER_HOST_MK :=
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(HOST_MK), )
+    ifeq ($(BUILDER_HOST_MK), )
+        $(error Unsupported HOST: $(HOST))
+    endif
 endif
 # ------------------------------------------------------------------------------
 
@@ -152,6 +373,12 @@ endif
 ifeq ($(shell sh -c "$(CROSS_COMPILE)gcc -v > /dev/null 2>&1 && echo 1 || echo 0"), 0)
     $(error $(CROSS_COMPILE)gcc is not in PATH)
 endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+.DEFAULT_GOAL := all
+
+.NOTPARALLEL:
 # ------------------------------------------------------------------------------
 
 # ALL ==========================================================================

@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-ifndef _include_os_windows_mk
-_include_os_windows_mk := 1
+ifndef _include_hosts_windows_mk
+_include_hosts_windows_mk := 1
 
 # ------------------------------------------------------------------------------
 ifeq ($(_project_mk_dir), )
@@ -76,5 +76,5 @@ $(distDir)/lib/$(artifactName).def: $(buildDir)/$(artifactName).def
 
 undefine __debugSuffix
 
-endif #_include_os_windows_mk
+endif #_include_hosts_windows_mk
 
