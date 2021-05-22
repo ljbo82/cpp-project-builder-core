@@ -36,6 +36,7 @@ defaultDistDirBase       := dist
 defaultSrcDir            := src
 defaultIncludeDir        := include
 defaultHostsDir          := hosts
+defaultHostMkRequired    := 0
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -174,6 +175,18 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+ifeq ($(HOST_MK_REQUIRED), )
+    HOST_MK_REQUIRED := $(defaultHostMkRequired)
+endif
+
+ifneq ($(HOST_MK_REQUIRED), 0)
+    ifneq ($(HOST_MK_REQUIRED), 1)
+        $(error Invalid value for HOST_MK_REQUIRED: $(HOST_MK_REQUIRED))
+    endif
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 ifeq ($(HOST_MK), )
     ifneq ($(wildcard $(HOSTS_DIR)/$(HOST).mk), )
         HOST_MK := $(HOSTS_DIR)/$(HOST).mk
@@ -192,6 +205,10 @@ endif
 
 ifneq ($(HOST_MK), )
     include $(HOST_MK)
+else
+    ifeq ($(HOST_MK_REQUIRED), 1)
+        $(error Unsupported HOST: $(HOST))
+    endif
 endif
 # ------------------------------------------------------------------------------
 
