@@ -36,8 +36,6 @@ defaultDistDirBase       := dist
 defaultSrcDir            := src
 defaultIncludeDir        := include
 defaultHostsDir          := hosts
-defaultSkipHostMk        := 0
-defaultSkipBuilderHostMk := 0
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -176,74 +174,46 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(SKIP_HOST_MK), )
-    SKIP_HOST_MK := $(defaultSkipHostMk)
-else
-    ifneq ($(SKIP_HOST_MK), 0)
-        ifneq ($(SKIP_HOST_MK), 1)
-            $(error Invalid value for SKIP_HOST_MK: $(SKIP_HOST_MK))
+ifeq ($(HOST_MK), )
+    ifneq ($(wildcard $(HOSTS_DIR)/$(HOST).mk), )
+        HOST_MK := $(HOSTS_DIR)/$(HOST).mk
+    else
+        ifneq ($(wildcard $(HOSTS_DIR)/$(hostOS).mk), )
+            HOST_MK := $(HOSTS_DIR)/$(hostOS).mk
+        else
+            HOST_MK :=
         endif
+    endif
+else
+    ifeq ($(wildcard $(HOST_MK)), )
+        $(error [HOST_MK] No such file: $(HOST_MK))
     endif
 endif
 
-ifeq ($(SKIP_HOST_MK), 0)
-    ifeq ($(HOST_MK), )
-        ifneq ($(wildcard $(HOSTS_DIR)/$(HOST).mk), )
-            HOST_MK := $(HOSTS_DIR)/$(HOST).mk
-        else
-            ifneq ($(wildcard $(HOSTS_DIR)/$(hostOS).mk), )
-                HOST_MK := $(HOSTS_DIR)/$(hostOS).mk
-            else
-                HOST_MK :=
-            endif
-        endif
-    else
-        ifeq ($(wildcard $(HOST_MK)), )
-            $(error [HOST_MK] No such file: $(HOST_MK))
-        endif
-    endif
-
-    ifneq ($(HOST_MK), )
-        include $(HOST_MK)
-    endif
-else
-    HOST_MK :=
+ifneq ($(HOST_MK), )
+    include $(HOST_MK)
 endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(SKIP_BUILDER_HOST_MK), )
-    SKIP_BUILDER_HOST_MK := $(defaultSkipBuilderHostMk)
-else
-    ifneq ($(SKIP_BUILDER_HOST_MK), 0)
-        ifneq ($(SKIP_BUILDER_HOST_MK), 1)
-            $(error Invalid value for SKIP_BUILDER_HOST_MK: $(SKIP_BUILDER_HOST_MK))
+ifeq ($(BUILDER_HOST_MK), )
+    ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk), )
+        BUILDER_HOST_MK := $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk
+    else
+        ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(hostOS).mk), )
+            BUILDER_HOST_MK := $(_project_mk_dir)$(defaultHostsDir)/$(hostOS).mk
+        else
+            BUILDER_HOST_MK :=
         endif
+    endif
+else
+    ifeq ($(wildcard $(BUILDER_HOST_MK)), )
+        $(error [BUILDER_HOST_MK] No such file: $(BUILDER_HOST_MK))
     endif
 endif
 
-ifeq ($(SKIP_BUILDER_HOST_MK), 0)
-    ifeq ($(BUILDER_HOST_MK), )
-        ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk), )
-            BUILDER_HOST_MK := $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk
-        else
-            ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(hostOS).mk), )
-                BUILDER_HOST_MK := $(_project_mk_dir)$(defaultHostsDir)/$(hostOS).mk
-            else
-                BUILDER_HOST_MK :=
-            endif
-        endif
-    else
-        ifeq ($(wildcard $(BUILDER_HOST_MK)), )
-            $(error [BUILDER_HOST_MK] No such file: $(BUILDER_HOST_MK))
-        endif
-    endif
-
-    ifneq ($(BUILDER_HOST_MK), )
-        include $(BUILDER_HOST_MK)
-    endif
-else
-    BUILDER_HOST_MK :=
+ifneq ($(BUILDER_HOST_MK), )
+    include $(BUILDER_HOST_MK)
 endif
 # ------------------------------------------------------------------------------
 
