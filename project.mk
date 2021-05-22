@@ -384,7 +384,7 @@ pre-build: $(PRE_BUILD_DEPS)
     endif
 
 .PHONY: post-build
-post-build: pre-build $(BUILD_DEPS) $(buildDir)/$(artifactName) $(_postBuildDeps) $(POST_BUILD_DEPS)
+post-build: pre-build $(buildDir)/$(artifactName) $(_postBuildDeps) $(POST_BUILD_DEPS)
     ifneq ($(POST_BUILD), )
 	    $(v)$(POST_BUILD)
     endif
@@ -449,7 +449,7 @@ endif
 # ==============================================================================
 
 # Build artifact ===============================================================
-$(buildDir)/$(artifactName): $(objFiles)
+$(buildDir)/$(artifactName): $(BUILD_DEPS) $(objFiles)
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
 	        @printf "$(nl)[LD] $@\n"
