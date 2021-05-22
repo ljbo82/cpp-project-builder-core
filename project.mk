@@ -409,20 +409,26 @@ post-dist: pre-dist $(DIST_DEPS) build $(_postDistDeps) $(POST_DIST_DEPS)
 # ==============================================================================
 
 # _postDistDeps ================================================================
+ifeq ($(PROJ_TYPE), lib)
 $(distDir)/%.h : %.h
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(dir $@)
 	$(v)ln -f $< $@
+endif
 
+ifeq ($(PROJ_TYPE), app)
 $(distDir)/bin/$(artifactName): $(buildDir)/$(artifactName)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/bin
 	$(v)ln -f $< $@
+endif
 
+ifeq ($(PROJ_TYPE), lib)
 $(distDir)/lib/$(artifactName): $(buildDir)/$(artifactName)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
 	$(v)ln -f $< $@
+endif
 # ==============================================================================
 
 # Build artifact ===============================================================

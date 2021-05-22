@@ -63,6 +63,7 @@ endif
 # ------------------------------------------------------------------------------
 
 # _postDistDeps ================================================================
+ifeq ($(PROJ_TYPE), lib)
 $(distDir)/lib/$(artifactName).lib: $(buildDir)/$(artifactName).lib
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
@@ -72,6 +73,7 @@ $(distDir)/lib/$(artifactName).def: $(buildDir)/$(artifactName).def
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
 	$(v)ln -f $< $@
+endif
 # ==============================================================================
 
 undefine __debugSuffix

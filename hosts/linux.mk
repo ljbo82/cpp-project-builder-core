@@ -77,16 +77,20 @@ endif
 # ------------------------------------------------------------------------------
 
 # _postBuildDeps ===============================================================
+ifeq ($(PROJ_TYPE), lib)
 $(buildDir)/$(_artifactBaseName): $(buildDir)/$(artifactName)
 	@printf "$(nl)[BUILD] $@\n"
 	$(v)ln -sf $(notdir $<) $@
+endif
 # ==============================================================================
 
 # _postDistDeps ================================================================
+ifeq ($(PROJ_TYPE), lib)
 $(distDir)/lib/$(_artifactBaseName): $(buildDir)/$(_artifactBaseName)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
 	$(v)ln -f $< $@
+endif
 # ==============================================================================
 
 undefine __debugSuffix
