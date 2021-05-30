@@ -494,7 +494,7 @@ Below are the list the input variables for advanced usage:
 
 ## Utility makefiles
 
-Along with **project.mk**, gcc-project-builder provides some utility makefiles which can be included to your project's Makefile in order to add more targets, exposing functions, and exporting output variables, and so on.
+Along with **project.mk**, gcc-project-builder provides some utility makefiles which can be included into your project's Makefile in order to add more targets, exposing functions, and exporting output variables, and so on.
 
 ### doxygen.mk
 
