@@ -457,6 +457,21 @@ Below are the list the input variables for advanced usage:
 * **post-clean**
 
   Executes all comands declared in [`$(POST_CLEAN)`](#var-post-clean) variable.
+  
+<a name="recipe-build"></a>
+* **build**
+
+  Compiles all source files and generate target binary (executable or library). It is preceeded by both [pre-build](#recipe-pre-build) recipe and dependencies declared in [`$(BUILD_DEPS)`](#var-build-deps) variable. This recipe is followed by [post-build](#recipe-post-build).
+
+<a name="recipe-pre-build"></a>
+* **pre-build**
+
+  Executes all comands declared in [`$(PRE_BUILD)`](#var-pre-build) variable. This recipe is preceeded by dependencies declared in [`$(PRE_BUILD_DEPS)`](#var-pre-build-deps) variable.
+  
+<a name="recipe-post-build"></a>
+* **post-build**
+
+  Executes all comands declared in [`$(POST_BUILD)`](#var-post-build) variable. This recipe is preceeded by dependencies declared in [`$(POST_BUILD_DEPS)`](#var-post-build-deps) variable.
 
 
 ## Utility makefiles
