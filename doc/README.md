@@ -227,6 +227,8 @@ Below are the list the commonly used input variables:
   * Default value: _(empty)_
 
   Commands to be executed during [pre-build](#recipe-pre-build) [recipe](#recipes).
+  
+  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
 <a name="var-prebuild-deps"></a>
 * **`PRE_BUILD_DEPS`**
@@ -251,6 +253,8 @@ Below are the list the commonly used input variables:
   * Default value: _(empty)_
 
   Commands to be executed during [post-build](#recipe-post-build) [recipe](#recipes).
+  
+  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
 <a name="var-post-build-deps"></a>
 * **`POST_BUILD_DEPS`**
@@ -267,6 +271,8 @@ Below are the list the commonly used input variables:
   * Default value: _(empty)_
 
   Commands to be executed during [pre-clean](#recipe-pre-clean) [recipe](#recipes).
+  
+  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
 <a name="var-post-clean"></a>
 * **`POST_CLEAN`**
@@ -276,6 +282,8 @@ Below are the list the commonly used input variables:
 
   Commands to be executed during [post-clean](#recipe-post-clean) [recipe](#recipes).
 
+  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
+
 <a name="var-pre-dist"></a>
 * **`PRE_DIST`**
   * Mandatory: no
@@ -283,6 +291,8 @@ Below are the list the commonly used input variables:
   * Default value: _(empty)_
 
   Commands to be executed during [pre-dist](#recipe-pre-dist) [recipe](#recipes).
+  
+  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
 <a name="var-pre-dist-deps"></a>
 * **`PRE_DIST_DEPS`**
@@ -307,6 +317,8 @@ Below are the list the commonly used input variables:
   * Default value: _(empty)_
 
   Commands to be executed during [post-dist](#recipe-post-dist) [recipe](#recipes).
+  
+  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
 <a name="var-post-dist-deps"></a>
 * **`POST_DIST_DEPS`**
@@ -426,13 +438,25 @@ Below are the list the input variables for advanced usage:
 
 ![Recipes overview](recipes-overview.png)
 
+<a name="recipe-all"></a>
 * **all**
 
-  Default goal. Just depends on [**dist**](#recipe-dist) recipe.
+  Default goal. Just depends on [dist](#recipe-dist) recipe.
 
-* **build**
+<a name="recipe-clean"></a>
+* **clean**
 
-  Build project target artifact. It will be preceeded by [**pre-build**](#recipe-pre-build) recipe, dependencies declared in [`BUILD_DEPS`](#var-build-deps). It will also be followed by [**post-build**](#recipe-post-build).
+  Removes all compiled artifacts. It is preceeded by [pre-clean](#recipe-pre-clean) and followed by [post-clean](#recipe-post-clean).
+
+<a name="recipe-pre-clean"></a>
+* **pre-clean**
+
+  Executes all comands declared in [`$(PRE_CLEAN)`](#var-pre-clean) variable.
+  
+<a name="recipe-post-clean"></a>
+* **post-clean**
+
+  Executes all comands declared in [`$(POST_CLEAN)`](#var-post-clean) variable.
 
 
 ## Utility makefiles
