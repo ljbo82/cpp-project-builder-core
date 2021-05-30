@@ -28,7 +28,7 @@ gcc-project-builder is distributed under version 2 of the General Public License
 
 ## Cloning
 
-This repository uses [git-lfs](https://git-lfs.github.com/) to version some binaries files (for instance: images in [**doc/**](doc) directory). Ensure extension is installed before cloning this repository.
+This repository uses [git-lfs](https://git-lfs.github.com/) to version some binaries files (for instance: images in [doc/](doc) directory). Ensure extension is installed before cloning this repository.
 
 ## Usage
 
@@ -52,7 +52,7 @@ include gcc-project-builder/project.mk
 
 With this minimal Makefile, an executable can be build just by calling `make`.
 
-For more examples, check the **demo/** directory.
+For more examples, check the [demo/](../demo) directory.
 
 ## Source directories
 
@@ -86,7 +86,7 @@ gcc-project-builder is inteded to support both native and cross-compilation. Dur
 
 ## Hosts
 
-TBD
+_To be documented_
 
 ## Input variables
 
@@ -441,23 +441,21 @@ Along with **project.mk**, gcc-project-builder provides some utility makefiles w
 
 ### doxygen.mk
 
-TBD
+_To be documented_
 
 ### functions.mk
 
-TBD
-
+_To be documented_
 
 ### functions.mk
 
-TBD
+_To be documented_
 
 ### git.mk
 
-TBD
-
+_To be documented_
 
 ### native_host.mk
 
-TBD
+_To be documented_
 
