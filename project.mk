@@ -415,13 +415,13 @@ post-clean: pre-clean
 dist: post-dist
 
 .PHONY: pre-dist
-pre-dist: $(PRE_DIST_DEPS)
+pre-dist: build $(PRE_DIST_DEPS)
     ifneq ($(PRE_DIST), )
 	    $(v)$(PRE_DIST)
     endif
 
 .PHONY: post-dist
-post-dist: pre-dist $(DIST_DEPS) build $(_postDistDeps) $(POST_DIST_DEPS)
+post-dist: pre-dist $(DIST_DEPS) $(_postDistDeps) $(POST_DIST_DEPS)
     ifneq ($(POST_DIST), )
 	    $(v)$(POST_DIST)
     endif
