@@ -4,7 +4,7 @@ This file tries to identify native host and exposes detected info through output
 
 ## Output variables
 
-| Variable    | Details                                                                                                 |
-|-------------|---------------------------------------------------------------------------------------------------------|
-| `nativeOS`  | Native operating system. Supported values are `linux` and `windows`                                     |
-| `nativeArch | Processor architecture. Supported values are `x64` and `x86`                                            |
+| Variable     | Details                                                                                                 |
+|--------------|---------------------------------------------------------------------------------------------------------|
+| `nativeOS`   | Native operating system. Supported values are `linux` and `windows`                                     |
+| `nativeArch` | Processor architecture. Supported values are `x64` and `x86`                                            |
