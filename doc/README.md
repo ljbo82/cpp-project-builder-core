@@ -498,17 +498,24 @@ Along with **project.mk**, gcc-project-builder provides some utility makefiles w
 
 ### doxygen.mk
 
-_To be documented_
+This file provides standard targets to generate source documentation based on [doxygen](https://www.doxygen.nl/index.html).
+
+See [doxygen.mk.md](doxygen.mk.md) for details.
 
 ### functions.mk
 
-_To be documented_
+This file provides convenience Makefile functions.
+
+See [functions.mk.md](functions.mk.md) for details.
 
 ### git.mk
 
-_To be documented_
+This file inspects project's directory tree and exposes git repository information (current commit, tag, status, etc) through output variables.
+
+See [git.mk.md](git.mk.md) for details.
 
 ### native_host.mk
 
-_To be documented_
+This file inspects current execution environment and identifies (some) native host. Identified info is exposed through output variables.
 
+See [native_host.mk.md](native_host.mk.md) for details.
