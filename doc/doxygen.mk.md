@@ -8,7 +8,9 @@ This file provides standard targets to generate source documentation based on [d
 |-----------------|-----------|------------|---------------------------------------------------------|
 | `DOC_BUILD_DIR` | no        | `dist/doc` | Directory where generated documentation shall be placed |
 | `DOXYFILE`      | no        | `Doxyfile` | Path of doxygen configuration file                      |
-| `PRE_DOC`       | no        | _(empty)_  | Commands to be executed on [pre-doc](#target-pre-doc)   |
+| `PRE_DOC`       | no        | _(empty)_  | Commands to be executed on [pre-doc](#pre-doc)   |
+| `POST_DOC`      | no        | _(empty)_  | Commands to be executed on [post-doc](#post-doc) |
+
 ## Make targets
 
 ![Targets overview](doxygen_mk_targets.png)
@@ -17,4 +19,4 @@ This file provides standard targets to generate source documentation based on [d
 |-------------------------------------|---------------------------------------|
 | <a name="doc"></a> **doc**          | Generates documentation using doxygen |
 | <a name="post-doc"></a>**post-doc** | Executed after internal doc rules     |
- 
+| <a name="pre-doc"></a>**pre-doc**   | Executed before internal doc rules    |
