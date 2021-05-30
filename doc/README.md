@@ -75,12 +75,12 @@ When present, these directories (relative to projet Makefile) are used with the 
 gcc-project-builder is inteded to support both native and cross-compilation. During build, output files are placed into host-specific directories (these output directories can be customized through [input variables](#input-variables):
 
 <a name="dir-build"></a>
-* **build/&lt;host>/**
+* **build/**
 
   Build directory. Object files as well as final artifact (application executable or library) are placed into this directory. The build directory can be changed through [`BUILD_DIR_BASE`](#var-build-dir-base) and [`BUILD_DIR`](#var-build-dir) [input variables](#input-variables).
 
 <a name="dir-dist"></a>
-* **dist/&lt;host>/**
+* **dist/**
 
   Distribution directory. Final artifact (and possibly companion header, for libraries) are placed into this directory. Distribution directory can be changed through [`DIST_DIR_BASE`](#var-dist-dir-base) and [`DIST_DIR`](#var-dist-dir) [input variables](#input-variables). Additional directories containing companion headers to be distribuited along with library binary can be added through [`DIST_INCLUDE_DIRS`](#var-dist-include-dirs) [input variable](#input-variables).
 
@@ -92,7 +92,7 @@ TBD
 
 The build system provided by **project.mk** can be customized through input variables.
 
-Variable declaration and usage follows Makefile standard syntax.
+Variable declaration and usage follows [Makefile standard syntax](https://www.gnu.org/software/make/manual/html_node/Using-Variables.html#Using-Variables).
 
 All input variables must be declared/defined prior to **project.mk** inclusion.
 
