@@ -346,7 +346,8 @@ else
     isCppProject := 1
 endif
 
-CC := gcc
+CC  := gcc
+CXX := g++
 ifeq ($(isCppProject), 0)
     # Pure C project
     LD := gcc
