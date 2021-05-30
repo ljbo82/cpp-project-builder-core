@@ -244,6 +244,7 @@ endif
 
 # ------------------------------------------------------------------------------
 SRC_DIRS := $(sort $(SRC_DIRS))
+$(foreach srcDir, $(SRC_DIRS), $(if $(findstring .., $(srcDir)), $(error Invalid source directory in SRC_DIRS: '$(srcDir)')))
 srcFiles := $(sort $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir) -type f -name '*.c' -or -name '*.cpp' -or -name '*.S' 2> /dev/null))))
 # ------------------------------------------------------------------------------
 
