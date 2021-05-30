@@ -8,6 +8,7 @@ gcc-project-builder provides a build system based on Makefiles containing standa
 * [Usage](#usage)
 * [Standard source directories](#standard-source-directories)
 * [Standard output directories](#standard-output-directories)
+* [Standard hosts](#standard-hosts)
 * [Input variables](#input-variables)
   * [Common input variables](#common-input-variables)
   * [Advanced input variables](#advanced-input-variables)
@@ -71,6 +72,10 @@ gcc-project-builder is inteded to support both native and cross-compilation. Dur
 * **dist/&lt;host>/**
 
   Distribution directory. Final artifact (and possibly companion header, for libraries) are placed into this directory. Distribution directory can be changed through [`DIST_DIR_BASE`](#var-dist-dir-base) and [`DIST_DIR`](#var-dist-dir) [input variables](#input-variables). Additional directories containing companion headers to be distribuited along with library binary can be added through [`DIST_INCLUDE_DIRS`](#var-dist-include-dirs) [input variable](#input-variables).
+
+## Standard hosts
+
+TBD
 
 ## Input variables
 
