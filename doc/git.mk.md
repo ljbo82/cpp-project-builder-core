@@ -13,8 +13,8 @@ Below are listed all accepted input variable (i.e. variables that must be declar
 
 ## Output variables
 
-| Variable    | Details                                                                                                 |
-|-------------|---------------------------------------------------------------------------------------------------------|
-| `gitCommit` | Repository current commit (if directory does not contain a valid git repository, returns an empty value |
-| `gitStatus` | Repo status: `0` (clean), `1` (dirty)                                                                   |
-| `gitTag`    | Current tag                                                                                             |
+| Variable    | Details                                                                                                  |
+|-------------|----------------------------------------------------------------------------------------------------------|
+| `gitCommit` | Repository current commit (if directory does not contain a valid git repository, returns an empty value) |
+| `gitStatus` | Repo status: `0` (clean), `1` (dirty)                                                                    |
+| `gitTag`    | Current tag                                                                                              |
