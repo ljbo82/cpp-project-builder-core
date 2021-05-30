@@ -6,13 +6,12 @@ For details, check [official repository](https://github.com/ljbo82/gcc-project-b
 
 ## License
 
-gcc-project-builder is distributed under version 2 of the General Public License. Please see the LICENSE file for details on copying and distribution.
+gcc-project-builder is distributed under version 2 of the General Public License. Please see the [LICENSE](LICENSE) file for details on copying and distribution.
 
 ## Cloning
 
-This repository uses [git-lfs](https://git-lfs.github.com/) to version some binaries (for instance: ima .
+This repository uses [git-lfs](https://git-lfs.github.com/) to version some binaries files (for instance: images in [**doc/**](doc) directory). Ensure extension is installed before to cloning this repository.
 
 ## Usage instructions
 
 Check [**doc/**](doc) directory.
-
