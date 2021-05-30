@@ -14,5 +14,5 @@ This repository uses [git-lfs](https://git-lfs.github.com/) to version some bina
 
 ## Usage instructions
 
-Check **doc/** directory.
+Check [**doc/**](doc) directory.
 
