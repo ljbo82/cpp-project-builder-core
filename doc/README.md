@@ -32,14 +32,15 @@ This repository uses [git-lfs](https://git-lfs.github.com/) to version some bina
 
 ## Usage
 
-gcc-project-builder provides a build system intended to be used by C/C++ projects in order to build its source files (C/C++/Assembly) using a GCC-based compiler.
+gcc-project-builder provides a build system (**project.mk**) intended to be used by C/C++ projects in order to build its source files (C/C++/Assembly) using a GCC-based compiler.
 
 Basically, the usage comprises the following steps:
 
-1. Source files must be located in specific directories
-2. Project's Makefile must declare some variables, which are used by the build system to generate an artifact (executable or library)
-3. Project's Makefile includes **project.mk**
-4. call `make`
+1. Clone gcc-project-builder as a [git submodule](https://git-scm.com/docs/gitsubmodules) inside your project or copy distribution package into a subdirectory inside project tree
+2. Place source files into specific directories (usually **src/** and **include/**)
+3. Declare variables for gcc-project-builder customization (at least [`PROJ_NAME`](#var-proj-name) and [`PROJ_TYPE`](#var-proj-type)) inside your project's Makefile
+4. Include **project.mk** (provided by gcc-project-builder)
+5. call `make` to build your project
 
 Here is an example of a minimal Makefile used to build an executable with sources contained in project's **src/** directory:
 
@@ -56,7 +57,7 @@ For more examples, check the [demo/](../demo) directory.
 
 ## Source directories
 
-When present, these directories (relative to projet Makefile) are used with the following purposes:
+When present, these directories (relative to project's Makefile) are used with the following purposes:
 
 * **src/**
 
@@ -83,6 +84,8 @@ gcc-project-builder is inteded to support both native and cross-compilation. Dur
 * **dist/**
 
   Distribution directory. Final artifact (and possibly companion header, for libraries) are placed into this directory. Distribution directory can be changed through [`DIST_DIR_BASE`](#var-dist-dir-base) and [`DIST_DIR`](#var-dist-dir) [input variables](#input-variables). Additional directories containing companion headers to be distribuited along with library binary can be added through [`DIST_INCLUDE_DIRS`](#var-dist-include-dirs) [input variable](#input-variables).
+  
+  Companion headers must have **.h** and/or **.hpp** filename extensions.
 
 ## Hosts
 
