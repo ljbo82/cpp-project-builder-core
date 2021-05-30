@@ -447,10 +447,6 @@ _To be documented_
 
 _To be documented_
 
-### functions.mk
-
-_To be documented_
-
 ### git.mk
 
 _To be documented_
