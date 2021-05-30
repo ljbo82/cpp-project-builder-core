@@ -1,6 +1,6 @@
 # gcc-project-builder
 
-gcc-project-builder provides a build system based on Makefiles containing standard recipes to build C/C++ projects.
+gcc-project-builder provides a build system based on Makefiles containing standard targets to build C/C++ projects.
 
 For details, check [official repository](https://github.com/ljbo82/gcc-project-builder).
 
@@ -15,7 +15,7 @@ For details, check [official repository](https://github.com/ljbo82/gcc-project-b
 * [Input variables](#input-variables)
   * [Common input variables](#common-input-variables)
   * [Advanced input variables](#advanced-input-variables)
-* [Recipes](#recipes)
+* [Make targets](#make-targets)
 * [Utility makefiles](#utility-makefiles)
   * [doxygen.mk](#doxygenmk)
   * [functions.mk](#functionsmk)
@@ -28,7 +28,7 @@ gcc-project-builder is distributed under version 2 of the General Public License
 
 ## Cloning
 
-This repository uses [git-lfs](https://git-lfs.github.com/) to version some binaries files (for instance: images in [doc/](doc) directory). Ensure extension is installed before cloning this repository.
+This repository uses [git-lfs](https://git-lfs.github.com/) to version some binaries files (for instance: images in [doc/](.) directory). Ensure extension is installed before cloning this repository.
 
 ## Usage
 
@@ -226,7 +226,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Commands to be executed during [pre-build](#recipe-pre-build) [recipe](#recipes).
+  Commands to be executed during [pre-build](#target-pre-build) [target](#targets).
   
   NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
@@ -236,7 +236,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Project-specific depdencies for [pre-build](#recipe-pre-build) [recipe](#recipes).
+  Project-specific depdencies for [pre-build](#target-pre-build) [target](#targets).
 
 <a name="var-build-deps"></a>
 * **`BUILD_DEPS`**
@@ -244,7 +244,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Project-specific dependencies for [build](#recipe-build) [recipe](#recipes).
+  Project-specific dependencies for [build](#target-build) [target](#targets).
 
 <a name="var-post-build"></a>
 * **`POST_BUILD`**
@@ -252,7 +252,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Commands to be executed during [post-build](#recipe-post-build) [recipe](#recipes).
+  Commands to be executed during [post-build](#target-post-build) [target](#targets).
   
   NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
@@ -262,7 +262,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Project-specific dependencies for [post-build](#recipe-post-build) [recipe](#recipes).
+  Project-specific dependencies for [post-build](#target-post-build) [target](#targets).
 
 <a name="var-pre-clean"></a>
 * **`PRE_CLEAN`**
@@ -270,7 +270,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Commands to be executed during [pre-clean](#recipe-pre-clean) [recipe](#recipes).
+  Commands to be executed during [pre-clean](#target-pre-clean) [target](#targets).
   
   NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
@@ -280,7 +280,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Commands to be executed during [post-clean](#recipe-post-clean) [recipe](#recipes).
+  Commands to be executed during [post-clean](#target-post-clean) [target](#targets).
 
   NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
@@ -290,7 +290,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Commands to be executed during [pre-dist](#recipe-pre-dist) [recipe](#recipes).
+  Commands to be executed during [pre-dist](#target-pre-dist) [target](#targets).
   
   NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
@@ -300,7 +300,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Project-specific dependencies for [pre-dist](#recipe-pre-dist) [recipe](#recipes).
+  Project-specific dependencies for [pre-dist](#target-pre-dist) [target](#targets).
 
 <a name="var-dist-deps"></a>
 * **`DIST_DEPS`**
@@ -308,7 +308,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Project-specific dependencies for [dist](#recipe-dist) [recipe](#recipes).
+  Project-specific dependencies for [dist](#target-dist) [target](#targets).
 
 <a name="var-post-dist"></a>
 * **`POST_DIST`**
@@ -316,7 +316,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Commands to be executed during [post-dist](#recipe-post-dist) [recipe](#recipes).
+  Commands to be executed during [post-dist](#target-post-dist) [target](#targets).
   
   NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
@@ -326,7 +326,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Project-specific dependencies for [post-dist](#recipe-post-dist) [recipe](#recipes).
+  Project-specific dependencies for [post-dist](#target-post-dist) [target](#targets).
 
 ### Advanced input variables
 
@@ -432,51 +432,66 @@ Below are the list the input variables for advanced usage:
 
   Sets the name of native archiver executable.
 
-## Recipes
+## Make targets
 
-**project.mk** provides standard recipes used for almost all kind of C/C++ projects:
+**project.mk** provides standard targets used for almost all kind of C/C++ projects:
 
-![Recipes overview](recipes-overview.png)
+![Targets overview](targets-overview.png)
 
-<a name="recipe-all"></a>
+<a name="target-all"></a>
 * **all**
 
-  Default goal. Just depends on [dist](#recipe-dist) recipe.
+  Default target. Just depends on [dist](#target-dist) target.
 
-<a name="recipe-clean"></a>
+<a name="target-clean"></a>
 * **clean**
 
-  Removes all compiled artifacts. It is preceeded by [pre-clean](#recipe-pre-clean) and followed by [post-clean](#recipe-post-clean).
+  Removes all compiled artifacts. It is preceeded by [pre-clean](#target-pre-clean) and followed by [post-clean](#target-post-clean).
 
-<a name="recipe-pre-clean"></a>
+<a name="target-pre-clean"></a>
 * **pre-clean**
 
   Executes all comands declared in [`$(PRE_CLEAN)`](#var-pre-clean) variable.
   
-<a name="recipe-post-clean"></a>
+<a name="target-post-clean"></a>
 * **post-clean**
 
   Executes all comands declared in [`$(POST_CLEAN)`](#var-post-clean) variable.
   
-<a name="recipe-build"></a>
+<a name="target-build"></a>
 * **build**
 
-  Compiles all source files and generate target binary (executable or library). It is preceeded by both [pre-build](#recipe-pre-build) recipe and dependencies declared in [`$(BUILD_DEPS)`](#var-build-deps) variable. This recipe is followed by [post-build](#recipe-post-build).
+  Compiles all source files and generate target binary (executable or library). It is preceeded by both [pre-build](#target-pre-build) target and dependencies declared in [`$(BUILD_DEPS)`](#var-build-deps) variable. This target is followed by [post-build](#target-post-build).
 
-<a name="recipe-pre-build"></a>
+<a name="target-pre-build"></a>
 * **pre-build**
 
-  Executes all comands declared in [`$(PRE_BUILD)`](#var-pre-build) variable. This recipe is preceeded by dependencies declared in [`$(PRE_BUILD_DEPS)`](#var-pre-build-deps) variable.
+  Executes all comands declared in [`$(PRE_BUILD)`](#var-pre-build) variable. This target is preceeded by dependencies declared in [`$(PRE_BUILD_DEPS)`](#var-pre-build-deps) variable.
   
-<a name="recipe-post-build"></a>
+<a name="target-post-build"></a>
 * **post-build**
 
-  Executes all comands declared in [`$(POST_BUILD)`](#var-post-build) variable. This recipe is preceeded by dependencies declared in [`$(POST_BUILD_DEPS)`](#var-post-build-deps) variable.
+  Executes all comands declared in [`$(POST_BUILD)`](#var-post-build) variable. This target is preceeded by dependencies declared in [`$(POST_BUILD_DEPS)`](#var-post-build-deps) variable.
 
+
+<a name="target-dist"></a>
+* **dist**
+
+  Generate distribuition tree. It depends on [build](#target-build) target. It is preceeded by both [pre-dist](#target-pre-dist) target and dependencies declared in [`$(DIST_DEPS)`](#var-dist-deps) variable. This target is followed by [post-dist](#target-post-dist).
+
+<a name="target-pre-dist"></a>
+* **pre-dist**
+
+  Executes all comands declared in [`$(PRE_DIST)`](#var-pre-dist) variable. This target is preceeded by dependencies declared in [`$(PRE_DIST_DEPS)`](#var-pre-dist-deps) variable.
+  
+<a name="target-post-dist"></a>
+* **post-dist**
+
+  Executes all comands declared in [`$(POST_DIST)`](#var-post-dist) variable. This target is preceeded by dependencies declared in [`$(POST_DIST_DEPS)`](#var-post-dist-deps) variable.
 
 ## Utility makefiles
 
-Along with **project.mk**, gcc-project-builder provides some utility makefiles which can be included to your project's Makefile in order to add more recipes, exposing functions, and exporting output variables, and so on.
+Along with **project.mk**, gcc-project-builder provides some utility makefiles which can be included to your project's Makefile in order to add more targets, exposing functions, and exporting output variables, and so on.
 
 ### doxygen.mk
 
