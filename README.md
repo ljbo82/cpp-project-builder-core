@@ -10,7 +10,7 @@ gcc-project-builder is distributed under version 2 of the General Public License
 
 ## Cloning
 
-This repository uses [git-lfs](https://git-lfs.github.com/) to version some binaries files (for instance: images in [**doc/**](doc) directory). Ensure extension is installed before to cloning this repository.
+This repository uses [git-lfs](https://git-lfs.github.com/) to version some binaries files (for instance: images in [**doc/**](doc) directory). Ensure extension is installed before cloning this repository.
 
 ## Usage instructions
 
