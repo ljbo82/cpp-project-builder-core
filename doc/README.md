@@ -435,6 +435,32 @@ Below are the list the input variables for advanced usage:
 
   Sets the name of native archiver executable.
 
+<a name="var-optimize-release"></a>
+* **`OPTIMIZE_RELEASE`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value: `1`
+
+  Defines if release artifacts shall be optimized (using compiler optimizations). Accepted values are `0` and `1`.
+
+<a name="var-optimization-level"></a>
+* **`OPTIMIZATION_LEVEL`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value: `2`
+
+  If optimization is enabled for release artifacts (see [`OPTIMIZE_RELEASE`](#var-optimize-release)), defines the optimization level used by gcc during build.
+
+  NOTE: There is no check for given value.
+
+<a name="var-strip-release"></a>
+* **`STRIP_RELEASE`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value: `1`
+
+  Defines if release artifacts shall be stripped. Accepted values are `0` and `1`.
+
 ## Make targets
 
 **project.mk** provides standard targets used for almost all kind of C/C++ projects:

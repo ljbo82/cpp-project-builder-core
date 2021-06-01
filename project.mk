@@ -37,6 +37,9 @@ defaultSrcDir            := src
 defaultIncludeDir        := include
 defaultHostsDir          := hosts
 defaultHostMkRequired    := 0
+defaultStripRelease      := 1
+defaultOptimizeRelease   := 1
+defaultOptimizationLevel := 2
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -66,6 +69,10 @@ ifneq ($(PROJ_TYPE), app)
             endif
         endif
     endif
+else
+    ifneq ($(LIB_TYPE), )
+        $(warning WARNING: LIB_TYPE defined for an application. Ignoring it...)
+    endif
 endif
 # ------------------------------------------------------------------------------
 
@@ -91,6 +98,34 @@ ifneq ($(DEBUG), 0)
     ifneq ($(DEBUG), 1)
         $(error Invalid value for DEBUG: $(DEBUG))
     endif
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(STRIP_RELEASE), )
+    STRIP_RELEASE := $(defaultStripRelease)
+endif
+ifneq ($(STRIP_RELEASE), 0)
+    ifneq ($(STRIP_RELEASE), 1)
+        $(error Invalid value for STRIP_RELEASE: $(STRIP_RELEASE))
+    endif
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(OPTIMIZE_RELEASE), )
+    OPTIMIZE_RELEASE := $(defaultOptimizeRelease)
+endif
+ifneq ($(OPTIMIZE_RELEASE), 0)
+    ifneq ($(OPTIMIZE_RELEASE), 1)
+        $(error Invalid value for OPTIMIZE_RELEASE: $(OPTIMIZE_RELEASE))
+    endif
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(OPTIMIZATION_LEVEL), )
+    OPTIMIZATION_LEVEL := $(defaultOptimizationLevel)
 endif
 # ------------------------------------------------------------------------------
 
@@ -308,6 +343,17 @@ ifeq ($(DEBUG), 1)
     _cFlags   += -g3
     _cxxFlags += -g3
     _asFlags  += -g3
+else
+    ifeq ($(OPTIMIZE_RELEASE), 1)
+        _cFlags   += -O$(OPTIMIZATION_LEVEL)
+        _cxxFlags += -O$(OPTIMIZATION_LEVEL)
+    endif
+
+    ifeq ($(STRIP_RELEASE), 1)
+        _cFlags   += -s
+        _cxxFlags += -s
+        _ldFlags  += -s
+    endif
 endif
 # ------------------------------------------------------------------------------
 
