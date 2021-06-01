@@ -69,10 +69,6 @@ ifneq ($(PROJ_TYPE), app)
             endif
         endif
     endif
-else
-    ifneq ($(LIB_TYPE), )
-        $(warning WARNING: LIB_TYPE defined for an application. Ignoring it...)
-    endif
 endif
 # ------------------------------------------------------------------------------
 
