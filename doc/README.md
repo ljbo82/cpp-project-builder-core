@@ -75,8 +75,12 @@ When present, these directories (relative to project's Makefile) are used with t
 
 gcc-project-builder is inteded to support both native and cross-compilation. During build, output files are placed into host-specific directories (these output directories can be customized through [input variables](#input-variables):
 
+> **Version control**
+> 
+> Output directories shall be ignored by your source code version control system.
+
 <a name="dir-build"></a>
-* **build/**
+* **.build/**
 
   Build directory. Object files as well as final artifact (application executable or library) are placed into this directory. The build directory can be changed through [`BUILD_DIR_BASE`](#var-build-dir-base) and [`BUILD_DIR`](#var-build-dir) [input variables](#input-variables).
 
