@@ -283,7 +283,7 @@ srcFiles := $(sort $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir)
 ifeq ($(DEBUG), 1)
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
-            objSuffix := .pic.dbg.o
+            objSuffix := .dbg.lo
         else
             objSuffix := .dbg.o
         endif
@@ -293,7 +293,7 @@ ifeq ($(DEBUG), 1)
 else
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
-            objSuffix := .pic.o
+            objSuffix := .lo
         else
             objSuffix := .o
         endif
