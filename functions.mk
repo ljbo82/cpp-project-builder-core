@@ -26,4 +26,6 @@ fn_host_valid = $(shell sh -c "echo $(1) | grep -oP '^[a-zA-Z0-9]+\-[a-zA-Z0-9]+
 fn_host_os    = $(shell sh -c "echo $(1) | cut -d'-' -f1")
 fn_host_arch  = $(shell sh -c "echo $(1) | cut -d'-' -f2-")
 
+fn_subdir = $(shell sh -c "echo $(abspath $(1)) | grep -oP '^$(abspath $(2))[/]*' > /dev/null && echo $(1)")
+
 endif # _include_functions_mk

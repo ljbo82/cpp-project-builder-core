@@ -14,31 +14,26 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-PROJ_NAME := app_lib
-PROJ_TYPE := app
+PROJ_NAME = app_lib
+PROJ_TYPE = app
 
-ifeq ($(DEBUG), 1)
-    mylib := mylib0_d
-else
-    mylib := mylib0
+ifeq ($(LIB_TYPE), )
+    LIB_TYPE := static
 endif
 
-BUILD_DEPS     += ../lib/$(buildDir)/$(libPrefix)$(mylib)$(sharedLibSuffix)
-POST_DIST_DEPS += $(distDir)/bin/$(libPrefix)$(mylib)$(sharedLibSuffix)
-INCLUDE_DIRS   += ../lib/include
-LDFLAGS        += -Wl,-rpath,./ -L../lib/$(buildDir) -l$(mylib)
+mylib_libName      = $(shell $(MAKE) -s -C ../lib printvars LIB_TYPE=$(LIB_TYPE) VARS='ARTIFACT_BASE_NAME')
+mylib_artifactName = $(shell $(MAKE) -s -C ../lib printvars LIB_TYPE=$(LIB_TYPE) VARS='ARTIFACT_NAME')
+
+BUILD_DEPS   += $(O)/libs/mylib/dist/$(HOST)/$(mylib_artifactName)
+LDFLAGS      += -L$(O)/libs/mylib/dist/$(HOST)/lib -l$(mylib_libName)
+INCLUDE_DIRS += $(O)/libs/mylib/dist/$(HOST)/include
 
 include ../../project.mk
 
-# ==============================================================================
-../lib/$(buildDir)/$(libPrefix)$(mylib)$(sharedLibSuffix):
+# BUILD_DEPS ===================================================================
+$(O)/libs/mylib/dist/$(HOST)/$(mylib_artifactName):
 	@printf "$(nl)[BUILD] $@\n"
-	@rm -f $(buildDir)/$(artifactName) $(distDir)/bin/$(artifactName)
-	$(v)$(MAKE) -C ../lib LIB_TYPE=shared
+	@rm -f $(buildDir)/$(ARTIFACT_NAME) $(distDir)/bin/$(ARTIFACT_NAME)
+	$(v)$(MAKE) -C ../lib LIB_TYPE=$(LIB_TYPE) O=$(abspath $(O))/libs/mylib
 # ==============================================================================
 
-# ==============================================================================
-$(distDir)/bin/$(libPrefix)$(mylib)$(sharedLibSuffix): ../lib/$(buildDir)/$(libPrefix)$(mylib)$(sharedLibSuffix)
-	@printf "$(nl)[DIST] $@\n"
-	$(v)cp $< $@
-# ==============================================================================

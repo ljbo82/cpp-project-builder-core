@@ -38,45 +38,47 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-appSuffix       := .exe
-libPrefix       := lib
-sharedLibSuffix :=.dll
-staticLibSuffix := .dll.a
-
-ifeq ($(DEBUG), 1)
-    __debugSuffix := _d
-endif
-
 ifeq ($(PROJ_TYPE), app)
-    artifactName  := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(appSuffix)
+    __postTargets := 0
+    ifeq ($(ARTIFACT_NAME), )
+        ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).exe
+    endif
 else
     ifeq ($(LIB_TYPE), static)
-        artifactName  := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(staticLibSuffix)
+        __postTargets := 0
+        ifeq ($(ARTIFACT_NAME), )
+            ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).a
+        endif
     else
-        artifactName  := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(sharedLibSuffix)
-        _ldFlags      += -Wl,--out-implib,$(buildDir)/$(artifactName).lib
-        _ldFlags      += -Wl,--output-def,$(buildDir)/$(artifactName).def
-        _postDistDeps += $(distDir)/lib/$(artifactName).lib
-        _postDistDeps += $(distDir)/lib/$(artifactName).def
+        ifeq ($(ARTIFACT_NAME), )
+            __postTargets := 1
+            ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).dll
+            _ldFlags      += -Wl,--out-implib,$(buildDir)/$(ARTIFACT_NAME).lib
+            _ldFlags      += -Wl,--output-def,$(buildDir)/$(ARTIFACT_NAME).def
+            _postDistDeps += $(distDir)/lib/$(ARTIFACT_NAME).lib
+            _postDistDeps += $(distDir)/lib/$(ARTIFACT_NAME).def
+        else
+            __postTargets := 0
+        endif
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # _postDistDeps ================================================================
-ifeq ($(PROJ_TYPE), lib)
-$(distDir)/lib/$(artifactName).lib: $(buildDir)/$(artifactName).lib
+ifeq ($(__postTargets), 1)
+$(distDir)/lib/$(ARTIFACT_NAME).lib: $(buildDir)/$(ARTIFACT_NAME).lib
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
 	$(v)ln -f $< $@
 
-$(distDir)/lib/$(artifactName).def: $(buildDir)/$(artifactName).def
+$(distDir)/lib/$(ARTIFACT_NAME).def: $(buildDir)/$(ARTIFACT_NAME).def
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
 	$(v)ln -f $< $@
 endif
 # ==============================================================================
 
-undefine __debugSuffix
+undefine __postTargets
 
 endif #_include_hosts_windows_mk
 

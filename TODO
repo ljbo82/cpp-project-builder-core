@@ -1,3 +1,8 @@
 gcc-project-builder TODO
 
-* Documentation
+* Documentation SKIP_DEFAULT_SRC_DIRS
+* Documentation ARTIFACT_BASE_NAME
+* Documentation ARTIFACT_NAME
+* Check of absolute or relative paths in $(O)
+* Documentation output variables
+

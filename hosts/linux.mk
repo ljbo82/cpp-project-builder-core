@@ -54,46 +54,48 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-libPrefix       := lib
-sharedLibSuffix := .so
-staticLibSuffix := .a
-
-ifeq ($(DEBUG), 1)
-    __debugSuffix := _d
-endif
-
 ifeq ($(PROJ_TYPE), app)
-    artifactName  := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)
+    __postTargets := 0
+    ifeq ($(ARTIFACT_NAME), )
+        ARTIFACT_NAME := $(ARTIFACT_BASE_NAME)
+    endif
 else
     ifeq ($(LIB_TYPE), static)
-        artifactName  := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(staticLibSuffix)
+        __postTargets := 0
+        ifeq ($(ARTIFACT_NAME), )
+            ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).a
+        endif
     else
-        _artifactBaseName := $(libPrefix)$(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)$(sharedLibSuffix)
-        artifactName      := $(_artifactBaseName).$(projVersionMinor).$(projVersionPatch)
-        _postBuildDeps    += $(buildDir)/$(_artifactBaseName)
-        _postDistDeps     += $(distDir)/lib/$(_artifactBaseName)
+        ifeq ($(ARTIFACT_NAME), )
+            __postTargets := 1
+            ARTIFACT_NAME      := lib$(ARTIFACT_BASE_NAME).so.$(projVersionMinor).$(projVersionPatch)
+            _postBuildDeps     += $(buildDir)/lib$(ARTIFACT_BASE_NAME).so
+            _postDistDeps      += $(distDir)/lib/lib$(ARTIFACT_BASE_NAME).so
+        else
+            __postTargets := 0
+        endif
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # _postBuildDeps ===============================================================
-ifeq ($(PROJ_TYPE), lib)
-$(buildDir)/$(_artifactBaseName): $(buildDir)/$(artifactName)
+ifeq ($(__postTargets), 1)
+$(buildDir)/lib$(ARTIFACT_BASE_NAME).so: $(buildDir)/$(ARTIFACT_NAME)
 	@printf "$(nl)[BUILD] $@\n"
 	$(v)ln -sf $(notdir $<) $@
 endif
 # ==============================================================================
 
 # _postDistDeps ================================================================
-ifeq ($(PROJ_TYPE), lib)
-$(distDir)/lib/$(_artifactBaseName): $(buildDir)/$(_artifactBaseName)
+ifeq ($(__postTargets), 1)
+$(distDir)/lib/lib$(ARTIFACT_BASE_NAME).so: $(buildDir)/lib$(ARTIFACT_BASE_NAME).so
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
 	$(v)ln -f $< $@
 endif
 # ==============================================================================
 
-undefine __debugSuffix
+undefine __postTargets
 
 endif #_include_hosts_linux_mk
 

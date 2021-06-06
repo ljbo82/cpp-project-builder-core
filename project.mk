@@ -18,6 +18,12 @@ ifndef _include_project_mk
 _include_project_mk := 1
 
 # ------------------------------------------------------------------------------
+ifneq (1, $(words $(shell pwd)))
+    $(error Current directory ($(shell pwd)) contains one or more whitespaces)
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 _project_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 # ------------------------------------------------------------------------------
 
@@ -27,18 +33,19 @@ include $(_project_mk_dir)native_host.mk
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-defaultLibType           := shared
-defaultProjVersion       := 0.1.0
-defaultDebug             := 0
-defaultV                 := 0
-defaultOutputDirBase     := output
-defaultSrcDir            := src
-defaultIncludeDir        := include
-defaultHostsDir          := hosts
-defaultHostMkRequired    := 0
-defaultStripRelease      := 1
-defaultOptimizeRelease   := 1
-defaultOptimizationLevel := 2
+defaultLibType            := shared
+defaultProjVersion        := 0.1.0
+defaultDebug              := 0
+defaultV                  := 0
+defaultOutputDirBase      := output
+defaultSrcDir             := src
+defaultIncludeDir         := include
+defaultHostsDir           := hosts
+defaultHostMkRequired     := 0
+defaultStripRelease       := 1
+defaultOptimizeRelease    := 1
+defaultOptimizationLevel  := 2
+defaultSkipDefaultSrcDirs := 0
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -89,6 +96,7 @@ projVersionPatch := $(call fn_version_patch, $(PROJ_VERSION))
 ifeq ($(DEBUG), )
     DEBUG := $(defaultDebug)
 endif
+
 ifneq ($(DEBUG), 0)
     ifneq ($(DEBUG), 1)
         $(error Invalid value for DEBUG: $(DEBUG))
@@ -100,6 +108,7 @@ endif
 ifeq ($(STRIP_RELEASE), )
     STRIP_RELEASE := $(defaultStripRelease)
 endif
+
 ifneq ($(STRIP_RELEASE), 0)
     ifneq ($(STRIP_RELEASE), 1)
         $(error Invalid value for STRIP_RELEASE: $(STRIP_RELEASE))
@@ -111,6 +120,7 @@ endif
 ifeq ($(OPTIMIZE_RELEASE), )
     OPTIMIZE_RELEASE := $(defaultOptimizeRelease)
 endif
+
 ifneq ($(OPTIMIZE_RELEASE), 0)
     ifneq ($(OPTIMIZE_RELEASE), 1)
         $(error Invalid value for OPTIMIZE_RELEASE: $(OPTIMIZE_RELEASE))
@@ -128,6 +138,7 @@ endif
 ifeq ($(V), )
     V := $(defaultV)
 endif
+
 ifneq ($(V), 0)
     ifneq ($(V), 1)
         $(error ERROR: Invalid value for V: $(V))
@@ -148,9 +159,11 @@ ifeq ($(HOST), )
     ifeq ($(nativeOS), )
         $(error Cannot detect native operating system)
     endif
+
     ifeq ($(nativeArch), )
         $(error Cannot detect native architecture)
     endif
+
     hostOS   := $(nativeOS)
     hostArch := $(nativeArch)
     HOST     := $(hostOS)-$(hostArch)
@@ -158,6 +171,7 @@ else
     ifeq ($(call fn_host_valid, $(HOST)), 0)
         $(error Invalid HOST: $(HOST))
     endif
+
     hostOS   := $(call fn_host_os, $(HOST))
     hostArch := $(call fn_host_arch, $(HOST))
 endif
@@ -167,28 +181,69 @@ endif
 ifeq ($(O), )
     O := $(defaultOutputDirBase)
 endif
+
+ifneq (1, $(words $(O)))
+    $(error Output directory ($(O)) cannot have whitespaces)
+endif
+
 buildDir := $(O)/build/$(HOST)
 distDir  := $(O)/dist/$(HOST)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifneq ($(wildcard $(defaultSrcDir)), )
-    SRC_DIRS += $(defaultSrcDir)
+ifeq ($(SKIP_DEFAULT_SRC_DIRS), )
+    SKIP_DEFAULT_SRC_DIRS := $(defaultSkipDefaultSrcDirs)
+endif
+
+ifneq ($(SKIP_DEFAULT_SRC_DIRS), 0)
+    ifneq ($(SKIP_DEFAULT_SRC_DIRS), 1)
+        $(error Invalid value for SKIP_DEFAULT_SRC_DIRS: $(SKIP_DEFAULT_SRC_DIRS))
+    endif
 endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifneq ($(wildcard $(defaultIncludeDir)), )
-    ifeq ($(PROJ_TYPE), lib)
-        DIST_INCLUDE_DIRS += $(defaultIncludeDir)
+ifeq ($(SKIP_DEFAULT_SRC_DIRS), 0)
+    ifneq ($(wildcard $(defaultSrcDir)), )
+        SRC_DIRS += $(defaultSrcDir)
     endif
-    INCLUDE_DIRS += $(defaultIncludeDir)
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(SKIP_DEFAULT_SRC_DIRS), 0)
+    ifneq ($(wildcard $(defaultIncludeDir)), )
+        ifeq ($(PROJ_TYPE), lib)
+            DIST_INCLUDE_DIRS += $(defaultIncludeDir)
+        endif
+
+        INCLUDE_DIRS += $(defaultIncludeDir)
+    endif
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(ARTIFACT_BASE_NAME), )
+    ifeq ($(DEBUG), 1)
+        __debugSuffix := _d
+    endif
+
+    ARTIFACT_BASE_NAME := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)
+    undefine __debugSuffix
+endif
+
+ifneq (1, $(words $(ARTIFACT_BASE_NAME)))
+    $(error ARTIFACT_BASE_NAME cannot have spaces)
 endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 ifeq ($(HOSTS_DIR), )
     HOSTS_DIR := $(defaultHostsDir)
+endif
+
+ifneq (1, $(words $(HOSTS_DIR)))
+    $(error HOSTS_DIR ($(HOSTS_DIR)) cannot have whitespaces)
 endif
 # ------------------------------------------------------------------------------
 
@@ -261,8 +316,18 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+ifeq ($(ARTIFACT_NAME), )
+    ARTIFACT_NAME := $(ARTIFACT_BASE_NAME)
+endif
+
+ifneq (1, $(words $(ARTIFACT_NAME)))
+    $(error ARTIFACT_NAME cannot have spaces)
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 SRC_DIRS := $(sort $(SRC_DIRS))
-$(foreach srcDir, $(SRC_DIRS), $(if $(findstring .., $(srcDir)), $(error Invalid source directory in SRC_DIRS: '$(srcDir)')))
+$(foreach srcDir, $(SRC_DIRS), $(if $(call fn_subdir, $(srcDir), $(shell pwd)),,$(error Source directory ($(srcDir)) is outside project tree)))
 srcFiles := $(sort $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir) -type f -name '*.c' -or -name '*.cpp' -or -name '*.S' 2> /dev/null))))
 # ------------------------------------------------------------------------------
 
@@ -293,7 +358,11 @@ objFiles := $(srcFiles:%=$(buildDir)/%$(objSuffix))
 
 # ------------------------------------------------------------------------------
 ifeq ($(PROJ_TYPE), lib)
-    depFiles := $(objFiles:.lo=.d)
+    ifeq ($(LIB_TYPE), shared)
+        depFiles := $(objFiles:.lo=.d)
+    else
+        depFiles := $(objFiles:.o=.d)
+    endif
 else
     depFiles := $(objFiles:.o=.d)
 endif
@@ -301,13 +370,9 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(PROJ_TYPE), app)
-    _postDistDeps += $(distDir)/bin/$(artifactName)
+    _postDistDeps += $(distDir)/bin/$(ARTIFACT_NAME)
 else
-    ifeq ($(LIB_TYPE), static)
-        _postDistDeps += $(distDir)/lib/$(artifactName)
-    else
-        _postDistDeps += $(distDir)/lib/$(artifactName)
-    endif
+    _postDistDeps += $(distDir)/lib/$(ARTIFACT_NAME)
 endif
 # ------------------------------------------------------------------------------
 
@@ -326,6 +391,7 @@ endif
 # ------------------------------------------------------------------------------
 _cFlags   += -Wall
 _cxxFlags += -Wall
+
 ifeq ($(DEBUG), 1)
     _cFlags   += -g3
     _cxxFlags += -g3
@@ -346,11 +412,13 @@ endif
 
 # ------------------------------------------------------------------------------
 _includeFlags += $(strip $(foreach srcDir, $(SRC_DIRS), -I$(srcDir)))
+
 ifeq ($(PROJ_TYPE), lib)
     _includeDirs = $(sort $(INCLUDE_DIRS) $(DIST_INCLUDE_DIRS))
 else
     _includeDirs = $(INCLUDE_DIRS)
 endif
+
 _includeFlags += $(strip $(foreach includeDir, $(_includeDirs), -I$(includeDir)))
 # ------------------------------------------------------------------------------
 
@@ -370,6 +438,7 @@ _arFlags += rcs
 
 # ------------------------------------------------------------------------------
 isCppProject := $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir) -type f -name *.cpp 2> /dev/null)))
+
 ifeq ($(isCppProject), )
     isCppProject = $(strip $(foreach includeDir, $(INCLUDE_DIRS), $(shell find $(includeDir) -type f -name *.hpp 2> /dev/null)))
 endif
@@ -382,6 +451,7 @@ endif
 
 CC  := gcc
 CXX := g++
+
 ifeq ($(isCppProject), 0)
     # Pure C project
     LD := gcc
@@ -403,12 +473,25 @@ endif
 .NOTPARALLEL:
 # ------------------------------------------------------------------------------
 
-# ALL ==========================================================================
+# all ==========================================================================
 .PHONY: all
 all: dist
 # ==============================================================================
 
-# BUILD ========================================================================
+# printvars ====================================================================
+.PHONY: printvars
+printvars:
+ifneq ($(words $(VARS)), 0)
+	@:
+ifeq ($(words $(VARS)), 1)
+	$(info $($(VARS)))
+else
+	$(foreach var, $(VARS), $(info $(var) = $($(var))))
+endif
+endif
+# ==============================================================================
+
+# build ========================================================================
 .PHONY: build
 build: post-build
 
@@ -419,13 +502,13 @@ pre-build: $(PRE_BUILD_DEPS)
     endif
 
 .PHONY: post-build
-post-build: pre-build $(buildDir)/$(artifactName) $(_postBuildDeps) $(POST_BUILD_DEPS)
+post-build: pre-build $(buildDir)/$(ARTIFACT_NAME) $(_postBuildDeps) $(POST_BUILD_DEPS)
     ifneq ($(POST_BUILD), )
 	    $(v)$(POST_BUILD)
     endif
 # ==============================================================================
 
-# CLEAN ========================================================================
+# clean ========================================================================
 .PHONY: clean
 clean: post-clean
 
@@ -443,7 +526,7 @@ post-clean: pre-clean
     endif
 # ==============================================================================
 
-# DIST =========================================================================
+# dist =========================================================================
 .PHONY: dist
 dist: post-dist
 
@@ -460,13 +543,6 @@ post-dist: pre-dist $(DIST_DEPS) $(_postDistDeps) $(POST_DIST_DEPS)
     endif
 # ==============================================================================
 
-# ==============================================================================
-.PHONY: printvars
-printvars:
-	@:
-	$(foreach var, $(VARS), $(info $(var) = $($(var))))
-# ==============================================================================
-
 # _postDistDeps ================================================================
 ifeq ($(PROJ_TYPE), lib)
 $(distDir)/%.h : %.h
@@ -476,14 +552,14 @@ $(distDir)/%.h : %.h
 endif
 
 ifeq ($(PROJ_TYPE), app)
-$(distDir)/bin/$(artifactName): $(buildDir)/$(artifactName)
+$(distDir)/bin/$(ARTIFACT_NAME): $(buildDir)/$(ARTIFACT_NAME)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/bin
 	$(v)ln -f $< $@
 endif
 
 ifeq ($(PROJ_TYPE), lib)
-$(distDir)/lib/$(artifactName): $(buildDir)/$(artifactName)
+$(distDir)/lib/$(ARTIFACT_NAME): $(buildDir)/$(ARTIFACT_NAME)
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
 	$(v)ln -f $< $@
@@ -491,7 +567,7 @@ endif
 # ==============================================================================
 
 # Build artifact ===============================================================
-$(buildDir)/$(artifactName): $(BUILD_DEPS) $(objFiles)
+$(buildDir)/$(ARTIFACT_NAME): $(BUILD_DEPS) $(objFiles)
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
 	        @printf "$(nl)[LD] $@\n"
