@@ -522,6 +522,19 @@ Below are the list the input variables for advanced usage:
 
   Executes all comands declared in [`$(POST_DIST)`](#var-post-dist) variable. This target is preceeded by dependencies declared in [`$(POST_DIST_DEPS)`](#var-post-dist-deps) variable.
 
+<a name="target-printvars"></a>
+* **printvars**
+
+  This target is used for debugging purposes.
+
+  List the values for variables selected through `$(VAR)` environment variable.
+
+  For example, to get the value of both `$(POST_CLEAN)` and `$(PRE_CLEAN)`:
+
+  ```bash
+  $ make printvars VAR='POST_CLEAN PRE_CLEAN'
+  ```
+
 ## Utility makefiles
 
 Along with **project.mk**, gcc-project-builder provides some utility makefiles which can be included into your project's Makefile in order to add more targets, exposing functions, and exporting output variables, and so on.

@@ -469,6 +469,13 @@ post-dist: pre-dist $(DIST_DEPS) $(_postDistDeps) $(POST_DIST_DEPS)
     endif
 # ==============================================================================
 
+# ==============================================================================
+.PHONY: printvars
+printvars:
+	@:
+	$(foreach var, $(VARS), $(info $(var) = $($(var))))
+# ==============================================================================
+
 # _postDistDeps ================================================================
 ifeq ($(PROJ_TYPE), lib)
 $(distDir)/%.h : %.h
@@ -529,7 +536,7 @@ $(buildDir)/%.S$(objSuffix): %.S
 	$(v)$(CROSS_COMPILE)$(AS) $(strip $(_asFlags) -MMD $(ASFLAGS) $(_includeFlags) -c $< -o $@)
 # ==============================================================================
 
--include $(_deps)
+-include $(depFiles)
 
 endif # _include_project_mk
 
