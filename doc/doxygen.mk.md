@@ -4,12 +4,12 @@ This file provides standard targets to generate source documentation based on [d
 
 ## Input variables
 
-| Variable        | Mandatory | Defaults   | Details                                                 |
-|-----------------|-----------|------------|---------------------------------------------------------|
-| `DOC_BUILD_DIR` | no        | `dist/doc` | Directory where generated documentation shall be placed |
-| `DOXYFILE`      | no        | `Doxyfile` | Path of doxygen configuration file                      |
-| `PRE_DOC`       | no        | _(empty)_  | Commands to be executed on [pre-doc](#pre-doc)   |
-| `POST_DOC`      | no        | _(empty)_  | Commands to be executed on [post-doc](#post-doc) |
+| Variable        | Mandatory | Defaults   | Details                                                                                 |
+|-----------------|-----------|------------|-----------------------------------------------------------------------------------------|
+| `O`             | no        | `output`   | Base directory where generated documentation shall be placed into **doc/** subdirectory |
+| `DOXYFILE`      | no        | `Doxyfile` | Path of doxygen configuration file                                                      |
+| `PRE_DOC`       | no        | _(empty)_  | Commands to be executed on [pre-doc](#pre-doc)                                          |
+| `POST_DOC`      | no        | _(empty)_  | Commands to be executed on [post-doc](#post-doc)                                        |
 
 ## Make targets
 

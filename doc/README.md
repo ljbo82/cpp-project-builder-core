@@ -73,23 +73,37 @@ When present, these directories (relative to project's Makefile) are used with t
 
 ## Output directories
 
-gcc-project-builder is inteded to support both native and cross-compilation. During build, output files are placed into host-specific directories (these output directories can be customized through [input variables](#input-variables):
+All generated files are placed (by default) into **output/** directory. This directory can be changed through [$(O)](#var-o) enviroment variable.
 
 > **Version control**
 > 
-> Output directories shall be ignored by your source code version control system.
+> Output base directory shall be ignored by your source code version control system.
 
-<a name="dir-build"></a>
-* **.build/**
+Inside output base directory (**$(O)/**) you may find some directories according to project type:
 
-  Build directory. Object files as well as final artifact (application executable or library) are placed into this directory. The build directory can be changed through [`BUILD_DIR_BASE`](#var-build-dir-base) and [`BUILD_DIR`](#var-build-dir) [input variables](#input-variables).
+* **$(O)/build/&lt;host>/**
 
-<a name="dir-dist"></a>
-* **dist/**
+  Build directory. Object files as well as final artifact (application executable or library) are placed into this directory.
 
-  Distribution directory. Final artifact (and possibly companion header, for libraries) are placed into this directory. Distribution directory can be changed through [`DIST_DIR_BASE`](#var-dist-dir-base) and [`DIST_DIR`](#var-dist-dir) [input variables](#input-variables). Additional directories containing companion headers to be distribuited along with library binary can be added through [`DIST_INCLUDE_DIRS`](#var-dist-include-dirs) [input variable](#input-variables).
+* **$(O)/dist/&lt;host>/**
+
+  Distribution directory. Final artifact (executable or library), and possibly companion header (for libraries) are placed into this directory. 
+
+  * **$(O)/dist/&lt;host>/bin/**
+
+    If project builds an application executable, resulting binary is placed into this directory.
+
+  * **$(O)/dist/&lt;host>/lib/**
+
+    If project builds a library (either static o shared), resulting binary is placed into this directory.
   
-  Companion headers must have **.h** and/or **.hpp** filename extensions.
+  * **$(O)/dist/&lt;host>/include/**
+
+    If project builds a library (either static of shared), companion headers are placed into this directory.
+
+    Additional directories containing companion headers to be distribuited along with library binary can be added through [`DIST_INCLUDE_DIRS`](#var-dist-include-dirs) [input variable](#input-variables).
+
+    Companion headers must have either **.h** or **.hpp** filename extensions.
 
 ## Hosts
 
@@ -335,6 +349,14 @@ Below are the list the commonly used input variables:
 
   Project-specific dependencies for [post-dist](#target-post-dist) [target](#targets).
 
+<a name="var-o"></a>
+* **`O`**
+  * Mandatory: no
+  * Common declaration: Environment
+  * Default value: `output`
+
+  Sets the name of the base [output directory](#output-directories) (relative to project Makefile directory), where all generated artifacts will be placed into.
+
 ### Advanced input variables
 
 Below are the list the input variables for advanced usage:
@@ -390,38 +412,6 @@ Below are the list the input variables for advanced usage:
   * Default value: _(empty)_
 
   This variable defines additional directories containing header files which must be copied to distribution package. Specified directories are also added to compiler include search path. 
-
-<a name="var-build-dir-base"></a>
-* **`BUILD_DIR_BASE`**
-  * Mandatory: no
-  * Common declaration: Environment
-  * Default value: `build`
-
-  Sets the name of the base directory (relative to project Makefile directory) where all build artifacts will be placed.
-
-<a name="var-build-dir"></a>
-* **`BUILD_DIR`**
-  * Mandatory: no
-  * Common declaration: Environment
-  * Default value: `$(HOST)`
-
-  Sets the name of the directory (relative to [`$(BUILD_DIR_BASE)`](#var-build-dir-base) where all build artifacts will be placed.
-
-<a name="var-dist-dir-base"></a>
-* **`DIST_DIR_BASE`**
-  * Mandatory: no
-  * Common declaration: Environment
-  * Default value: `dist`
-
-  Sets the name of the base directory (relative to project Makefile directory) where all distribution artifacts will be placed.
-
-<a name="var-dist-dir"></a>
-* **`DIST_DIR`**
-  * Mandatory: no
-  * Common declaration: Environment
-  * Default value: `$(HOST)`
-
-  Sets the name of the directory (relative to [`$(DIST_DIR_BASE)`](#var-dist-dir-base)) where all distribution artifacts will be placed.
 
 <a name="var-as"></a>
 * **`AS`**

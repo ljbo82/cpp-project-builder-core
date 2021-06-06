@@ -18,9 +18,11 @@ ifndef _include_doxygen_mk
 _include_doxygen_mk := 1
 
 # ------------------------------------------------------------------------------
-ifeq ($(DOC_BUILD_DIR), )
-    DOC_BUILD_DIR := dist/doc
+defaultDocOutputDirBase := output
+ifeq ($(O), )
+    O := $(defaultDocOutputDirBase)
 endif
+docOutputDir := $(O)/doc
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -44,8 +46,8 @@ post-doc: pre-doc $(DOC_DEPS)
     ifeq ($(wildcard $(DOXYFILE)), )
 	    $(error [ERROR] $(DOXYFILE) not found)
     else
-	    @mkdir -p $(DOC_BUILD_DIR)
-	    $(v)( cat $(DOXYFILE); echo OUTPUT_DIRECTORY = $(DOC_BUILD_DIR) ) | doxygen -
+	    @mkdir -p $(docOutputDir)
+	    $(v)( cat $(DOXYFILE); echo OUTPUT_DIRECTORY = $(docOutputDir) ) | doxygen -
         ifneq ($(POST_DOC), )
 	        $(v)$(POST_DOC)
         endif

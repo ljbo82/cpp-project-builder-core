@@ -31,8 +31,7 @@ defaultLibType           := shared
 defaultProjVersion       := 0.1.0
 defaultDebug             := 0
 defaultV                 := 0
-defaultBuildDirBase      := .build
-defaultDistDirBase       := dist
+defaultOutputDirBase     := output
 defaultSrcDir            := src
 defaultIncludeDir        := include
 defaultHostsDir          := hosts
@@ -165,23 +164,11 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(BUILD_DIR_BASE), )
-    BUILD_DIR_BASE := $(defaultBuildDirBase)
+ifeq ($(O), )
+    O := $(defaultOutputDirBase)
 endif
-ifeq ($(BUILD_DIR_NAME), )
-    BUILD_DIR_NAME := $(HOST)
-endif
-buildDir := $(BUILD_DIR_BASE)/$(BUILD_DIR_NAME)
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifeq ($(DIST_DIR_BASE), )
-    DIST_DIR_BASE := $(defaultDistDirBase)
-endif
-ifeq ($(DIST_DIR_NAME), )
-    DIST_DIR_NAME := $(HOST)
-endif
-distDir := $(DIST_DIR_BASE)/$(DIST_DIR_NAME)
+buildDir := $(O)/build/$(HOST)
+distDir := $(O)/dist/$(HOST)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -446,7 +433,7 @@ pre-clean:
 
 .PHONY: post-clean
 post-clean: pre-clean
-	$(v)rm -rf $(BUILD_DIR_BASE) $(DIST_DIR_BASE)
+	$(v)rm -rf $(O)
     ifneq ($(POST_CLEAN), )
 	    $(v)$(POST_CLEAN)
     endif
