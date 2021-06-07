@@ -18,6 +18,14 @@ ifndef _include_doxygen_mk
 _include_doxygen_mk := 1
 
 # ------------------------------------------------------------------------------
+_doxygen_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+include $(_doxygen_mk_dir)common.mk
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 defaultDocOutputDirBase := output
 ifeq ($(O), )
     O := $(defaultDocOutputDirBase)
@@ -42,7 +50,7 @@ pre-doc: $(PRE_DOC_DEPS)
     endif
 
 .PHONY: post-doc
-post-doc: pre-doc $(DOC_DEPS)
+post-doc: pre-doc $(DOC_DEPS) $(POST_DOC_DEPS)
     ifeq ($(wildcard $(DOXYFILE)), )
 	    $(error [ERROR] $(DOXYFILE) not found)
     else

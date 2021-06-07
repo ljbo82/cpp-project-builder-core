@@ -26,10 +26,10 @@ endif
 # ------------------------------------------------------------------------------
 ifeq ($(CROSS_COMPILE), )
     ifeq ($(hostArch), x64)
-        CROSS_COMPILE := x86_64-w64-mingw32-
+        override CROSS_COMPILE := x86_64-w64-mingw32-
     else
         ifeq ($(hostArch), x86)
-            CROSS_COMPILE := i686-w64-mingw32-
+            override CROSS_COMPILE := i686-w64-mingw32-
         else
             $(error Missing CROSS_COMPILE for arch '$(hostArch)')
         endif
@@ -41,22 +41,23 @@ endif
 ifeq ($(PROJ_TYPE), app)
     __postTargets := 0
     ifeq ($(ARTIFACT_NAME), )
-        ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).exe
+        override ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).exe
     endif
 else
     ifeq ($(LIB_TYPE), static)
         __postTargets := 0
         ifeq ($(ARTIFACT_NAME), )
-            ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).a
+            override ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).a
         endif
     else
         ifeq ($(ARTIFACT_NAME), )
             __postTargets := 1
-            ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).dll
-            _ldFlags      += -Wl,--out-implib,$(buildDir)/$(ARTIFACT_NAME).lib
-            _ldFlags      += -Wl,--output-def,$(buildDir)/$(ARTIFACT_NAME).def
-            _postDistDeps += $(distDir)/lib/$(ARTIFACT_NAME).lib
-            _postDistDeps += $(distDir)/lib/$(ARTIFACT_NAME).def
+            override ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).dll
+
+            ldFlags       += -Wl,--out-implib,$(buildDir)/$(ARTIFACT_NAME).lib
+            ldFlags       += -Wl,--output-def,$(buildDir)/$(ARTIFACT_NAME).def
+            postDistDeps  += $(distDir)/lib/$(ARTIFACT_NAME).lib
+            postDistDeps  += $(distDir)/lib/$(ARTIFACT_NAME).def
         else
             __postTargets := 0
         endif
@@ -64,7 +65,7 @@ else
 endif
 # ------------------------------------------------------------------------------
 
-# _postDistDeps ================================================================
+# postDistDeps =================================================================
 ifeq ($(__postTargets), 1)
 $(distDir)/lib/$(ARTIFACT_NAME).lib: $(buildDir)/$(ARTIFACT_NAME).lib
 	@printf "$(nl)[DIST] $@\n"

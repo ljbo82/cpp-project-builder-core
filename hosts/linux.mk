@@ -31,17 +31,17 @@ ifeq ($(CROSS_COMPILE), )
         ifneq ($(hostArch), $(nativeArch))
             ifeq ($(hostArch), x86)
                 ifeq ($(nativeArch), x64)
-                    _cxxFlags += -m32
-                    _cFlags   += -m32
-                    _ldFlags  += -m32
+                    cxxFlags += -m32
+                    cFlags   += -m32
+                    ldFlags  += -m32
                 else
                     $(error Missing CROSS_COMPILE for arch '$(hostArch)')
                 endif
             else ifeq ($(hostArch), x64)
                 ifeq ($(nativeArch), x86)
-                    _cxxFlags += -m64
-                    _cFlags   += -m64
-                    _ldFlags  += -m64
+                    cxxFlags += -m64
+                    cFlags   += -m64
+                    ldFlags  += -m64
                 else
                     $(error Missing CROSS_COMPILE for arch '$(hostArch)')
                 endif
@@ -57,20 +57,21 @@ endif
 ifeq ($(PROJ_TYPE), app)
     __postTargets := 0
     ifeq ($(ARTIFACT_NAME), )
-        ARTIFACT_NAME := $(ARTIFACT_BASE_NAME)
+        override ARTIFACT_NAME := $(ARTIFACT_BASE_NAME)
     endif
 else
     ifeq ($(LIB_TYPE), static)
         __postTargets := 0
         ifeq ($(ARTIFACT_NAME), )
-            ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).a
+            override ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).a
         endif
     else
         ifeq ($(ARTIFACT_NAME), )
             __postTargets := 1
-            ARTIFACT_NAME      := lib$(ARTIFACT_BASE_NAME).so.$(projVersionMinor).$(projVersionPatch)
-            _postBuildDeps     += $(buildDir)/lib$(ARTIFACT_BASE_NAME).so
-            _postDistDeps      += $(distDir)/lib/lib$(ARTIFACT_BASE_NAME).so
+            override ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).so.$(projVersionMinor).$(projVersionPatch)
+
+            postBuildDeps += $(buildDir)/lib$(ARTIFACT_BASE_NAME).so
+            postDistDeps  += $(distDir)/lib/lib$(ARTIFACT_BASE_NAME).so
         else
             __postTargets := 0
         endif
@@ -78,7 +79,7 @@ else
 endif
 # ------------------------------------------------------------------------------
 
-# _postBuildDeps ===============================================================
+# postBuildDeps ================================================================
 ifeq ($(__postTargets), 1)
 $(buildDir)/lib$(ARTIFACT_BASE_NAME).so: $(buildDir)/$(ARTIFACT_NAME)
 	@printf "$(nl)[BUILD] $@\n"
@@ -86,7 +87,7 @@ $(buildDir)/lib$(ARTIFACT_BASE_NAME).so: $(buildDir)/$(ARTIFACT_NAME)
 endif
 # ==============================================================================
 
-# _postDistDeps ================================================================
+# postDistDeps =================================================================
 ifeq ($(__postTargets), 1)
 $(distDir)/lib/lib$(ARTIFACT_BASE_NAME).so: $(buildDir)/lib$(ARTIFACT_BASE_NAME).so
 	@printf "$(nl)[DIST] $@\n"

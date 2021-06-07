@@ -14,12 +14,27 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-PROJ_NAME = app_lib
-PROJ_TYPE = app
+ifndef _include_common_mk
+_include_common_mk := 1
 
-LIBS += lib/liba
-LIBS += lib/libb
-LIBS += lib/libd
+defaultV := 0
 
-include ../../project.mk
+ifeq ($(V), )
+    V := $(defaultV)
+endif
 
+ifneq ($(V), 0)
+    ifneq ($(V), 1)
+        $(error ERROR: Invalid value for V: $(V))
+    endif
+endif
+
+ifeq ($(V), 0)
+    v  := @
+    nl :=
+else
+    v  :=
+    nl := \n
+endif
+
+endif # _include_common_mk

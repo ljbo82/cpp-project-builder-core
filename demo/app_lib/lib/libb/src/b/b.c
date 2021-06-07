@@ -16,12 +16,13 @@
     along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 */
 
-#include <a/a.h>
 #include <b/b.h>
+#include <d/d.h>
 
-int main(int argc, char** argv) {
-    a();
-    b();
+#include <stdio.h>
 
-    return 0;
+void b() {
+    printf("Hello from libb\n");
+    d();
 }
+

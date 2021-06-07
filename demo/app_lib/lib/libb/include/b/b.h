@@ -16,12 +16,15 @@
     along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 */
 
-#include <a/a.h>
-#include <b/b.h>
+#pragma once
 
-int main(int argc, char** argv) {
-    a();
-    b();
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    return 0;
-}
+void b();
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+

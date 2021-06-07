@@ -28,6 +28,7 @@ _project_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+include $(_project_mk_dir)common.mk
 include $(_project_mk_dir)functions.mk
 include $(_project_mk_dir)native_host.mk
 # ------------------------------------------------------------------------------
@@ -36,7 +37,6 @@ include $(_project_mk_dir)native_host.mk
 defaultLibType            := shared
 defaultProjVersion        := 0.1.0
 defaultDebug              := 0
-defaultV                  := 0
 defaultOutputDirBase      := output
 defaultSrcDir             := src
 defaultIncludeDir         := include
@@ -67,7 +67,7 @@ ifneq ($(PROJ_TYPE), app)
         $(error Unsupported PROJ_TYPE: $(PROJ_TYPE))
     else
         ifeq ($(LIB_TYPE), )
-            LIB_TYPE := $(defaultLibType)
+            override LIB_TYPE := $(defaultLibType)
         endif
         ifneq ($(LIB_TYPE), shared)
             ifneq ($(LIB_TYPE), static)
@@ -80,7 +80,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(PROJ_VERSION), )
-    PROJ_VERSION := $(defaultProjVersion)
+    override PROJ_VERSION := $(defaultProjVersion)
 endif
 
 ifeq ($(call fn_version_valid, $(PROJ_VERSION)), 0)
@@ -94,7 +94,7 @@ projVersionPatch := $(call fn_version_patch, $(PROJ_VERSION))
 
 # ------------------------------------------------------------------------------
 ifeq ($(DEBUG), )
-    DEBUG := $(defaultDebug)
+    override DEBUG := $(defaultDebug)
 endif
 
 ifneq ($(DEBUG), 0)
@@ -106,7 +106,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(STRIP_RELEASE), )
-    STRIP_RELEASE := $(defaultStripRelease)
+    override STRIP_RELEASE := $(defaultStripRelease)
 endif
 
 ifneq ($(STRIP_RELEASE), 0)
@@ -118,7 +118,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(OPTIMIZE_RELEASE), )
-    OPTIMIZE_RELEASE := $(defaultOptimizeRelease)
+    override OPTIMIZE_RELEASE := $(defaultOptimizeRelease)
 endif
 
 ifneq ($(OPTIMIZE_RELEASE), 0)
@@ -130,27 +130,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(OPTIMIZATION_LEVEL), )
-    OPTIMIZATION_LEVEL := $(defaultOptimizationLevel)
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifeq ($(V), )
-    V := $(defaultV)
-endif
-
-ifneq ($(V), 0)
-    ifneq ($(V), 1)
-        $(error ERROR: Invalid value for V: $(V))
-    endif
-endif
-
-ifeq ($(V), 0)
-    v  := @
-    nl :=
-else
-    v  :=
-    nl := \n
+    override OPTIMIZATION_LEVEL := $(defaultOptimizationLevel)
 endif
 # ------------------------------------------------------------------------------
 
@@ -179,7 +159,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(O), )
-    O := $(defaultOutputDirBase)
+    override O := $(defaultOutputDirBase)
 endif
 
 ifneq (1, $(words $(O)))
@@ -192,7 +172,7 @@ distDir  := $(O)/dist/$(HOST)
 
 # ------------------------------------------------------------------------------
 ifeq ($(SKIP_DEFAULT_SRC_DIRS), )
-    SKIP_DEFAULT_SRC_DIRS := $(defaultSkipDefaultSrcDirs)
+    override SKIP_DEFAULT_SRC_DIRS := $(defaultSkipDefaultSrcDirs)
 endif
 
 ifneq ($(SKIP_DEFAULT_SRC_DIRS), 0)
@@ -226,6 +206,8 @@ endif
 ifeq ($(ARTIFACT_BASE_NAME), )
     ifeq ($(DEBUG), 1)
         __debugSuffix := _d
+    else
+        __debugSuffix :=
     endif
 
     ARTIFACT_BASE_NAME := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)
@@ -239,7 +221,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(HOSTS_DIR), )
-    HOSTS_DIR := $(defaultHostsDir)
+    override HOSTS_DIR := $(defaultHostsDir)
 endif
 
 ifneq (1, $(words $(HOSTS_DIR)))
@@ -249,7 +231,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(HOST_MK_REQUIRED), )
-    HOST_MK_REQUIRED := $(defaultHostMkRequired)
+    override HOST_MK_REQUIRED := $(defaultHostMkRequired)
 endif
 
 ifneq ($(HOST_MK_REQUIRED), 0)
@@ -262,12 +244,12 @@ endif
 # ------------------------------------------------------------------------------
 ifeq ($(HOST_MK), )
     ifneq ($(wildcard $(HOSTS_DIR)/$(HOST).mk), )
-        HOST_MK := $(HOSTS_DIR)/$(HOST).mk
+        override HOST_MK := $(HOSTS_DIR)/$(HOST).mk
     else
         ifneq ($(wildcard $(HOSTS_DIR)/$(hostOS).mk), )
-            HOST_MK := $(HOSTS_DIR)/$(hostOS).mk
+            override HOST_MK := $(HOSTS_DIR)/$(hostOS).mk
         else
-            HOST_MK :=
+            override HOST_MK :=
         endif
     endif
 else
@@ -288,12 +270,12 @@ endif
 # ------------------------------------------------------------------------------
 ifeq ($(BUILDER_HOST_MK), )
     ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk), )
-        BUILDER_HOST_MK := $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk
+        override BUILDER_HOST_MK := $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk
     else
         ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(hostOS).mk), )
-            BUILDER_HOST_MK := $(_project_mk_dir)$(defaultHostsDir)/$(hostOS).mk
+            override BUILDER_HOST_MK := $(_project_mk_dir)$(defaultHostsDir)/$(hostOS).mk
         else
-            BUILDER_HOST_MK :=
+            override BUILDER_HOST_MK :=
         endif
     endif
 else
@@ -317,7 +299,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(ARTIFACT_NAME), )
-    ARTIFACT_NAME := $(ARTIFACT_BASE_NAME)
+    override ARTIFACT_NAME := $(ARTIFACT_BASE_NAME)
 endif
 
 ifneq (1, $(words $(ARTIFACT_NAME)))
@@ -370,9 +352,39 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(PROJ_TYPE), app)
-    _postDistDeps += $(distDir)/bin/$(ARTIFACT_NAME)
+    postDistDeps += $(distDir)/bin/$(ARTIFACT_NAME)
 else
-    _postDistDeps += $(distDir)/lib/$(ARTIFACT_NAME)
+    postDistDeps += $(distDir)/lib/$(ARTIFACT_NAME)
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+LIBS := $(sort $(LIBS))
+$(foreach lib, $(LIBS), $(if $(wildcard $(lib)),,$(error LIBS: '$(lib)' not found)))
+$(foreach lib, $(LIBS), $(if $(call fn_str_eq, lib, $(shell sh -c "$(MAKE) -s -C $(lib) printvars VARS='PROJ_TYPE'")),,$(error LIBS: '$(lib)' is not a library project)))
+
+# (1) = path, $(2) projName
+define lib_template =
+
+$(2)_libName      = $$(shell $$(MAKE) -s -C $(1) DEBUG=$$(DEBUG) printvars VARS='ARTIFACT_BASE_NAME')
+$(2)_artifactName = $$(shell $$(MAKE) -s -C $(1) DEBUG=$$(DEBUG) LIB_TYPE=$$(LIB_TYPE) printvars VARS='ARTIFACT_NAME')
+
+buildDeps    += $$(O)/dist/$$(HOST)/$$($(2)_artifactName)
+ldFlags      += -L$$(O)/dist/$$(HOST)/lib -l$$($(2)_libName)
+INCLUDE_DIRS += $$(O)/dist/$$(HOST)/include
+
+# Library BUILD_DEPS ===========================================================
+$$(O)/dist/$$(HOST)/$$($(2)_artifactName):
+	@printf "$$(nl)[BUILD] $$@\n"
+	$$(v)$$(MAKE) -C $(1) O=$(abspath $(O))
+# ==============================================================================
+endef
+
+$(foreach lib,$(LIBS),$(eval $(call lib_template,$(lib),$(shell $(MAKE) -s -C $(lib) printvars VARS='PROJ_NAME'))))
+
+ifeq ($(D), 1)
+$(info template: $(call lib_template,lib/liba,$(shell $(MAKE) -s -C lib/liba printvars VARS='PROJ_NAME')))
+$(error hey)
 endif
 # ------------------------------------------------------------------------------
 
@@ -383,57 +395,57 @@ INCLUDE_DIRS := $(sort $(INCLUDE_DIRS))
 # ------------------------------------------------------------------------------
 ifeq ($(PROJ_TYPE), lib)
     DIST_INCLUDE_DIRS := $(sort $(DIST_INCLUDE_DIRS))
-    distIncludeFiles := $(strip $(foreach distIncludeDir, $(DIST_INCLUDE_DIRS), $(shell find $(distIncludeDir) -type f -name '*.h' -or -name '*.hpp' 2> /dev/null)))
-    _postDistDeps += $(strip $(foreach distIncludeFile, $(distIncludeFiles), $(distDir)/$(distIncludeFile)))
+    distIncludeFiles  := $(strip $(foreach distIncludeDir, $(DIST_INCLUDE_DIRS), $(shell find $(distIncludeDir) -type f -name '*.h' -or -name '*.hpp' 2> /dev/null)))
+    postDistDeps      += $(strip $(foreach distIncludeFile, $(distIncludeFiles), $(distDir)/$(distIncludeFile)))
 endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-_cFlags   += -Wall
-_cxxFlags += -Wall
+cFlags   += -Wall
+cxxFlags += -Wall
 
 ifeq ($(DEBUG), 1)
-    _cFlags   += -g3
-    _cxxFlags += -g3
-    _asFlags  += -g3
+    cFlags   += -g3
+    cxxFlags += -g3
+    asFlags  += -g3
 else
     ifeq ($(OPTIMIZE_RELEASE), 1)
-        _cFlags   += -O$(OPTIMIZATION_LEVEL)
-        _cxxFlags += -O$(OPTIMIZATION_LEVEL)
+        cFlags   += -O$(OPTIMIZATION_LEVEL)
+        cxxFlags += -O$(OPTIMIZATION_LEVEL)
     endif
 
     ifeq ($(STRIP_RELEASE), 1)
-        _cFlags   += -s
-        _cxxFlags += -s
-        _ldFlags  += -s
+        cFlags   += -s
+        cxxFlags += -s
+        ldFlags  += -s
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-_includeFlags += $(strip $(foreach srcDir, $(SRC_DIRS), -I$(srcDir)))
+includeFlags += $(strip $(foreach srcDir, $(SRC_DIRS), -I$(srcDir)))
 
 ifeq ($(PROJ_TYPE), lib)
-    _includeDirs = $(sort $(INCLUDE_DIRS) $(DIST_INCLUDE_DIRS))
+    includeDirs = $(sort $(INCLUDE_DIRS) $(DIST_INCLUDE_DIRS))
 else
-    _includeDirs = $(INCLUDE_DIRS)
+    includeDirs = $(INCLUDE_DIRS)
 endif
 
-_includeFlags += $(strip $(foreach includeDir, $(_includeDirs), -I$(includeDir)))
+includeFlags += $(strip $(foreach includeDir, $(includeDirs), -I$(includeDir)))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 ifeq ($(PROJ_TYPE), lib)
     ifeq ($(LIB_TYPE), shared)
-        _cFlags   += -fPIC
-        _cxxFlags += -fPIC
-        _ldFlags  += -shared
+        cFlags   += -fPIC
+        cxxFlags += -fPIC
+        ldFlags  += -shared
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-_arFlags += rcs
+arFlags += rcs
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -468,6 +480,24 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+cFlags   := $(strip -MMD -MP $(includeFlags) $(cFlags) $(CFLAGS))
+cxxFlags := $(strip -MMD -MP $(includeFlags) $(cxxFlags) $(CXXFLAGS))
+asFlags  := $(strip -MMD -MP $(includeFlags) $(asFlags) $(ASFLAGS))
+arFlags  := $(strip $(arFlags))# By default ARFLAGS includes rv
+ldFlags  := $(strip $(ldFlags) $(LDFLAGS))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+preBuildDeps  := $(strip $(preBuildDeps) $(PRE_BUILD_DEPS))
+buildDeps     := $(strip $(buildDeps) $(BUILD_DEPS))
+postBuildDeps := $(strip $(postBuildDeps) $(POST_BUILD_DEPS))
+
+preDistDeps   := $(strip $(preDistDeps) $(PRE_DIST_DEPS))
+distDeps      := $(strip $(distDeps) $(DIST_DEPS))
+postDistDeps  := $(strip $(postDistDeps) $(POST_DIST_DEPS))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 .DEFAULT_GOAL := all
 
 .NOTPARALLEL:
@@ -483,11 +513,13 @@ all: dist
 printvars:
 ifneq ($(words $(VARS)), 0)
 	@:
-ifeq ($(words $(VARS)), 1)
+  ifeq ($(words $(VARS)), 1)
 	$(info $($(VARS)))
-else
+  else
 	$(foreach var, $(VARS), $(info $(var) = $($(var))))
-endif
+  endif
+else
+	$(error Missing VARS)
 endif
 # ==============================================================================
 
@@ -496,13 +528,13 @@ endif
 build: post-build
 
 .PHONY: pre-build
-pre-build: $(PRE_BUILD_DEPS)
+pre-build: $(preBuildDeps)
     ifneq ($(PRE_BUILD), )
 	    $(v)$(PRE_BUILD)
     endif
 
 .PHONY: post-build
-post-build: pre-build $(buildDir)/$(ARTIFACT_NAME) $(_postBuildDeps) $(POST_BUILD_DEPS)
+post-build: pre-build $(buildDir)/$(ARTIFACT_NAME) $(postBuildDeps)
     ifneq ($(POST_BUILD), )
 	    $(v)$(POST_BUILD)
     endif
@@ -531,19 +563,19 @@ post-clean: pre-clean
 dist: post-dist
 
 .PHONY: pre-dist
-pre-dist: build $(PRE_DIST_DEPS)
+pre-dist: build $(preDistDeps)
     ifneq ($(PRE_DIST), )
 	    $(v)$(PRE_DIST)
     endif
 
 .PHONY: post-dist
-post-dist: pre-dist $(DIST_DEPS) $(_postDistDeps) $(POST_DIST_DEPS)
+post-dist: pre-dist $(DIST_DEPS) $(postDistDeps)
     ifneq ($(POST_DIST), )
 	    $(v)$(POST_DIST)
     endif
 # ==============================================================================
 
-# _postDistDeps ================================================================
+# postDistDeps =================================================================
 ifeq ($(PROJ_TYPE), lib)
 $(distDir)/%.h : %.h
 	@printf "$(nl)[DIST] $@\n"
@@ -567,18 +599,18 @@ endif
 # ==============================================================================
 
 # Build artifact ===============================================================
-$(buildDir)/$(ARTIFACT_NAME): $(BUILD_DEPS) $(objFiles)
+$(buildDir)/$(ARTIFACT_NAME): $(buildDeps) $(objFiles)
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
 	        @printf "$(nl)[LD] $@\n"
-	        $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(_ldFlags) $(LDFLAGS))
+	        $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(ldFlags) $(LDFLAGS))
         else
 	        @printf "$(nl)[AR] $@\n"
-	        $(v)$(CROSS_COMPILE)$(AR) $(strip $(_arFlags) $@ $(objFiles))
+	        $(v)$(CROSS_COMPILE)$(AR) $(strip $(arFlags) $@ $(objFiles))
         endif
     else
 	    @printf "$(nl)[LD] $@\n"
-	    $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(_ldFlags) $(LDFLAGS))
+	    $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(ldFlags) $(LDFLAGS))
     endif
 # ==============================================================================
 
@@ -586,21 +618,21 @@ $(buildDir)/$(ARTIFACT_NAME): $(BUILD_DEPS) $(objFiles)
 $(buildDir)/%.c$(objSuffix): %.c
 	@printf "$(nl)[CC] $@\n"
 	@mkdir -p $(dir $@)
-	$(v)$(CROSS_COMPILE)$(CC) $(strip $(_cFlags) -MMD $(CFLAGS) $(_includeFlags) -c $< -o $@)
+	$(v)$(CROSS_COMPILE)$(CC) $(cFlags) -c $< -o $@
 # ==============================================================================
 
 # C++ sources ==================================================================
 $(buildDir)/%.cpp$(objSuffix): %.cpp
 	@printf "$(nl)[CXX] $@\n"
 	@mkdir -p $(dir $@)
-	$(v)$(CROSS_COMPILE)$(CXX) $(strip $(_cxxFlags) -MMD -MP $(CXXFLAGS) $(_includeFlags) -c $< -o $@)
+	$(v)$(CROSS_COMPILE)$(CXX) $(cxxFlags) -c $< -o $@
 # ==============================================================================
 
 # Assembly sources =============================================================
 $(buildDir)/%.S$(objSuffix): %.S
 	@printf "$(nl)[AS] $@\n"
 	@mkdir -p $(dir $@)
-	$(v)$(CROSS_COMPILE)$(AS) $(strip $(_asFlags) -MMD $(ASFLAGS) $(_includeFlags) -c $< -o $@)
+	$(v)$(CROSS_COMPILE)$(AS) $(asFlags) -c $< -o $@
 # ==============================================================================
 
 -include $(depFiles)
