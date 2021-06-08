@@ -211,7 +211,7 @@ ifeq ($(ARTIFACT_BASE_NAME), )
         __debugSuffix :=
     endif
 
-    ARTIFACT_BASE_NAME := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)
+    override ARTIFACT_BASE_NAME := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)
     undefine __debugSuffix
 endif
 
@@ -382,11 +382,6 @@ $$(O)/dist/$$(HOST)/$$($(2)_artifactName):
 endef
 
 $(foreach lib,$(LIBS),$(eval $(call lib_template,$(lib),$(shell $(MAKE) -s -C $(lib) printvars VARS='PROJ_NAME'))))
-
-ifeq ($(D), 1)
-$(info template: $(call lib_template,lib/liba,$(shell $(MAKE) -s -C lib/liba printvars VARS='PROJ_NAME')))
-$(error hey)
-endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
