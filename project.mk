@@ -146,7 +146,8 @@ ifeq ($(HOST), )
 
     hostOS   := $(nativeOS)
     hostArch := $(nativeArch)
-    HOST     := $(hostOS)-$(hostArch)
+
+    override HOST := $(hostOS)-$(hostArch)
 else
     ifeq ($(call fn_host_valid, $(HOST)), 0)
         $(error Invalid HOST: $(HOST))
