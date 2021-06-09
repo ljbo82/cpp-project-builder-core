@@ -4,6 +4,10 @@ gcc-project-builder provides a build system based on Makefiles containing standa
 
 For details, check [official repository](https://github.com/ljbo82/gcc-project-builder).
 
+> **No official release yet**
+>
+> gcc-project-builder is still under development and there is no official releases yet!
+
 ## License
 
 gcc-project-builder is distributed under version 2 of the General Public License. Please see the [LICENSE](LICENSE) file for details on copying and distribution.

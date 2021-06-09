@@ -29,6 +29,11 @@ fn_host_arch  = $(shell sh -c "echo $(1) | cut -d'-' -f2-")
 fn_subdir = $(shell sh -c "echo $(abspath $(1)) | grep -oP '^$(abspath $(2))[/]*' > /dev/null && echo $(1)")
 
 fn_eq = $(shell sh -c "[ '$(1)' = '$(2)' ] && echo '$(1)'")
-fn_word = $(shell sh -c "echo $(1) | cut -d' ' -f$(2)")
+
+# $(call fn_cut,base_string,delimiter,index)
+fn_cut = $(shell sh -c "echo $(1) | cut -d'$(2)' -f$(3)")
+
+# $(call fn_word,base_string,index)
+fn_word = $(call fn_cut,$(1), ,$(2))
 
 endif # _include_functions_mk

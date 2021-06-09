@@ -24,6 +24,14 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+# ifeq ($(__R), 1) identifies a recursive call
+# This flag is used for performance optimization on dependency inspections
+ifeq ($(__R), )
+    override __R := 0
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 _project_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 # ------------------------------------------------------------------------------
 
@@ -311,9 +319,12 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-SRC_DIRS := $(sort $(SRC_DIRS))
-$(foreach srcDir, $(SRC_DIRS), $(if $(call fn_subdir, $(srcDir), $(shell pwd)),,$(error Source directory ($(srcDir)) is outside project tree)))
-srcFiles := $(sort $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir) -type f -name '*.c' -or -name '*.cpp' -or -name '*.S' 2> /dev/null))))
+ifeq ($(__R), 0)
+    # Source file scanning is not required on recursive calls
+    SRC_DIRS := $(sort $(SRC_DIRS))
+    $(foreach srcDir, $(SRC_DIRS), $(if $(call fn_subdir, $(srcDir), $(shell pwd)),,$(error Source directory ($(srcDir)) is outside project tree)))
+    srcFiles := $(sort $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir) -type f -name '*.c' -or -name '*.cpp' -or -name '*.S' 2> /dev/null))))
+endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -354,10 +365,25 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+# Template for distribution artifacts (executed on post-dir target)
+# $(call postDistDeps_template,destinationFileInDistDir,sourceFile)
+define postDistDeps_template=
+# ==============================================================================
+postDistDeps += $$(distDir)/$(1)
+
+$$(distDir)/$(1): $(2)
+	@printf "$$(nl)[DIST] $$@\n"
+	@mkdir -p $$(dir $$@)
+	$$(v)ln -f $$< $$@
+# ==============================================================================
+endef
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 ifeq ($(PROJ_TYPE), app)
-    postDistDeps += $(distDir)/bin/$(ARTIFACT_NAME)
+    distFiles += bin/$(ARTIFACT_NAME):$(buildDir)/$(ARTIFACT_NAME)
 else
-    postDistDeps += $(distDir)/lib/$(ARTIFACT_NAME)
+    distFiles += lib/$(ARTIFACT_NAME):$(buildDir)/$(ARTIFACT_NAME)
 endif
 # ------------------------------------------------------------------------------
 
@@ -401,21 +427,20 @@ ifneq ($(LIBS), )
     INCLUDE_DIRS += $(O)/dist/$(HOST)/include
 endif
 
-# __R == 0 prevents recursive call
-ifeq ($(__R), )
-    override __R := 1
-endif
-
-ifeq ($(__R), 1)
+# Checks only direct dependencies
+ifeq ($(__R), 0)
     $(foreach lib,$(LIBS),$(if $(wildcard $(lib)),,$(error LIBS: '$(lib)' not found)))
-    $(foreach lib,$(LIBS),$(if $(call fn_eq,lib,$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) printvars __R=0 VARS=PROJ_TYPE")),,$(error LIBS: '$(lib)' is not a library project)))
+    $(foreach lib,$(LIBS),$(if $(call fn_eq,lib,$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) printvars __R=1 VARS=PROJ_TYPE")),,$(error LIBS: '$(lib)' is not a library project)))
 endif
 
-libs := $(strip $(sort $(foreach lib,$(LIBS),$(if $(wildcard $(lib)),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) __R=0 DEBUG=$(DEBUG) printvars VARS='ARTIFACT_BASE_NAME libs'")))))
+# This is required to be enabled even on recursive calls in order to resolve
+# transient dependencies
+libs := $(strip $(sort $(foreach lib,$(LIBS),$(if $(wildcard $(lib)),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) __R=1 DEBUG=$(DEBUG) printvars VARS='ARTIFACT_BASE_NAME libs'")))))
+
 ldFlags += $(foreach lib,$(libs),-l$(lib))
 
-ifeq ($(__R), 1)
-# $(1): Lib path
+ifeq ($(__R), 0)
+# $(call lib_template,libPath,spaceDelimitedParameters)
 # $(2): Space-delimited parameters:
     # 1) PROJ_NAME
     # 2) ARTIFACT_NAME
@@ -431,18 +456,8 @@ $$(O)/dist/$$(HOST)/lib/$$($(call fn_word,$(2),1)_artifactName):
 # ==============================================================================
 endef
 
-# Uncomment to enable debug
-#ifeq ($(D), 1)
-#$(info ldFlags: $(ldFlags))
-#$(info)
-#$(info =========== TEMPLATES ===========)
-#$(foreach lib,$(LIBS),$(info $(call lib_template,$(lib),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) printvars __R=0 DEBUG=$(DEBUG) LIB_TYPE=$(LIB_TYPE) VARS='PROJ_NAME ARTIFACT_NAME'"))))
-#$(error bye)
-#endif
-
-$(foreach lib,$(LIBS),$(eval $(call lib_template,$(lib),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) printvars __R=0 DEBUG=$(DEBUG) LIB_TYPE=$(LIB_TYPE) VARS='PROJ_NAME ARTIFACT_NAME'"))))
-
-endif # ifeq ($(__R), 1)
+$(foreach lib,$(LIBS),$(eval $(call lib_template,$(lib),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) printvars __R=1 DEBUG=$(DEBUG) LIB_TYPE=$(LIB_TYPE) VARS='PROJ_NAME ARTIFACT_NAME'"))))
+endif # ifeq ($(__R), 0)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -450,10 +465,12 @@ INCLUDE_DIRS := $(sort $(INCLUDE_DIRS))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(PROJ_TYPE), lib)
-    DIST_INCLUDE_DIRS := $(sort $(DIST_INCLUDE_DIRS))
-    distIncludeFiles  := $(strip $(foreach distIncludeDir, $(DIST_INCLUDE_DIRS), $(shell find $(distIncludeDir) -type f -name '*.h' -or -name '*.hpp' 2> /dev/null)))
-    postDistDeps      += $(strip $(foreach distIncludeFile, $(distIncludeFiles), $(distDir)/$(distIncludeFile)))
+ifeq ($(__R), 0)
+    # Header file scanning is not required on recursive calls
+    ifeq ($(PROJ_TYPE), lib)
+        DIST_INCLUDE_DIRS := $(sort $(DIST_INCLUDE_DIRS))
+        distFiles += $(strip $(foreach distIncludeDir, $(DIST_INCLUDE_DIRS), $(shell sh -c "cd $(distIncludeDir); find . -type f -name '*.h' -or -name '*.hpp' 2> /dev/null | sed 's:./::' | xargs -I {} echo $(defaultIncludeDir)/\{\}:$(distIncludeDir)/\{\}")))
+    endif
 endif
 # ------------------------------------------------------------------------------
 
@@ -474,33 +491,37 @@ arFlags += rcs
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-isCppProject := $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir) -type f -name *.cpp 2> /dev/null)))
+ifeq ($(__R), 0)
+    isCppProject := $(strip $(foreach srcDir, $(SRC_DIRS), $(shell find $(srcDir) -type f -name *.cpp 2> /dev/null)))
 
-ifeq ($(isCppProject), )
-    isCppProject = $(strip $(foreach includeDir, $(INCLUDE_DIRS), $(shell find $(includeDir) -type f -name *.hpp 2> /dev/null)))
-endif
+    ifeq ($(isCppProject), )
+        isCppProject = $(strip $(foreach includeDir, $(INCLUDE_DIRS), $(shell find $(includeDir) -type f -name *.hpp 2> /dev/null)))
+    endif
 
-ifeq ($(isCppProject), )
-    isCppProject := 0
-else
-    isCppProject := 1
-endif
+    ifeq ($(isCppProject), )
+        isCppProject := 0
+    else
+        isCppProject := 1
+    endif
 
-CC  := gcc
-CXX := g++
+    CC  := gcc
+    CXX := g++
 
-ifeq ($(isCppProject), 0)
-    # Pure C project
-    LD := gcc
-else
-    # C/C++ project
-    LD := $(CXX)
+    ifeq ($(isCppProject), 0)
+        # Pure C project
+        LD := gcc
+    else
+        # C/C++ project
+        LD := $(CXX)
+    endif
 endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(shell sh -c "$(CROSS_COMPILE)gcc -v > /dev/null 2>&1 && echo 1 || echo 0"), 0)
-    $(error $(CROSS_COMPILE)gcc is not in PATH)
+ifeq ($(__R), 0)
+    ifeq ($(shell sh -c "$(CROSS_COMPILE)gcc -v > /dev/null 2>&1 && echo 1 || echo 0"), 0)
+        $(error $(CROSS_COMPILE)gcc is not in PATH)
+    endif
 endif
 # ------------------------------------------------------------------------------
 
@@ -510,6 +531,14 @@ cxxFlags := $(strip -MMD -MP $(includeFlags) $(cxxFlags) $(CXXFLAGS))
 asFlags  := $(strip -MMD -MP $(includeFlags) $(asFlags) $(ASFLAGS))
 arFlags  := $(strip $(arFlags))# By default ARFLAGS includes rv
 ldFlags  := $(strip $(ldFlags) $(LDFLAGS))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+distFiles := $(strip $(sort $(distFiles) $(DIST_FILES)))
+
+ifeq ($(__R), 0)
+    $(foreach distFile,$(distFiles),$(eval $(call postDistDeps_template,$(call fn_cut,$(distFile),:,1),$(call fn_cut,$(distFile),:,2))))
+endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -529,8 +558,10 @@ postDistDeps  := $(strip $(postDistDeps) $(POST_DIST_DEPS))
 # ------------------------------------------------------------------------------
 
 # all ==========================================================================
+ifeq ($(__R), 0)
 .PHONY: all
 all: dist
+endif
 # ==============================================================================
 
 # printvars ====================================================================
@@ -544,6 +575,7 @@ endif
 # ==============================================================================
 
 # build ========================================================================
+ifeq ($(__R), 0)
 .PHONY: build
 build: post-build
 
@@ -561,9 +593,11 @@ post-build: pre-build $(buildDir)/$(ARTIFACT_NAME) $(postBuildDeps)
     ifneq ($(POST_BUILD), )
 	    $(v)$(POST_BUILD)
     endif
+endif
 # ==============================================================================
 
 # clean ========================================================================
+ifeq ($(__R), 0)
 .PHONY: clean
 clean: post-clean
 
@@ -579,9 +613,11 @@ post-clean: pre-clean
     ifneq ($(POST_CLEAN), )
 	    $(v)$(POST_CLEAN)
     endif
+endif
 # ==============================================================================
 
 # dist =========================================================================
+ifeq ($(__R), 0)
 .PHONY: dist
 dist: post-dist
 
@@ -596,32 +632,11 @@ post-dist: pre-dist $(DIST_DEPS) $(postDistDeps)
     ifneq ($(POST_DIST), )
 	    $(v)$(POST_DIST)
     endif
-# ==============================================================================
-
-# postDistDeps =================================================================
-ifeq ($(PROJ_TYPE), lib)
-$(distDir)/%.h : %.h
-	@printf "$(nl)[DIST] $@\n"
-	@mkdir -p $(dir $@)
-	$(v)ln -f $< $@
-endif
-
-ifeq ($(PROJ_TYPE), app)
-$(distDir)/bin/$(ARTIFACT_NAME): $(buildDir)/$(ARTIFACT_NAME)
-	@printf "$(nl)[DIST] $@\n"
-	@mkdir -p $(distDir)/bin
-	$(v)ln -f $< $@
-endif
-
-ifeq ($(PROJ_TYPE), lib)
-$(distDir)/lib/$(ARTIFACT_NAME): $(buildDir)/$(ARTIFACT_NAME)
-	@printf "$(nl)[DIST] $@\n"
-	@mkdir -p $(distDir)/lib
-	$(v)ln -f $< $@
 endif
 # ==============================================================================
 
 # Build artifact ===============================================================
+ifeq ($(__R), 0)
 $(buildDir)/$(ARTIFACT_NAME): $(buildDeps) $(objFiles)
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
@@ -635,27 +650,34 @@ $(buildDir)/$(ARTIFACT_NAME): $(buildDeps) $(objFiles)
 	    @printf "$(nl)[LD] $@\n"
 	    $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(ldFlags))
     endif
+endif
 # ==============================================================================
 
 # C sources ====================================================================
+ifeq ($(__R), 0)
 $(buildDir)/%.c$(objSuffix): %.c
 	@printf "$(nl)[CC] $@\n"
 	@mkdir -p $(dir $@)
 	$(v)$(CROSS_COMPILE)$(CC) $(cFlags) -c $< -o $@
+endif
 # ==============================================================================
 
 # C++ sources ==================================================================
+ifeq ($(__R), 0)
 $(buildDir)/%.cpp$(objSuffix): %.cpp
 	@printf "$(nl)[CXX] $@\n"
 	@mkdir -p $(dir $@)
 	$(v)$(CROSS_COMPILE)$(CXX) $(cxxFlags) -c $< -o $@
+endif
 # ==============================================================================
 
 # Assembly sources =============================================================
+ifeq ($(__R), 0)
 $(buildDir)/%.S$(objSuffix): %.S
 	@printf "$(nl)[AS] $@\n"
 	@mkdir -p $(dir $@)
 	$(v)$(CROSS_COMPILE)$(AS) $(asFlags) -c $< -o $@
+endif
 # ==============================================================================
 
 -include $(depFiles)
