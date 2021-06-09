@@ -20,7 +20,9 @@ PROJ_TYPE = app
 LIBS += lib/libA
 LIBS += lib/libB
 
-#NOTE: libB depends on libC. Transient dependencies are handled automatically!
+#NOTE:
+# libB depends on libC (which, in turn depends on libD). Transient dependencies
+# are handled automatically!
 
 include ../../project.mk
 
