@@ -21,6 +21,6 @@
 #include <stdio.h>
 
 void a() {
-    printf("Hello from liba\n");
+    printf("Hello from libA\n");
 }
 

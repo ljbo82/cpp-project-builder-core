@@ -21,6 +21,6 @@
 #include <stdio.h>
 
 void d() {
-    printf("Hello from libd\n");
+    printf("Hello from libD\n");
 }
 

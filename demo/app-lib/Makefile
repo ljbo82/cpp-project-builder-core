@@ -14,7 +14,27 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-PROJ_NAME := a
-PROJ_TYPE := lib
+PROJ_NAME = app-lib
+PROJ_TYPE = app
 
-include ../../../../project.mk
+LIBS += lib/libA
+LIBS += lib/libB
+
+#NOTE: libB depends on libC. Transient dependencies are handled automatically!
+
+include ../../project.mk
+
+ifeq ($(LIB_TYPE), )
+    override LIB_TYPE := shared
+endif
+
+# ==============================================================================
+.PHONY: run
+run: all
+    ifeq ($(LIB_TYPE), shared)
+	    $(v)LD_LIBRARY_PATH=$(O)/dist/$(HOST)/lib $(O)/dist/$(HOST)/bin/$(ARTIFACT_NAME)
+    else
+	    $(v)$(O)/dist/$(HOST)/bin/$(ARTIFACT_NAME)
+    endif
+# ==============================================================================
+

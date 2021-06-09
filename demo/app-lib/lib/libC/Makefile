@@ -14,12 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-PROJ_NAME = app_lib
-PROJ_TYPE = app
+PROJ_NAME := C
+PROJ_TYPE := lib
 
-LIBS += lib/liba
-LIBS += lib/libb
-LIBS += lib/libd
+LIBS += ../libD
 
-include ../../project.mk
-
+include ../../../../project.mk

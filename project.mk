@@ -166,7 +166,9 @@ endif
 ifneq (1, $(words $(O)))
     $(error Output directory ($(O)) cannot have whitespaces)
 endif
+# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 buildDir := $(O)/build/$(HOST)
 distDir  := $(O)/dist/$(HOST)
 # ------------------------------------------------------------------------------
@@ -360,43 +362,6 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-LIBS := $(sort $(LIBS))
-$(foreach lib, $(LIBS), $(if $(wildcard $(lib)),,$(error LIBS: '$(lib)' not found)))
-$(foreach lib, $(LIBS), $(if $(call fn_str_eq, lib, $(shell sh -c "$(MAKE) -s -C $(lib) printvars VARS='PROJ_TYPE'")),,$(error LIBS: '$(lib)' is not a library project)))
-
-# (1) = path, $(2) projName
-define lib_template =
-
-$(2)_libName      = $$(shell $$(MAKE) -s -C $(1) DEBUG=$$(DEBUG) printvars VARS='ARTIFACT_BASE_NAME')
-$(2)_artifactName = $$(shell $$(MAKE) -s -C $(1) DEBUG=$$(DEBUG) LIB_TYPE=$$(LIB_TYPE) printvars VARS='ARTIFACT_NAME')
-
-buildDeps    += $$(O)/dist/$$(HOST)/$$($(2)_artifactName)
-ldFlags      += -L$$(O)/dist/$$(HOST)/lib -l$$($(2)_libName)
-INCLUDE_DIRS += $$(O)/dist/$$(HOST)/include
-
-# Library BUILD_DEPS ===========================================================
-$$(O)/dist/$$(HOST)/$$($(2)_artifactName):
-	@printf "$$(nl)[BUILD] $$@\n"
-	$$(v)$$(MAKE) -C $(1) O=$(abspath $(O))
-# ==============================================================================
-endef
-
-$(foreach lib,$(LIBS),$(eval $(call lib_template,$(lib),$(shell $(MAKE) -s -C $(lib) printvars VARS='PROJ_NAME'))))
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-INCLUDE_DIRS := $(sort $(INCLUDE_DIRS))
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifeq ($(PROJ_TYPE), lib)
-    DIST_INCLUDE_DIRS := $(sort $(DIST_INCLUDE_DIRS))
-    distIncludeFiles  := $(strip $(foreach distIncludeDir, $(DIST_INCLUDE_DIRS), $(shell find $(distIncludeDir) -type f -name '*.h' -or -name '*.hpp' 2> /dev/null)))
-    postDistDeps      += $(strip $(foreach distIncludeFile, $(distIncludeFiles), $(distDir)/$(distIncludeFile)))
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
 cFlags   += -Wall
 cxxFlags += -Wall
 
@@ -419,6 +384,80 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+ifeq ($(PROJ_TYPE), lib)
+    ifeq ($(LIB_TYPE), shared)
+        cFlags   += -fPIC
+        cxxFlags += -fPIC
+        ldFlags  += -shared
+    endif
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+LIBS := $(sort $(LIBS))
+
+ifneq ($(LIBS), )
+    ldFlags      += -L$(O)/dist/$(HOST)/lib -Wl,--as-needed
+    INCLUDE_DIRS += $(O)/dist/$(HOST)/include
+endif
+
+# __R == 0 prevents recursive call
+ifeq ($(__R), )
+    override __R := 1
+endif
+
+ifeq ($(__R), 1)
+    $(foreach lib,$(LIBS),$(if $(wildcard $(lib)),,$(error LIBS: '$(lib)' not found)))
+    $(foreach lib,$(LIBS),$(if $(call fn_eq,lib,$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) printvars __R=0 VARS=PROJ_TYPE")),,$(error LIBS: '$(lib)' is not a library project)))
+endif
+
+libs := $(strip $(sort $(foreach lib,$(LIBS),$(if $(wildcard $(lib)),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) __R=0 DEBUG=$(DEBUG) printvars VARS='ARTIFACT_BASE_NAME libs'")))))
+ldFlags += $(foreach lib,$(libs),-l$(lib))
+
+ifeq ($(__R), 1)
+# $(1): Lib path
+# $(2): Space-delimited parameters:
+    # 1) PROJ_NAME
+    # 2) ARTIFACT_NAME
+define lib_template =
+$(call fn_word,$(2),1)_artifactName := $(call fn_word,$(2),2)
+
+buildDeps += $$(O)/dist/$$(HOST)/lib/$$($(call fn_word,$(2),1)_artifactName)
+
+# Library BUILD_DEPS ===========================================================
+$$(O)/dist/$$(HOST)/lib/$$($(call fn_word,$(2),1)_artifactName):
+	@printf "$$(nl)[LIBS] $$@\n"
+	$$(v)$$(MAKE) -C $(1) O=$(abspath $(O))
+# ==============================================================================
+endef
+
+# Uncomment to enable debug
+#ifeq ($(D), 1)
+#$(info ldFlags: $(ldFlags))
+#$(info)
+#$(info =========== TEMPLATES ===========)
+#$(foreach lib,$(LIBS),$(info $(call lib_template,$(lib),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) printvars __R=0 DEBUG=$(DEBUG) LIB_TYPE=$(LIB_TYPE) VARS='PROJ_NAME ARTIFACT_NAME'"))))
+#$(error bye)
+#endif
+
+$(foreach lib,$(LIBS),$(eval $(call lib_template,$(lib),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) printvars __R=0 DEBUG=$(DEBUG) LIB_TYPE=$(LIB_TYPE) VARS='PROJ_NAME ARTIFACT_NAME'"))))
+
+endif # ifeq ($(__R), 1)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+INCLUDE_DIRS := $(sort $(INCLUDE_DIRS))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+ifeq ($(PROJ_TYPE), lib)
+    DIST_INCLUDE_DIRS := $(sort $(DIST_INCLUDE_DIRS))
+    distIncludeFiles  := $(strip $(foreach distIncludeDir, $(DIST_INCLUDE_DIRS), $(shell find $(distIncludeDir) -type f -name '*.h' -or -name '*.hpp' 2> /dev/null)))
+    postDistDeps      += $(strip $(foreach distIncludeFile, $(distIncludeFiles), $(distDir)/$(distIncludeFile)))
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 includeFlags += $(strip $(foreach srcDir, $(SRC_DIRS), -I$(srcDir)))
 
 ifeq ($(PROJ_TYPE), lib)
@@ -428,16 +467,6 @@ else
 endif
 
 includeFlags += $(strip $(foreach includeDir, $(includeDirs), -I$(includeDir)))
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifeq ($(PROJ_TYPE), lib)
-    ifeq ($(LIB_TYPE), shared)
-        cFlags   += -fPIC
-        cxxFlags += -fPIC
-        ldFlags  += -shared
-    endif
-endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -508,12 +537,7 @@ all: dist
 .PHONY: printvars
 printvars:
 ifneq ($(words $(VARS)), 0)
-	@:
-  ifeq ($(words $(VARS)), 1)
-	$(info $($(VARS)))
-  else
-	$(foreach var, $(VARS), $(info $(var) = $($(var))))
-  endif
+	@echo $(foreach var,$(VARS),$($(var)))
 else
 	$(error Missing VARS)
 endif
@@ -525,6 +549,9 @@ build: post-build
 
 .PHONY: pre-build
 pre-build: $(preBuildDeps)
+    ifneq ($(preBuild), )
+	    @$(preBuild)
+    endif
     ifneq ($(PRE_BUILD), )
 	    $(v)$(PRE_BUILD)
     endif
@@ -599,14 +626,14 @@ $(buildDir)/$(ARTIFACT_NAME): $(buildDeps) $(objFiles)
     ifeq ($(PROJ_TYPE), lib)
         ifeq ($(LIB_TYPE), shared)
 	        @printf "$(nl)[LD] $@\n"
-	        $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(ldFlags) $(LDFLAGS))
+	        $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(ldFlags))
         else
 	        @printf "$(nl)[AR] $@\n"
 	        $(v)$(CROSS_COMPILE)$(AR) $(strip $(arFlags) $@ $(objFiles))
         endif
     else
 	    @printf "$(nl)[LD] $@\n"
-	    $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(ldFlags) $(LDFLAGS))
+	    $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(ldFlags))
     endif
 # ==============================================================================
 

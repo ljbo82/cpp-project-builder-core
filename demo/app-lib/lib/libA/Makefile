@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-PROJ_NAME := d
+PROJ_NAME := A
 PROJ_TYPE := lib
 
 include ../../../../project.mk

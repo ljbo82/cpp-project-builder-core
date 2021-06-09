@@ -17,12 +17,12 @@
 */
 
 #include <b/b.h>
-#include <d/d.h>
+#include <c/c.h>
 
 #include <stdio.h>
 
 void b() {
-    printf("Hello from libb\n");
-    d();
+    printf("Hello from libB\n");
+    c();
 }
 
