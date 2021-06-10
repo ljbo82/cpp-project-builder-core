@@ -1,5 +1,5 @@
 gcc-project-builder TODO
 
-* Documentation for LIBS input variable
+* Documentation for 'LIBS' and 'LIB_PROJ_DIRS' input variables
 * Documentation output variables
 

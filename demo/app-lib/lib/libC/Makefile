@@ -17,6 +17,6 @@
 PROJ_NAME := C
 PROJ_TYPE := lib
 
-LIBS += ../libD
+LIB_PROJ_DIRS += ../libD
 
 include ../../../../project.mk

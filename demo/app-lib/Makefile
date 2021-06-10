@@ -17,8 +17,8 @@
 PROJ_NAME = app-lib
 PROJ_TYPE = app
 
-LIBS += lib/libA
-LIBS += lib/libB
+LIB_PROJ_DIRS += lib/libA
+LIB_PROJ_DIRS += lib/libB
 
 #NOTE:
 # libB depends on libC (which, in turn depends on libD). Transient dependencies

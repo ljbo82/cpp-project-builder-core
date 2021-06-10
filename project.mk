@@ -420,31 +420,36 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-LIBS := $(sort $(LIBS))
+LIB_PROJ_DIRS := $(sort $(LIB_PROJ_DIRS))
+LIBS          := $(sort $(LIBS))
 
-ifneq ($(LIBS), )
-    ldFlags      += -L$(O)/dist/$(HOST)/lib -Wl,--as-needed
+ifneq ($(LIB_PROJ_DIRS), )
+    ldFlags      += -L$(O)/dist/$(HOST)/lib
     INCLUDE_DIRS += $(O)/dist/$(HOST)/include
+endif
+
+ifneq ($(or $(LIB_PROJ_DIRS),$(LIBS)),)
+    ldFlags += -Wl,--as-needed
 endif
 
 # Checks only direct dependencies
 ifeq ($(__R), 0)
-    $(foreach lib,$(LIBS),$(if $(wildcard $(lib)),,$(error LIBS: '$(lib)' not found)))
-    $(foreach lib,$(LIBS),$(if $(call fn_eq,lib,$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) printvars __R=1 VARS=PROJ_TYPE")),,$(error LIBS: '$(lib)' is not a library project)))
+    $(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(wildcard $(libProjDir)),,$(error LIB_PROJ_DIRS: '$(libProjDir)' not found)))
+    $(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(call fn_eq,lib,$(shell sh -c "$(MAKE) -s --no-print-directory -C $(libProjDir) printvars __R=1 VARS=PROJ_TYPE")),,$(error LIB_PROJ_DIRS: '$(libProjDir)' is not a library project)))
 endif
 
 # This is required to be enabled even on recursive calls in order to resolve
 # transient dependencies
-libs := $(strip $(sort $(foreach lib,$(LIBS),$(if $(wildcard $(lib)),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) __R=1 DEBUG=$(DEBUG) printvars VARS='ARTIFACT_BASE_NAME libs'")))))
+libs := $(strip $(foreach lib,$(LIBS),$(lib)) $(sort $(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(wildcard $(libProjDir)),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(libProjDir) __R=1 DEBUG=$(DEBUG) printvars VARS='ARTIFACT_BASE_NAME libs'")))))
 
 ldFlags += $(foreach lib,$(libs),-l$(lib))
 
 ifeq ($(__R), 0)
-# $(call lib_template,libPath,spaceDelimitedParameters)
+# $(call libProjDeps_template,libProjDir,spaceDelimitedParameters)
 # $(2): Space-delimited parameters:
     # 1) PROJ_NAME
     # 2) ARTIFACT_NAME
-define lib_template =
+define libProjDeps_template =
 $(call fn_word,$(2),1)_artifactName := $(call fn_word,$(2),2)
 
 buildDeps += $$(O)/dist/$$(HOST)/lib/$$($(call fn_word,$(2),1)_artifactName)
@@ -456,7 +461,7 @@ $$(O)/dist/$$(HOST)/lib/$$($(call fn_word,$(2),1)_artifactName):
 # ==============================================================================
 endef
 
-$(foreach lib,$(LIBS),$(eval $(call lib_template,$(lib),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(lib) printvars __R=1 DEBUG=$(DEBUG) LIB_TYPE=$(LIB_TYPE) VARS='PROJ_NAME ARTIFACT_NAME'"))))
+$(foreach libProjDir,$(LIB_PROJ_DIRS),$(eval $(call libProjDeps_template,$(libProjDir),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(libProjDir) printvars __R=1 DEBUG=$(DEBUG) VARS='PROJ_NAME ARTIFACT_NAME'"))))
 endif # ifeq ($(__R), 0)
 # ------------------------------------------------------------------------------
 
