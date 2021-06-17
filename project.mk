@@ -178,7 +178,14 @@ endif
 
 # ------------------------------------------------------------------------------
 buildDir := $(O)/build/$(HOST)
-distDir  := $(O)/dist/$(HOST)
+ifneq ($(strip $(BUILD_DIR)),)
+    buildDir := $(buildDir)/$(strip $(BUILD_DIR))
+endif
+
+distDir := $(O)/dist/$(HOST)
+ifneq ($(strip $(DIST_DIR)),)
+    distDir := $(distDir)/$(strip $(DIST_DIR))
+endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -420,8 +427,8 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-LIB_PROJ_DIRS := $(sort $(LIB_PROJ_DIRS))
-LIBS          := $(sort $(LIBS))
+LIB_PROJ_DIRS := $(call fn_unique,$(LIB_PROJ_DIRS))
+LIBS          := $(call fn_unique,$(LIBS))
 
 ifneq ($(LIB_PROJ_DIRS), )
     ldFlags      += -L$(O)/dist/$(HOST)/lib
@@ -440,7 +447,7 @@ endif
 
 # This is required to be enabled even on recursive calls in order to resolve
 # transient dependencies
-libs := $(strip $(foreach lib,$(LIBS),$(lib)) $(sort $(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(wildcard $(libProjDir)),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(libProjDir) __R=1 DEBUG=$(DEBUG) printvars VARS='ARTIFACT_BASE_NAME libs'")))))
+libs := $(strip $(foreach lib,$(LIBS),$(lib)) $(call fn_unique,$(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(wildcard $(libProjDir)),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(libProjDir) __R=1 DEBUG=$(DEBUG) printvars VARS='ARTIFACT_BASE_NAME libs'")))))
 
 ldFlags += $(foreach lib,$(libs),-l$(lib))
 
@@ -455,9 +462,12 @@ $(call fn_word,$(2),1)_artifactName := $(call fn_word,$(2),2)
 buildDeps += $$(O)/dist/$$(HOST)/lib/$$($(call fn_word,$(2),1)_artifactName)
 
 # Library BUILD_DEPS ===========================================================
+ifeq ($(PHONY_LIBS), 1)
+.PHONY: $$(O)/dist/$$(HOST)/lib/$$($(call fn_word,$(2),1)_artifactName)
+endif
 $$(O)/dist/$$(HOST)/lib/$$($(call fn_word,$(2),1)_artifactName):
 	@printf "$$(nl)[LIBS] $$@\n"
-	$$(v)$$(MAKE) -C $(1) O=$(abspath $(O))
+	$$(v)$$(MAKE) -C $(1) O=$(abspath $(O)) BUILD_DIR=lib/$(call fn_word,$(2),1)
 # ==============================================================================
 endef
 

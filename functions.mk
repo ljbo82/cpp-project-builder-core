@@ -61,4 +61,8 @@ fn_cut = $(shell sh -c "echo $(1) | cut -d'$(2)' -f$(3)")
 # Syntax: $(call fn_word,base_string,index)
 fn_word = $(call fn_cut,$(1), ,$(2))
 
+# Removes duplicate words without sorting
+# Syntax: $(call fn_unique,list_of_words)
+fn_unique = $(strip $(if $(1),$(firstword $(1)) $(call fn_unique,$(filter-out $(firstword $(1)),$(1)))))
+
 endif # _include_functions_mk
