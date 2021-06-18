@@ -9,7 +9,7 @@ For details, check [official repository](https://github.com/ljbo82/gcc-project-b
 * [License](#license)
 * [Cloning](#cloning)
 * [Usage](#usage)
-* [Source directories](#source-directories)
+* [Default source directories](#default-source-directories)
 * [Output directories](#output-directories)
 * [Hosts](#hosts)
 * [Input variables](#input-variables)
@@ -55,7 +55,7 @@ With this minimal Makefile, an executable can be build just by calling `make`.
 
 For more examples, check the [demo/](../demo) directory.
 
-## Source directories
+## Default source directories
 
 When present, these directories (relative to project's Makefile) are used with the following purposes:
 
@@ -71,9 +71,9 @@ When present, these directories (relative to project's Makefile) are used with t
   
   Additional include directories can be added to the project through [`INCLUDE_DIRS`](#INCLUDE_DIRS) and [`DIST_INCLUDE_DIRS`](#DIST_INCLUDE_DIRS) [input variables](#input-variables).
 
-> **Skip default source directories**
+> **Skip default source & include directories**
 >
-> Default source directories handling can be ignored by build system through setting the value of [`SKIP_DEFAULT_SRC_DIRS`](#SKIP_DEFAULT_SRC_DIRS) [advanced input variable](#advanced-input-variables).
+> Default source & include directories handling can be ignored by build system through setting the value of [`SKIP_DEFAULT_SRC_DIR`](#SKIP_DEFAULT_SRC_DIR) and [`SKIP_DEFAULT_INCLUDE_DIR`](#SKIP_DEFAULT_INCLUDE_DIR) [advanced input variable](#advanced-input-variables).
 
 ## Output directories
 
@@ -447,13 +447,22 @@ Below are the list the input variables for advanced usage:
 
   This variable defines additional directories containing header files which must be copied to distribution package. Specified directories are also added to compiler include search path. 
 
-<a name="SKIP_DEFAULT_SRC_DIRS"></a>
-* **`SKIP_DEFAULT_SRC_DIRS`**
+<a name="SKIP_DEFAULT_SRC_DIR"></a>
+* **`SKIP_DEFAULT_SRC_DIR`**
   * Mandatory: no
   * Common declaration: Makefile
   * Default value: _0_
 
-  This variable defines if default [source directories](#source-directories) handling shall be ignored by build system. Once ignored, these directories although still can be used as source directories, but rather their usage must be declared explicitly (through either [`SRC_DIRS`](#SRC_DIRS), [`INCLUDE_DIRS`](#INCLUDE_DIRS), or [`DIST_INCLUDE_DIRS`](#DIST_INCLUDE_DIRS)). 
+  This variable defines if [default source directory](#default-source-directories) handling shall be ignored by build system. Once ignored, this directory although still can be used as a source directory, but rather their usage must be declared explicitly (through [`SRC_DIRS`](#SRC_DIRS) variable).
+
+<a name="SKIP_DEFAULT_INCLUDE_DIR"></a>
+* **`SKIP_DEFAULT_INCLUDE_DIR`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value: _0_
+
+  This variable defines if [default include directory](#default-source-directories) handling shall be ignored by build system. Once ignored, this directory although still can be used as an include directory, but rather their usage must be declared explicitly (through either [`INCLUDE_DIRS`](#INCLUDE_DIRS), or [`DIST_INCLUDE_DIRS`](#DIST_INCLUDE_DIRS) variables).
+
 
 <a name="AS"></a>
 * **`AS`**

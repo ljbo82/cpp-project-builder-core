@@ -42,18 +42,19 @@ include $(_project_mk_dir)native_host.mk
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-defaultLibType            := shared
-defaultProjVersion        := 0.1.0
-defaultDebug              := 0
-defaultOutputDirBase      := output
-defaultSrcDir             := src
-defaultIncludeDir         := include
-defaultHostsDir           := hosts
-defaultHostMkRequired     := 0
-defaultStripRelease       := 1
-defaultOptimizeRelease    := 1
-defaultOptimizationLevel  := 2
-defaultSkipDefaultSrcDirs := 0
+defaultLibType               := shared
+defaultProjVersion           := 0.1.0
+defaultDebug                 := 0
+defaultOutputDirBase         := output
+defaultSrcDir                := src
+defaultIncludeDir            := include
+defaultHostsDir              := hosts
+defaultHostMkRequired        := 0
+defaultStripRelease          := 1
+defaultOptimizeRelease       := 1
+defaultOptimizationLevel     := 2
+defaultSkipDefaultSrcDir     := 0
+defaultSkipDefaultIncludeDir := 0
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -189,19 +190,32 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(SKIP_DEFAULT_SRC_DIRS), )
-    override SKIP_DEFAULT_SRC_DIRS := $(defaultSkipDefaultSrcDirs)
+ifeq ($(SKIP_DEFAULT_SRC_DIR), )
+    override SKIP_DEFAULT_SRC_DIR := $(defaultSkipDefaultSrcDir)
 endif
 
-ifneq ($(SKIP_DEFAULT_SRC_DIRS), 0)
-    ifneq ($(SKIP_DEFAULT_SRC_DIRS), 1)
-        $(error Invalid value for SKIP_DEFAULT_SRC_DIRS: $(SKIP_DEFAULT_SRC_DIRS))
+ifneq ($(SKIP_DEFAULT_SRC_DIR), 0)
+    ifneq ($(SKIP_DEFAULT_SRC_DIR), 1)
+        $(error Invalid value for SKIP_DEFAULT_SRC_DIR: $(SKIP_DEFAULT_SRC_DIR))
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(SKIP_DEFAULT_SRC_DIRS), 0)
+ifeq ($(SKIP_DEFAULT_INCLUDE_DIR),)
+    override SKIP_DEFAULT_INCLUDE_DIR := $(defaultSkipDefaultIncludeDir)
+endif
+
+ifneq ($(SKIP_DEFAULT_INCLUDE_DIR), 0)
+    ifneq ($(SKIP_DEFAULT_INCLUDE_DIR), 1)
+        $(error Invalid value for SKIP_DEFAULT_INCLUDE_DIR: $(SKIP_DEFAULT_INCLUDE_DIR))
+    endif
+endif
+# ------------------------------------------------------------------------------
+
+
+# ------------------------------------------------------------------------------
+ifeq ($(SKIP_DEFAULT_SRC_DIR), 0)
     ifneq ($(wildcard $(defaultSrcDir)), )
         SRC_DIRS += $(defaultSrcDir)
     endif
@@ -209,7 +223,7 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(SKIP_DEFAULT_SRC_DIRS), 0)
+ifeq ($(SKIP_DEFAULT_INCLUDE_DIR), 0)
     ifneq ($(wildcard $(defaultIncludeDir)), )
         ifeq ($(PROJ_TYPE), lib)
             DIST_INCLUDE_DIRS += $(defaultIncludeDir)
