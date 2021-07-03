@@ -57,7 +57,7 @@ For more examples, check the [demo/](../demo) directory.
 
 ## Default source directories
 
-When present, these directories (relative to project's Makefile) are used with the following purposes:
+When present, these directories (relative to project's Makefile) are used (by default) with the following purposes:
 
 * **src/**
 
@@ -67,7 +67,7 @@ When present, these directories (relative to project's Makefile) are used with t
 
 * **include/**
 
-  Contains public includes (header files) used by application during build. If project is a library, header files inside this directory will be copied to [distribution directory](#dir-dist). Any kind of file can be placed into this directory, but no compilation will be performed at all. This directory is added to compiler's include search path.
+  Contains public includes (header files) used by application during build. If project is a library, header files (**\*.h** or **\*.hpp**) inside this directory will be copied to [distribution directory](#dir-dist). Any kind of file can be placed into this directory, but no compilation will be performed at all. This directory is added to compiler's include search path.
   
   Additional include directories can be added to the project through [`INCLUDE_DIRS`](#INCLUDE_DIRS) and [`DIST_INCLUDE_DIRS`](#DIST_INCLUDE_DIRS) [input variables](#input-variables).
 
@@ -85,13 +85,13 @@ All generated files are placed (by default) into **output/** base directory. Thi
 
 Inside output base directory (**`$(O)/`**) you may find some directories according to project type (note that listed directories depends on [`HOST`](#HOST) [input variable](#input-variables)):
 
-* **`$(O)/build/$(HOST)/`**
+* **`$(O)/build/$(HOST)/$(BUILD_DIR)`**
 
-  Build directory. Object files as well as final artifact (application executable or library) are placed into this directory.
+  Build directory. Object files as well as final artifact (application executable or library) are placed into this directory. NOTE: By default, [`BUILD_DIR`](#BUILD_DIR) is empty.
 
-* **`$(O)/dist/$(HOST)/`**
+* **`$(O)/dist/$(HOST)/$(DIST_DIR)`**
 
-  Distribution directory. Final artifact (executable or library), and possibly companion header (for libraries) are placed into this directory. 
+  Distribution directory. Final artifact (executable or library), and possibly companion header (for libraries) are placed into this directory. NOTE: By default, [`DIST_DIR`](#DIST_DIR) is empty.
 
   * **`$(O)/dist/$(HOST)/bin/`**
 
@@ -185,7 +185,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Environment
   * Default value: _(native host)_
 
-  Sets the name which identifies the host for build artifacts (used for cross-compiling). 
+  Sets the name which identifies the host for build artifacts (used for cross-compiling).
 
   The value must follow the syntax `<os>-<arch>`. For more details, see [hosts](#hosts) section.
 
@@ -247,6 +247,26 @@ Below are the list the commonly used input variables:
 
   NOTE: Linker executable will be `$(CROSS_COMPILE)gcc` (if project contains only C source files) or `$(CROSS_COMPILE)g++` (if project containts C++ source files).
 
+<a name="PRE_CLEAN"></a>
+* **`PRE_CLEAN`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value: _(empty)_
+
+  Commands to be executed during [pre-clean](#pre-clean) [target](#targets).
+  
+  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
+
+<a name="POST_CLEAN"></a>
+* **`POST_CLEAN`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value: _(empty)_
+
+  Commands to be executed during [post-clean](#post-clean) [target](#targets).
+
+  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
+
 <a name="PRE_BUILD"></a>
 * **`PRE_BUILD`**
   * Mandatory: no
@@ -290,26 +310,6 @@ Below are the list the commonly used input variables:
   * Default value: _(empty)_
 
   Project-specific dependencies for [post-build](#post-build) [target](#targets).
-
-<a name="PRE_CLEAN"></a>
-* **`PRE_CLEAN`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Commands to be executed during [pre-clean](#pre-clean) [target](#targets).
-  
-  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
-
-<a name="POST_CLEAN"></a>
-* **`POST_CLEAN`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Commands to be executed during [post-clean](#post-clean) [target](#targets).
-
-  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
 <a name="PRE_DIST"></a>
 * **`PRE_DIST`**
@@ -363,6 +363,42 @@ Below are the list the commonly used input variables:
 
   Sets the name of the base [output directory](#output-directories) (relative to project Makefile directory), where all generated artifacts will be placed into.
 
+<a name="LIBS"></a>
+* **`LIBS`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value: _(empty)_
+
+  Lists the libs (libname) used during link. Although libraries can be passed through [LDFLAGS](#LDFLAGS), LIBS variable usage is preferred because it is used to resolve transitive dependencies.
+
+<a name="LIB_PROJ_DIRS"></a>
+* **`LIB_PROJ_DIRS`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value: _(empty)_
+
+  Lists the directories containing Makefiles used to build a library project which a project depends on. Directories shall point to library projects (`PROJ_TYPE == lib`).
+
+### Advanced input variables
+
+Below are the list the input variables for advanced usage:
+
+<a name="BUILD_DIR"></a>
+* **`BUILD_DIR`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value:  _(empty)_
+
+  Sets name for a directory (inside `$(O)/build/$(HOST)`) where build artifacts shall be placed.
+
+<a name="DIST_DIR"></a>
+* **`DIST_DIR`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value:  _(empty)_
+
+  Sets name for a directory (inside `$(O)/dist/$(HOST)`) where distribution artifacts shall be placed.
+
 <a name="VARS"></a>
 * **`VARS`**
   * Mandatory: no (except for [printvars](#printvars) target)
@@ -370,10 +406,6 @@ Below are the list the commonly used input variables:
   * Default value: _(empty)_
 
   This variable defines the list of variables names which shall be inspected through [printvars](#printvars) target.
-
-### Advanced input variables
-
-Below are the list the input variables for advanced usage:
 
 <a name="ARTIFACT_BASE_NAME"></a>
 * **`ARTIFACT_BASE_NAME`**
@@ -445,7 +477,15 @@ Below are the list the input variables for advanced usage:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  This variable defines additional directories containing header files which must be copied to distribution package. Specified directories are also added to compiler include search path. 
+  This variable defines additional directories containing header files which must be copied to distribution package. Specified directories are also added to compiler include search path.
+
+<a name="DIST_FILES"></a>
+* **`DIST_FILES`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value: _(empty)_
+
+  List of tokens in format `distFile:srcFile` where `distFile` points to a path inside `$(O)/dist/$(HOST)/$(DIST_DIR)` and `srcFile` points to a file inside poject's tree which will be copied into `distFile`. This variable is useful to add custom files into distribution directory.
 
 <a name="SKIP_DEFAULT_SRC_DIR"></a>
 * **`SKIP_DEFAULT_SRC_DIR`**
@@ -463,22 +503,13 @@ Below are the list the input variables for advanced usage:
 
   This variable defines if [default include directory](#default-source-directories) handling shall be ignored by build system. Once ignored, this directory although still can be used as an include directory, but rather their usage must be declared explicitly (through either [`INCLUDE_DIRS`](#INCLUDE_DIRS), or [`DIST_INCLUDE_DIRS`](#DIST_INCLUDE_DIRS) variables).
 
-
-<a name="AS"></a>
-* **`AS`**
+<a name="STRIP_RELEASE"></a>
+* **`STRIP_RELEASE`**
   * Mandatory: no
-  * Common declaration: Environment or Makefile
-  * Default value: `as`
+  * Common declaration: Makefile
+  * Default value: `1`
 
-  Sets the name of native assembler executable.
-
-<a name="AR"></a>
-* **`AR`**
-  * Mandatory: no
-  * Common declaration: Environment or Makefile
-  * Default value: `ar`
-
-  Sets the name of native archiver executable.
+  Defines if release artifacts (when [`DEBUG`](#DEBUG) is `0`) shall be stripped. Accepted values are `0` and `1`.
 
 <a name="OPTIMIZE_RELEASE"></a>
 * **`OPTIMIZE_RELEASE`**
@@ -498,13 +529,21 @@ Below are the list the input variables for advanced usage:
 
   NOTE: There is no check for given value.
 
-<a name="STRIP_RELEASE"></a>
-* **`STRIP_RELEASE`**
+<a name="AS"></a>
+* **`AS`**
   * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: `1`
+  * Common declaration: Environment or Makefile
+  * Default value: `as`
 
-  Defines if release artifacts (when [`DEBUG`](#DEBUG) is `0`) shall be stripped. Accepted values are `0` and `1`.
+  Sets the name of native assembler executable.
+
+<a name="AR"></a>
+* **`AR`**
+  * Mandatory: no
+  * Common declaration: Environment or Makefile
+  * Default value: `ar`
+
+  Sets the name of native archiver executable.
 
 ## Make targets
 
