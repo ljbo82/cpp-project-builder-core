@@ -1,4 +1,5 @@
 gcc-project-builder TODO
 
 * Document HOSTS section
+* Document PHONY_LIBS var
 
