@@ -32,15 +32,15 @@ This repository uses [git-lfs](https://git-lfs.github.com/) to version some bina
 
 ## Usage
 
-gcc-project-builder provides a build system (**project.mk**) intended to be used by C/C++ projects in order to build its source files (C/C++/Assembly) using a GCC-based compiler.
+gcc-project-builder provides a build system (through **project.mk**) intended to be used by C/C++ projects in order to build its source files (C/C++/Assembly) using a GCC-based compiler.
 
 Basically, the usage comprises the following steps:
 
-1. Clone gcc-project-builder as a [git submodule](https://git-scm.com/docs/gitsubmodules) inside your project or copy distribution package into a subdirectory inside project tree
-2. Place source files into specific directories (usually **src/** and **include/**)
-3. Declare variables for gcc-project-builder customization (at least [`PROJ_NAME`](#PROJ_NAME) and [`PROJ_TYPE`](#PROJ_TYPE)) inside your project's Makefile
-4. Include **project.mk** (provided by gcc-project-builder)
-5. call `make` to build your project
+1. Clone gcc-project-builder as a [git submodule](https://git-scm.com/docs/gitsubmodules) inside your project or copy distribution package into a subdirectory inside project tree.
+2. Place source files into specific directories (usually **src/** and **include/**).
+3. Declare [variables](#input-variables) for gcc-project-builder customization (at least [`PROJ_NAME`](#PROJ_NAME) and [`PROJ_TYPE`](#PROJ_TYPE)) inside your project's Makefile.
+4. Include **project.mk** (provided by gcc-project-builder).
+5. call `make` to build your project.
 
 Here is an example of a minimal Makefile used to build an executable with sources contained in project's **src/** directory:
 
@@ -61,9 +61,9 @@ When present, these directories (relative to project's Makefile) are used (by de
 
 * **src/**
 
-  Contains source files and private headers used by application during build. Any kind of file can be placed into this directory, but only files with standard filename extensions are compiled (case-sensitive): **.c** (C source file), **.cpp** (C++ source file), and **.S** (Assembly source file). This directory is also added to compiler's include search path.
+  Contains source files and private headers used by application during build. Any kind of file can be placed into this directory, but only source files with standard filename extensions are compiled (case-sensitive): **.c** (C source file), **.cpp** (C++ source file), and **.S** (Assembly source file). This directory is also added to compiler's include search path.
   
-  Additional source directories can be added to the project through the [`SRC_DIRS`](#SRC_DIRS) [input variable](#input-variables).
+  Additional source directories can be added to the project through [`SRC_DIRS`](#SRC_DIRS) [input variable](#input-variables).
 
 * **include/**
 
@@ -73,7 +73,7 @@ When present, these directories (relative to project's Makefile) are used (by de
 
 > **Skip default source & include directories**
 >
-> Default source & include directories handling can be ignored by build system through setting the value of [`SKIP_DEFAULT_SRC_DIR`](#SKIP_DEFAULT_SRC_DIR) and [`SKIP_DEFAULT_INCLUDE_DIR`](#SKIP_DEFAULT_INCLUDE_DIR) [advanced input variable](#advanced-input-variables).
+> Default source & include directories handling can be ignored by build system through setting the value of [`SKIP_DEFAULT_SRC_DIR`](#SKIP_DEFAULT_SRC_DIR) and [`SKIP_DEFAULT_INCLUDE_DIR`](#SKIP_DEFAULT_INCLUDE_DIR) [advanced variables](#advanced-input-variables).
 
 ## Output directories
 
@@ -83,29 +83,33 @@ All generated files are placed (by default) into **output/** base directory. Thi
 > 
 > Output base directory shall be ignored by your source code version control system.
 
-Inside output base directory (**`$(O)/`**) you may find some directories according to project type (note that listed directories depends on [`HOST`](#HOST) [input variable](#input-variables)):
+Inside output base directory (**`$(O)/`**) you may find some directories according to project type (note that listed directories depends on [`HOST`](#HOST) [variable](#input-variables)):
 
 * **`$(O)/build/$(HOST)/$(BUILD_DIR)`**
 
-  Build directory. Object files as well as final artifact (application executable or library) are placed into this directory. NOTE: By default, [`BUILD_DIR`](#BUILD_DIR) is empty.
+  Build directory. Object files as well as final artifact (application executable or library) are placed into this directory.
+
+  NOTE: By default, [`BUILD_DIR`](#BUILD_DIR) is empty.
 
 * **`$(O)/dist/$(HOST)/$(DIST_DIR)`**
 
-  Distribution directory. Final artifact (executable or library), and possibly companion header (for libraries) are placed into this directory. NOTE: By default, [`DIST_DIR`](#DIST_DIR) is empty.
+  Distribution directory. Final artifact (executable or library), and possibly companion header (for libraries) are placed into this directory.
 
-  * **`$(O)/dist/$(HOST)/bin/`**
+  NOTE: By default, [`DIST_DIR`](#DIST_DIR) is empty.
+
+  * **`$(O)/dist/$(HOST)/$(DIST_DIR)/bin/`**
 
     If project builds an application executable, resulting binary is placed into this directory.
 
-  * **`$(O)/dist/$(HOST)/lib/`**
+  * **`$(O)/dist/$(HOST)/$(DIST_DIR)/lib/`**
 
     If project builds a library (either static o shared), resulting binary is placed into this directory.
   
-  * **`$(O)/dist/$(HOST)/include/`**
+  * **`$(O)/dist/$(HOST)/$(DIST_DIR)/include/`**
 
     If project builds a library (either static of shared), companion headers are placed into this directory.
 
-    Additional directories containing companion headers to be distribuited along with library binary can be added through [`DIST_INCLUDE_DIRS`](#DIST_INCLUDE_DIRS) [input variable](#input-variables).
+    Additional directories containing companion headers to be distribuited along with library binary can be added through [`DIST_INCLUDE_DIRS`](#DIST_INCLUDE_DIRS) [variable](#input-variables).
 
     Companion headers must have either **.h** or **.hpp** filename extensions.
 
@@ -119,11 +123,11 @@ The build system provided by **project.mk** can be customized through input vari
 
 Variable declaration and usage follows [Makefile standard syntax](https://www.gnu.org/software/make/manual/html_node/Using-Variables.html#Using-Variables).
 
+By convention, input variables are named in `UPPER_CASE` fashion.
+
 All input variables must be declared/defined prior to **project.mk** inclusion.
 
-Although it is perfectly legal to declare all input variables in a Makefile (or declaring all of them as environment variables), it its usually better to declare some of them in the Makefile and others as environment variables in order to achieve maximum build flexibility.
-
-By convention, input variables are named in `UPPER_CASE` fashion.
+Although it is perfectly legal to declare all input variables in a Makefile (or declaring all of them as environment variables), it is usually better to declare some of them in the Makefile and others as environment variables in order to achieve maximum build flexibility.
 
 ### Common input variables
 
@@ -193,15 +197,15 @@ Below are the list the commonly used input variables:
 * **`INCLUDE_DIRS`**
   * Mandatory: no
   * Common declaration: Makefile
-  * Default value: _(empty)_
+  * Default value: _(empty)_ (if **include/** directory DOES NOT exist) or `include` (if **include/** directory exists).
 
-  Defines extra include directories to be evaluated during build.
+  Defines include directories to be added to compiler search path during build.
 
 <a name="SRC_DIRS"></a>
 * **`SRC_DIRS`**
   * Mandatory: no
   * Common declaration: Makefile
-  * Default value: _(empty)_
+  * Default value: _(empty)_ (if **src/** directory DOES NOT exist) or `src` (if **src/** directory exists).
 
   Defines extra source directories containing files to be compiled. Paths must be inside project tree (project's root is where `Makefile` is located).
 
@@ -235,7 +239,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Extra flags to be passed to assembler.
+  Extra flags to be passed to the assembler.
 
 <a name="LDFLAGS"></a>
 * **`LDFLAGS`**
@@ -245,7 +249,7 @@ Below are the list the commonly used input variables:
 
   Extra flags to be passed to the linker. 
 
-  NOTE: Linker executable will be `$(CROSS_COMPILE)gcc` (if project contains only C source files) or `$(CROSS_COMPILE)g++` (if project containts C++ source files).
+  NOTE: Linker executable will be either `$(CROSS_COMPILE)gcc` (if project contains only C source files) or `$(CROSS_COMPILE)g++` (if project containts C++ source files).
 
 <a name="PRE_CLEAN"></a>
 * **`PRE_CLEAN`**
@@ -254,7 +258,7 @@ Below are the list the commonly used input variables:
   * Default value: _(empty)_
 
   Commands to be executed during [pre-clean](#pre-clean) [target](#targets).
-  
+
   NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
 <a name="POST_CLEAN"></a>
@@ -274,7 +278,7 @@ Below are the list the commonly used input variables:
   * Default value: _(empty)_
 
   Commands to be executed during [pre-build](#pre-build) [target](#targets).
-  
+
   NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
 <a name="PREBUILD_DEPS"></a>
@@ -283,7 +287,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Project-specific depdencies for [pre-build](#pre-build) [target](#targets).
+  Project-specific dependencies for [pre-build](#pre-build) [target](#targets).
 
 <a name="BUILD_DEPS"></a>
 * **`BUILD_DEPS`**
@@ -369,7 +373,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Lists the libs (libname) used during link. Although libraries can be passed through [LDFLAGS](#LDFLAGS), LIBS variable usage is preferred because it is used to resolve transitive dependencies.
+  Lists the libs (libname) used during link. Although libraries can be passed through [LDFLAGS](#LDFLAGS), LIBS variable usage is preferred because it is used to resolve transitive dependencies when using [`LIB_PROJ_DIRS`](#LIB_PROJ_DIRS).
 
 <a name="LIB_PROJ_DIRS"></a>
 * **`LIB_PROJ_DIRS`**
@@ -377,7 +381,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Lists the directories containing Makefiles used to build a library project which a project depends on. Directories shall point to library projects (`PROJ_TYPE == lib`).
+  Lists the directories containing Makefiles used to build a library project, which a project depends on. Directories shall point to library projects (`PROJ_TYPE == lib`).
 
 ### Advanced input variables
 
@@ -415,7 +419,7 @@ Below are the list the input variables for advanced usage:
     * Debug artifacts: `$(PROJ_NAME)$(projVersionMajor)_d`
     * Release artifacts: `$(PROJ_NAME)$(projVersionMajor)`
 
-  Defines the base name for generated artifact. The base name is used as base for final [`ARTIFACT_NAME`](#ARTIFACT_NAME). By default, debug artifacts ([`DEBUG`](#DEBUG) is `1`) have a `_d` suffix.
+  Defines the base name for generated artifact. The value is used as a base for final [`ARTIFACT_NAME`](#ARTIFACT_NAME). By default, debug artifacts (`DEBUG == 1`) have a `_d` suffix.
 
 <a name="ARTIFACT_NAME"></a>
 * **`ARTIFACT_NAME`**
@@ -435,7 +439,7 @@ Below are the list the input variables for advanced usage:
 
   The default value is usually enough for most projects.
 
-  This variable is useful for projects supporting multiple hosts with host-specific code and/or building procedure.
+  This variable is useful for projects supporting specific hosts.
 
 <a name="HOST_MK"></a>
 * **`HOST_MK`**
@@ -477,7 +481,7 @@ Below are the list the input variables for advanced usage:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  This variable defines additional directories containing header files which must be copied to distribution package. Specified directories are also added to compiler include search path.
+  This variable defines additional directories containing companion header files which must be copied to distribution package. Specified directories are also added to compiler include search path.
 
 <a name="DIST_FILES"></a>
 * **`DIST_FILES`**
@@ -485,13 +489,13 @@ Below are the list the input variables for advanced usage:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  List of tokens in format `distFile:srcFile` where `distFile` points to a path inside `$(O)/dist/$(HOST)/$(DIST_DIR)` and `srcFile` points to a file inside poject's tree which will be copied into `distFile`. This variable is useful to add custom files into distribution directory.
+  List of tokens in format `distFile:srcFile` where `distFile` is a path inside `$(O)/dist/$(HOST)/$(DIST_DIR)` and `srcFile` is a path inside project's tree which will be copied into `distFile`. This variable is useful to add custom files into distribution directory.
 
 <a name="SKIP_DEFAULT_SRC_DIR"></a>
 * **`SKIP_DEFAULT_SRC_DIR`**
   * Mandatory: no
   * Common declaration: Makefile
-  * Default value: _0_
+  * Default value: `0`
 
   This variable defines if [default source directory](#default-source-directories) handling shall be ignored by build system. Once ignored, this directory although still can be used as a source directory, but rather their usage must be declared explicitly (through [`SRC_DIRS`](#SRC_DIRS) variable).
 
@@ -499,7 +503,7 @@ Below are the list the input variables for advanced usage:
 * **`SKIP_DEFAULT_INCLUDE_DIR`**
   * Mandatory: no
   * Common declaration: Makefile
-  * Default value: _0_
+  * Default value: `0`
 
   This variable defines if [default include directory](#default-source-directories) handling shall be ignored by build system. Once ignored, this directory although still can be used as an include directory, but rather their usage must be declared explicitly (through either [`INCLUDE_DIRS`](#INCLUDE_DIRS), or [`DIST_INCLUDE_DIRS`](#DIST_INCLUDE_DIRS) variables).
 
@@ -517,7 +521,7 @@ Below are the list the input variables for advanced usage:
   * Common declaration: Makefile
   * Default value: `1`
 
-  Defines if release artifacts (when [`DEBUG`](#DEBUG) is `0`) shall be optimized (using compiler optimizations). Accepted values are `0` and `1`.
+  Defines if release artifacts (when [`DEBUG`](#DEBUG) is `0`) shall be optimized (using compiler optimizations. Optimization level is defined in [`OPTIMIZATION_LEVEL`](#OPTIMIZATION_LEVEL) variable). Accepted values are `0` and `1`.
 
 <a name="OPTIMIZATION_LEVEL"></a>
 * **`OPTIMIZATION_LEVEL`**
@@ -605,7 +609,7 @@ Below are the list the input variables for advanced usage:
 <a name="printvars"></a>
 * **printvars**
 
-  This target is used for debugging purposes.
+  This target is used internally when solving dependencies. For general usage, this target is used mostly for debugging purposes.
 
   List the values for variables selected through `VARS` environment variable.
 
@@ -618,33 +622,26 @@ Below are the list the input variables for advanced usage:
   Generates the following output (for [app demo](../demo/app)):
 
   ```
-  srcFiles = src/main.c
-  objFiles = output/build/linux-x64/src/main.c.o
+  src/main.c output/build/linux-x64/src/main.c.o
   ```
-
-  > **Output**
-  >
-  > If a single variable is requested, only its value will be returned. For example:
-  >
-  > ```bash
-  > $ make printvars VARS=srcFiles
-  > ```
-  >
-  > Will generate the following output (for [app demo](../demo/app)):
-  >
-  > ```
-  > src/main.c
-  > ```
 
 ## Output variables
 
 Once included, **project.mk** also exposes some variables that can be used inside project's Makefile (usually through [recusively expanded variables](https://www.gnu.org/software/make/manual/html_node/Flavors.html#Flavors), since **project.mk** is normally included at the end of project's Makefile):
 
-By convention, input variables are named in `camelCase` fashion.
+By convention, output variables are named in `camelCase` fashion.
 
-| Variable | Details |
-|----------|---------|
-| TODO     | TODO    |
+Note: Not all output variables are documented because some of them are targeted only for internal use.
+
+| Variable         | Details                                                       |
+|------------------|---------------------------------------------------------------|
+| projVersionMajor | Major version extracted from [`PROJ_VERSION`](#PROJ_VERSION)  |
+| projVersionMinor | Mintor version extracted from [`PROJ_VERSION`](#PROJ_VERSION) |
+| projVersionPatch | Patch version extracted from [`PROJ_VERSION`](#PROJ_VERSION)  |
+| hostOS           | OS component extracted from [`HOST`](#HOST)                   |
+| hostArch         | Arch component extract from [`HOST`](#HOST)                   |
+| buildDir         | Directory where all built artifacts are placed                |
+| distDir          | Directory where distribution artifacts are placed             |
 
 ## Utility makefiles
 
@@ -660,6 +657,8 @@ See [doxygen.mk.md](doxygen.mk.md) for details.
 
 This file provides convenience Makefile functions.
 
+NOTE: This file is included by **project.mk**.
+
 See [functions.mk.md](functions.mk.md) for details.
 
 ### git.mk
@@ -671,5 +670,7 @@ See [git.mk.md](git.mk.md) for details.
 ### native_host.mk
 
 This file inspects current execution environment and identifies (some) native host. Identified info is exposed through output variables.
+
+NOTE: This file is included by **project.mk** when [`HOST`](#HOST) variable is not set.
 
 See [native_host.mk.md](native_host.mk.md) for details.
