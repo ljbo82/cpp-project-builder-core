@@ -610,9 +610,6 @@ build: post-build
 
 .PHONY: pre-build
 pre-build: $(preBuildDeps)
-    ifneq ($(preBuild), )
-	    @$(preBuild)
-    endif
     ifneq ($(PRE_BUILD), )
 	    $(v)$(PRE_BUILD)
     endif
