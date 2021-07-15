@@ -17,21 +17,25 @@
 ifndef _include_functions_mk
 _include_functions_mk := 1
 
+# Cuts a string based on given delimiter
+# Syntax: $(call fn_cut,base_string,delimiter,index)
+fn_cut = $(shell sh -c "echo $(1) | cut -d'$(2)' -f$(3)")
+
 # Returns 1 if version is a valid semantic version. Otherwise, returns 0
 # Syntax: $(call fn_version_valid,semanticVersion)
 fn_version_valid = $(shell sh -c "echo $(1) | grep -oP '^[0-9]+\.[0-9]+\.[0-9]+.*$$' > /dev/null && echo 1 || echo 0")
 
 # Returns the major component for given version
 # Syntax: $(call fn_version_major,semanticVersion)
-fn_version_major = $(shell sh -c "echo $(1) | cut -d'.' -f1")
+fn_version_major = $(call fn_cut,$(1),.,1)
 
 # Returns the minor component for given version
 # Syntax: $(call fn_version_minor,semanticVersion)
-fn_version_minor = $(shell sh -c "echo $(1) | cut -d'.' -f2")
+fn_version_minor = $(call fn_cut,$(1),.,2)
 
 # Returns the patch component for given version
 # Syntax: $(call fn_version_patch,semanticVersion)
-fn_version_patch = $(shell sh -c "echo $(1) | cut -d'.' -f3-")
+fn_version_patch = $(call fn_cut,$(1),.,3-)
 
 # Returns 1 if host is a valid host string. Otherwise, returns 0
 # Syntax: $(call fn_host_valid,host)
@@ -39,11 +43,11 @@ fn_host_valid = $(shell sh -c "echo $(1) | grep -oP '^[a-zA-Z0-9]+\-[a-zA-Z0-9]+
 
 # Returns the OS component for given host
 # Syntax: $(call fn_host_os,host)
-fn_host_os    = $(shell sh -c "echo $(1) | cut -d'-' -f1")
+fn_host_os  = $(call fn_cut,$(1),-,1)
 
 # Returns the ARCH component for given host
 # Syntax: $(call fn_host_arch,host)
-fn_host_arch  = $(shell sh -c "echo $(1) | cut -d'-' -f2-")
+fn_host_arch = $(call fn_cut,$(1),-,2-)
 
 # If childDir is a subdirectory inside parentDir, returns childDir. Otherwise, returns an empty value
 # Syntax: $(call fn_subdir,childDir,parentDir)
@@ -52,10 +56,6 @@ fn_subdir = $(shell sh -c "echo $(abspath $(1)) | grep -oP '^$(abspath $(2))[/]*
 # If str1 equals str2, returns str1. Otherwise, returns an empty value
 # Syntax: $(call fn_str_eq,srt1,str2)
 fn_eq = $(shell sh -c "[ '$(1)' = '$(2)' ] && echo '$(1)'")
-
-# Cuts a string based on given delimiter
-# Syntax: $(call fn_cut,base_string,delimiter,index)
-fn_cut = $(shell sh -c "echo $(1) | cut -d'$(2)' -f$(3)")
 
 # Returns the n-th word in a string
 # Syntax: $(call fn_word,base_string,index)
