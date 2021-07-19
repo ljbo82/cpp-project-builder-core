@@ -35,7 +35,7 @@ ifeq ($(CROSS_COMPILE), )
                     cFlags   += -m32
                     ldFlags  += -m32
                 else
-                    PRE_BUILD += @echo [ERROR] Missing CROSS_COMPILE for arch '$(hostArch)'; exit 1;
+                    PRE_BUILD += echo [ERROR] Missing CROSS_COMPILE for arch '$(hostArch)'; exit 1;
                 endif
             else ifeq ($(hostArch), x64)
                 ifeq ($(nativeArch), x86)
@@ -43,10 +43,10 @@ ifeq ($(CROSS_COMPILE), )
                     cFlags   += -m64
                     ldFlags  += -m64
                 else
-                    PRE_BUILD += @echo [ERROR] Missing CROSS_COMPILE for arch '$(hostArch)'; exit 1;
+                    PRE_BUILD += echo [ERROR] Missing CROSS_COMPILE for arch '$(hostArch)'; exit 1;
                 endif
             else
-                PRE_BUILD += @echo [ERROR] Missing CROSS_COMPILE for arch '$(hostArch)'; exit 1;
+                PRE_BUILD += echo [ERROR] Missing CROSS_COMPILE for arch '$(hostArch)'; exit 1;
             endif
         endif
     endif
@@ -99,4 +99,3 @@ endif
 undefine __postTargets
 
 endif #_include_hosts_linux_mk
-

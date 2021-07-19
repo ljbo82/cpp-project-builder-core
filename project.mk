@@ -294,7 +294,7 @@ ifneq ($(HOST_MK), )
     include $(HOST_MK)
 else
     ifeq ($(HOST_MK_REQUIRED), 1)
-        $(error Unsupported HOST: $(HOST))
+        __preBuild += echo "[ERROR] Unsupported HOST: $(HOST)"; exit 1;
     endif
 endif
 # ------------------------------------------------------------------------------
@@ -549,7 +549,7 @@ endif
 # ------------------------------------------------------------------------------
 ifeq ($(__R), 0)
     ifeq ($(shell sh -c "$(CROSS_COMPILE)gcc -v > /dev/null 2>&1 && echo 1 || echo 0"), 0)
-        $(error $(CROSS_COMPILE)gcc is not in PATH)
+        __preBuild += echo "[ERROR] $(CROSS_COMPILE)gcc is not in PATH"; exit 1;
     endif
 endif
 # ------------------------------------------------------------------------------
@@ -610,8 +610,11 @@ build: post-build
 
 .PHONY: pre-build
 pre-build: $(preBuildDeps)
-    ifneq ($(PRE_BUILD), )
+    ifneq ($(PRE_BUILD),)
 	    $(v)$(PRE_BUILD)
+    endif
+    ifneq ($(__preBuild),)
+	    @$(__preBuild)
     endif
 
 .PHONY: post-build
@@ -709,4 +712,3 @@ endif
 -include $(depFiles)
 
 endif # _include_project_mk
-

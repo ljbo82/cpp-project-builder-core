@@ -31,7 +31,7 @@ ifeq ($(CROSS_COMPILE), )
         ifeq ($(hostArch), x86)
             override CROSS_COMPILE := i686-w64-mingw32-
         else
-            PRE_BUILD += @echo [ERROR] Missing CROSS_COMPILE for arch '$(hostArch)'; exit 1;
+            PRE_BUILD += echo [ERROR] Missing CROSS_COMPILE for arch '$(hostArch)'; exit 1;
         endif
     endif
 endif
@@ -82,4 +82,3 @@ endif
 undefine __postTargets
 
 endif #_include_hosts_windows_mk
-
