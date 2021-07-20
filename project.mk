@@ -252,7 +252,7 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(HOSTS_DIR), )
+ifeq ($(HOSTS_DIR),)
     override HOSTS_DIR := $(defaultHostsDir)
 endif
 
@@ -262,69 +262,69 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(HOST_MK_REQUIRED), )
+ifeq ($(HOST_MK_REQUIRED),)
     override HOST_MK_REQUIRED := $(defaultHostMkRequired)
 endif
 
-ifneq ($(HOST_MK_REQUIRED), 0)
-    ifneq ($(HOST_MK_REQUIRED), 1)
+ifneq ($(HOST_MK_REQUIRED),0)
+    ifneq ($(HOST_MK_REQUIRED),1)
         $(error Invalid value for HOST_MK_REQUIRED: $(HOST_MK_REQUIRED))
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(HOST_MK), )
-    ifneq ($(wildcard $(HOSTS_DIR)/$(HOST).mk), )
-        override HOST_MK := $(HOSTS_DIR)/$(HOST).mk
+ifeq ($(HOST_MK),)
+    ifneq ($(wildcard $(HOSTS_DIR)/$(HOST).mk),)
+        override HOST_MK := $(HOST).mk
     else
-        ifneq ($(wildcard $(HOSTS_DIR)/$(hostOS).mk), )
-            override HOST_MK := $(HOSTS_DIR)/$(hostOS).mk
+        ifneq ($(wildcard $(HOSTS_DIR)/$(hostOS).mk),)
+            override HOST_MK := $(hostOS).mk
         else
             override HOST_MK :=
         endif
     endif
 else
-    ifeq ($(wildcard $(HOST_MK)), )
-        $(error [HOST_MK] No such file: $(HOST_MK))
+    ifeq ($(wildcard $(HOSTS_DIR)/$(HOST_MK)),)
+        $(error [HOST_MK] No such file: $(HOSTS_DIR)/$(HOST_MK))
     endif
 endif
 
-ifneq ($(HOST_MK), )
-    include $(HOST_MK)
+ifneq ($(HOST_MK),)
+    include $(HOSTS_DIR)/$(HOST_MK)
 else
-    ifeq ($(HOST_MK_REQUIRED), 1)
+    ifeq ($(HOST_MK_REQUIRED),1)
         __preBuild += echo "[ERROR] Unsupported HOST: $(HOST)"; exit 1;
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(BUILDER_HOST_MK), )
-    ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk), )
-        override BUILDER_HOST_MK := $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk
+ifeq ($(BUILDER_HOST_MK),)
+    ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk),)
+        override BUILDER_HOST_MK := $(HOST).mk
     else
-        ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(hostOS).mk), )
-            override BUILDER_HOST_MK := $(_project_mk_dir)$(defaultHostsDir)/$(hostOS).mk
+        ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(hostOS).mk),)
+            override BUILDER_HOST_MK := $(hostOS).mk
         else
             override BUILDER_HOST_MK :=
         endif
     endif
 else
-    ifeq ($(wildcard $(BUILDER_HOST_MK)), )
-        $(error [BUILDER_HOST_MK] No such file: $(BUILDER_HOST_MK))
+    ifeq ($(wildcard  $(_project_mk_dir)$(defaultHostsDir)/$(BUILDER_HOST_MK)),)
+        $(error [BUILDER_HOST_MK] No such file:  $(_project_mk_dir)$(defaultHostsDir)/$(BUILDER_HOST_MK))
     endif
 endif
 
-ifneq ($(BUILDER_HOST_MK), )
-    include $(BUILDER_HOST_MK)
+ifneq ($(BUILDER_HOST_MK),)
+    include  $(_project_mk_dir)$(defaultHostsDir)/$(BUILDER_HOST_MK)
 endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(HOST_MK), )
-    ifeq ($(BUILDER_HOST_MK), )
-        $(error Unsupported HOST: $(HOST))
+ifeq ($(HOST_MK),)
+    ifeq ($(BUILDER_HOST_MK),)
+        __preBuild += echo "[ERROR] Unsupported HOST: $(HOST)"; exit 1;
     endif
 endif
 # ------------------------------------------------------------------------------
