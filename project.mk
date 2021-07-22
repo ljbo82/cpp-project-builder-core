@@ -27,7 +27,7 @@ endif
 # ifeq ($(__R), 1) identifies a recursive call
 # This flag is used for performance optimization on dependency inspections
 ifeq ($(__R), )
-    override __R := 0
+    __R := 0
 endif
 # ------------------------------------------------------------------------------
 
@@ -76,7 +76,7 @@ ifneq ($(PROJ_TYPE), app)
         $(error Unsupported PROJ_TYPE: $(PROJ_TYPE))
     else
         ifeq ($(LIB_TYPE), )
-            override LIB_TYPE := $(defaultLibType)
+            LIB_TYPE := $(defaultLibType)
         endif
         ifneq ($(LIB_TYPE), shared)
             ifneq ($(LIB_TYPE), static)
@@ -89,7 +89,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(PROJ_VERSION), )
-    override PROJ_VERSION := $(defaultProjVersion)
+    PROJ_VERSION := $(defaultProjVersion)
 endif
 
 ifeq ($(call fn_version_valid, $(PROJ_VERSION)), 0)
@@ -103,7 +103,7 @@ projVersionPatch := $(call fn_version_patch, $(PROJ_VERSION))
 
 # ------------------------------------------------------------------------------
 ifeq ($(DEBUG), )
-    override DEBUG := $(defaultDebug)
+    DEBUG := $(defaultDebug)
 endif
 
 ifneq ($(DEBUG), 0)
@@ -115,7 +115,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(STRIP_RELEASE), )
-    override STRIP_RELEASE := $(defaultStripRelease)
+    STRIP_RELEASE := $(defaultStripRelease)
 endif
 
 ifneq ($(STRIP_RELEASE), 0)
@@ -127,7 +127,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(OPTIMIZE_RELEASE), )
-    override OPTIMIZE_RELEASE := $(defaultOptimizeRelease)
+    OPTIMIZE_RELEASE := $(defaultOptimizeRelease)
 endif
 
 ifneq ($(OPTIMIZE_RELEASE), 0)
@@ -139,7 +139,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(OPTIMIZATION_LEVEL), )
-    override OPTIMIZATION_LEVEL := $(defaultOptimizationLevel)
+    OPTIMIZATION_LEVEL := $(defaultOptimizationLevel)
 endif
 # ------------------------------------------------------------------------------
 
@@ -156,7 +156,7 @@ ifeq ($(HOST), )
     hostOS   := $(nativeOS)
     hostArch := $(nativeArch)
 
-    override HOST := $(hostOS)-$(hostArch)
+    HOST := $(hostOS)-$(hostArch)
 else
     ifeq ($(call fn_host_valid, $(HOST)), 0)
         $(error Invalid HOST: $(HOST))
@@ -169,7 +169,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(O), )
-    override O := $(defaultOutputDirBase)
+    O := $(defaultOutputDirBase)
 endif
 
 ifneq (1, $(words $(O)))
@@ -191,7 +191,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(SKIP_DEFAULT_SRC_DIR), )
-    override SKIP_DEFAULT_SRC_DIR := $(defaultSkipDefaultSrcDir)
+    SKIP_DEFAULT_SRC_DIR := $(defaultSkipDefaultSrcDir)
 endif
 
 ifneq ($(SKIP_DEFAULT_SRC_DIR), 0)
@@ -203,7 +203,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(SKIP_DEFAULT_INCLUDE_DIR),)
-    override SKIP_DEFAULT_INCLUDE_DIR := $(defaultSkipDefaultIncludeDir)
+    SKIP_DEFAULT_INCLUDE_DIR := $(defaultSkipDefaultIncludeDir)
 endif
 
 ifneq ($(SKIP_DEFAULT_INCLUDE_DIR), 0)
@@ -212,7 +212,6 @@ ifneq ($(SKIP_DEFAULT_INCLUDE_DIR), 0)
     endif
 endif
 # ------------------------------------------------------------------------------
-
 
 # ------------------------------------------------------------------------------
 ifeq ($(SKIP_DEFAULT_SRC_DIR), 0)
@@ -242,7 +241,7 @@ ifeq ($(ARTIFACT_BASE_NAME), )
         __debugSuffix :=
     endif
 
-    override ARTIFACT_BASE_NAME := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)
+    ARTIFACT_BASE_NAME := $(PROJ_NAME)$(projVersionMajor)$(__debugSuffix)
     undefine __debugSuffix
 endif
 
@@ -253,7 +252,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(HOSTS_DIR),)
-    override HOSTS_DIR := $(defaultHostsDir)
+    HOSTS_DIR := $(defaultHostsDir)
 endif
 
 ifneq (1, $(words $(HOSTS_DIR)))
@@ -263,7 +262,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(HOST_MK_REQUIRED),)
-    override HOST_MK_REQUIRED := $(defaultHostMkRequired)
+    HOST_MK_REQUIRED := $(defaultHostMkRequired)
 endif
 
 ifneq ($(HOST_MK_REQUIRED),0)
@@ -276,12 +275,12 @@ endif
 # ------------------------------------------------------------------------------
 ifeq ($(HOST_MK),)
     ifneq ($(wildcard $(HOSTS_DIR)/$(HOST).mk),)
-        override HOST_MK := $(HOST).mk
+        HOST_MK := $(HOST).mk
     else
         ifneq ($(wildcard $(HOSTS_DIR)/$(hostOS).mk),)
-            override HOST_MK := $(hostOS).mk
+            HOST_MK := $(hostOS).mk
         else
-            override HOST_MK :=
+            HOST_MK :=
         endif
     endif
 else
@@ -302,12 +301,12 @@ endif
 # ------------------------------------------------------------------------------
 ifeq ($(BUILDER_HOST_MK),)
     ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk),)
-        override BUILDER_HOST_MK := $(HOST).mk
+        BUILDER_HOST_MK := $(HOST).mk
     else
         ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(hostOS).mk),)
-            override BUILDER_HOST_MK := $(hostOS).mk
+            BUILDER_HOST_MK := $(hostOS).mk
         else
-            override BUILDER_HOST_MK :=
+            BUILDER_HOST_MK :=
         endif
     endif
 else
@@ -331,7 +330,7 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(ARTIFACT_NAME), )
-    override ARTIFACT_NAME := $(ARTIFACT_BASE_NAME)
+    ARTIFACT_NAME := $(ARTIFACT_BASE_NAME)
 endif
 
 ifneq (1, $(words $(ARTIFACT_NAME)))

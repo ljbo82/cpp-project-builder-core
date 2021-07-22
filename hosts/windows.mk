@@ -26,10 +26,10 @@ endif
 # ------------------------------------------------------------------------------
 ifeq ($(CROSS_COMPILE), )
     ifeq ($(hostArch), x64)
-        override CROSS_COMPILE := x86_64-w64-mingw32-
+        CROSS_COMPILE := x86_64-w64-mingw32-
     else
         ifeq ($(hostArch), x86)
-            override CROSS_COMPILE := i686-w64-mingw32-
+            CROSS_COMPILE := i686-w64-mingw32-
         else
             __preBuild += echo "[ERROR] Missing CROSS_COMPILE for HOST '$(HOST)'"; exit 1;
         endif
@@ -41,18 +41,18 @@ endif
 ifeq ($(PROJ_TYPE), app)
     __postTargets := 0
     ifeq ($(ARTIFACT_NAME), )
-        override ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).exe
+        ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).exe
     endif
 else
     ifeq ($(LIB_TYPE), static)
         __postTargets := 0
         ifeq ($(ARTIFACT_NAME), )
-            override ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).a
+            ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).a
         endif
     else
         ifeq ($(ARTIFACT_NAME), )
             __postTargets := 1
-            override ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).dll
+            ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).dll
 
             ldFlags       += -Wl,--out-implib,$(buildDir)/$(ARTIFACT_NAME).lib
             ldFlags       += -Wl,--output-def,$(buildDir)/$(ARTIFACT_NAME).def

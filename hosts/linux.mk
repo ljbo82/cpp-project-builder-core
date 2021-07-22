@@ -57,18 +57,18 @@ endif
 ifeq ($(PROJ_TYPE), app)
     __postTargets := 0
     ifeq ($(ARTIFACT_NAME), )
-        override ARTIFACT_NAME := $(ARTIFACT_BASE_NAME)
+        ARTIFACT_NAME := $(ARTIFACT_BASE_NAME)
     endif
 else
     ifeq ($(LIB_TYPE), static)
         __postTargets := 0
         ifeq ($(ARTIFACT_NAME), )
-            override ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).a
+            ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).a
         endif
     else
         ifeq ($(ARTIFACT_NAME), )
             __postTargets := 1
-            override ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).so.$(projVersionMinor).$(projVersionPatch)
+            ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).so.$(projVersionMinor).$(projVersionPatch)
 
             postBuildDeps += $(buildDir)/lib$(ARTIFACT_BASE_NAME).so
             postDistDeps  += $(distDir)/lib/lib$(ARTIFACT_BASE_NAME).so

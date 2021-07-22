@@ -27,7 +27,7 @@ LIB_PROJ_DIRS += lib/libB
 include ../../project.mk
 
 ifeq ($(LIB_TYPE), )
-    override LIB_TYPE := shared
+    LIB_TYPE := shared
 endif
 
 # ==============================================================================
@@ -39,4 +39,3 @@ run: all
 	    $(v)$(O)/dist/$(HOST)/bin/$(ARTIFACT_NAME)
     endif
 # ==============================================================================
-
