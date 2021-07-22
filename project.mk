@@ -456,12 +456,12 @@ endif
 # Checks only direct dependencies
 ifeq ($(__R), 0)
     $(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(wildcard $(libProjDir)),,$(error LIB_PROJ_DIRS: '$(libProjDir)' not found)))
-    $(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(call fn_eq,lib,$(shell sh -c "$(MAKE) -s --no-print-directory -C $(libProjDir) printvars __R=1 VARS=PROJ_TYPE")),,$(error LIB_PROJ_DIRS: '$(libProjDir)' is not a library project)))
+    $(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(call fn_eq,lib,$(shell sh -c "$(MAKE) -s --no-print-directory -C $(libProjDir) printvars __R=1 HOST=$(HOST) VARS=PROJ_TYPE")),,$(error LIB_PROJ_DIRS: '$(libProjDir)' is not a library project)))
 endif
 
 # This is required to be enabled even on recursive calls in order to resolve
 # transient dependencies
-libs := $(strip $(foreach lib,$(LIBS),$(lib)) $(call fn_unique,$(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(wildcard $(libProjDir)),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(libProjDir) __R=1 DEBUG=$(DEBUG) printvars VARS='ARTIFACT_BASE_NAME libs'")))))
+libs := $(strip $(foreach lib,$(LIBS),$(lib)) $(call fn_unique,$(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(wildcard $(libProjDir)),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(libProjDir) printvars __R=1 DEBUG=$(DEBUG) HOST=$(HOST) VARS='ARTIFACT_BASE_NAME libs'")))))
 
 ldFlags += $(foreach lib,$(libs),-l$(lib))
 
