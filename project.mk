@@ -460,7 +460,7 @@ endif
 
 # This is required to be enabled even on recursive calls in order to resolve
 # transient dependencies
-libs := $(strip $(call fn_unique,$(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(wildcard $(libProjDir)),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(libProjDir) printvars __R=1 DEBUG=$(DEBUG) HOST=$(HOST) VARS='ARTIFACT_BASE_NAME libs'")))) $(foreach lib,$(LIBS),$(lib)))
+libs := $(strip $(foreach lib,$(LIBS),$(lib)) $(call fn_unique,$(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(wildcard $(libProjDir)),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(libProjDir) printvars __R=1 DEBUG=$(DEBUG) HOST=$(HOST) VARS='ARTIFACT_BASE_NAME libs'")))))
 
 ldFlags += $(foreach lib,$(libs),-l$(lib))
 
