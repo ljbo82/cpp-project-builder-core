@@ -460,7 +460,7 @@ endif
 
 # This is required to be enabled even on recursive calls in order to resolve
 # transient dependencies
-libs := $(strip $(foreach lib,$(LIBS),$(lib)) $(call fn_unique,$(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(wildcard $(libProjDir)),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(libProjDir) printvars __R=1 DEBUG=$(DEBUG) HOST=$(HOST) VARS='ARTIFACT_BASE_NAME libs'")))))
+libs := $(strip $(call fn_unique,$(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(wildcard $(libProjDir)),$(shell sh -c "$(MAKE) -s --no-print-directory -C $(libProjDir) printvars __R=1 DEBUG=$(DEBUG) HOST=$(HOST) VARS='ARTIFACT_BASE_NAME libs'")))) $(foreach lib,$(LIBS),$(lib)))
 
 ldFlags += $(foreach lib,$(libs),-l$(lib))
 
@@ -475,9 +475,7 @@ $(call fn_word,$(2),1)_artifactName := $(call fn_word,$(2),2)
 buildDeps += $$(O)/dist/$$(HOST)/lib/$$($(call fn_word,$(2),1)_artifactName)
 
 # Library BUILD_DEPS ===========================================================
-ifeq ($(PHONY_LIBS), 1)
 .PHONY: $$(O)/dist/$$(HOST)/lib/$$($(call fn_word,$(2),1)_artifactName)
-endif
 $$(O)/dist/$$(HOST)/lib/$$($(call fn_word,$(2),1)_artifactName):
 	@printf "$$(nl)[LIBS] $$@\n"
 	$$(v)$$(MAKE) -C $(1) O=$(abspath $(O)) BUILD_DIR=lib/$(call fn_word,$(2),1)
