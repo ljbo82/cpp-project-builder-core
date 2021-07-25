@@ -452,7 +452,7 @@ endif
 
 # Syntax: $(call __fn_lib_proj_dir,projDirEntry)
 # Return: The directory for projDirEntry
-__fn_lib_proj_dir = $(call fn_cut,$(1),:,1)
+__fn_lib_proj_dir = $(call fn_cut,$(1):,:,1)
 
 # Syntax: $(call __fn_lib_proj_makefile,projDirEntry)
 # Return: The makefile associated with projDirentry
@@ -470,28 +470,16 @@ __fn_lib_proj_environment = $(strip $(subst :, ,$(call fn_cut,$(1),:,4-)))
 # Return: requested variabled
 __fn_lib_proj_info = $(shell $(MAKE) -s --no-print-directory -C $(call __fn_lib_proj_dir,$(1)) $(call __fn_lib_proj_makefile,$(1)) printvars __R=1 HOST=$(HOST) DEBUG=$(DEBUG) VARS='$(2)' $(call __fn_lib_proj_environment,$(1)))
 
-ifeq ($(D),1)
-    libProjDir := lib/libA:Makefile:target:env1=ENV1:env2=ENV2
-    $(info [DEBUG] libProjDir: $(libProjDir))
-    $(info [DEBUG] __fn_lib_proj_dir:         $(call __fn_lib_proj_dir,$(libProjDir)))
-    $(info [DEBUG] __fn_lib_proj_makefile:    $(call __fn_lib_proj_makefile,$(libProjDir)))
-    $(info [DEBUG] __fn_lib_proj_target:      $(call __fn_lib_proj_target,$(libProjDir)))
-    $(info [DEBUG] __fn_lib_proj_environment: $(call __fn_lib_proj_environment,$(libProjDir)))
-    $(info [DEBUG] __fn_lib_proj_info:        $(call __fn_lib_proj_info,$(libProjDir),PROJ_NAME PROJ_TYPE))
-endif
-
 # Checks only direct dependencies
 ifeq ($(__R),0)
-    $(info [DEBUG] $(foreach libProjDir,$(LIB_PROJ_DIRS),libProjDir := $(libProjDir), __fn_lib_proj_dir := $(call __fn_lib_proj_dir,$(libProjDir)), wildcard := $(wildcard $(call __fn_lib_proj_dir,$(libProjDir))) !))
-    $(error [DEBUG] BYE!)
-
     $(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(wildcard $(call __fn_lib_proj_dir,$(libProjDir))),,$(error LIB_PROJ_DIRS: '$(libProjDir)' not found)))
     $(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(call fn_eq,lib,$(call __fn_lib_proj_info,$(libProjDir),PROJ_TYPE)),,$(error LIB_PROJ_DIRS: '$(libProjDir)' is not a library project)))
 endif
 
 # This is required to be enabled even on recursive calls in order to resolve
 # transient dependencies
-libs := $(strip $(foreach lib,$(LIBS),$(lib)) $(call fn_unique,$(foreach libProjDir,$(LIB_PROJ_DIRS),$(if $(wildcard $(libProjDir)),$(call __fn_lib_proj_info,$(libProjDir),ARTIFACT_BASE_NAME libs)))))
+libs := $(strip $(call fn_unique,$(foreach lib,$(LIBS),$(lib)) $(foreach libProjDir,$(LIB_PROJ_DIRS),$(call __fn_lib_proj_info,$(libProjDir),ARTIFACT_BASE_NAME libs))))
+
 
 ldFlags += $(foreach lib,$(libs),-l$(lib))
 
@@ -503,8 +491,8 @@ buildDeps += __lib_($(call fn_word,$(2),1)
 # Library BUILD_DEPS ===========================================================
 .PHONY: __lib_($(call fn_word,$(2),1)
 __lib_($(call fn_word,$(2),1):
-	@printf "$$(nl)[LIBS] $$(O)/build/$$(HOST)/lib/$$($(call fn_word,$(2),1))\n"
-	$$(v)$$(MAKE) -C $(call __fn_lib_proj_dir,$(1)) $(strip $(call __fn_lib_proj_makefile,$(1))) $(strip $(call __fn_lib_proj_target,$(1))) O=$(abspath $(O)) BUILD_DIR=lib/$(call fn_word,$(2),1) HOST=$(HOST) DEBUG=$(DEBUG) $(call __fn_lib_proj_environment,$(1))
+	@printf "$$(nl)[LIBS] $$(O)/build/$$(HOST)/lib/$(call fn_word,$(2),1)\n"
+	$$(v)$$(MAKE) -C $(call __fn_lib_proj_dir,$(1)) $(call __fn_lib_proj_makefile,$(1)) $(call __fn_lib_proj_target,$(1)) O=$(abspath $(O)) BUILD_DIR=lib/$(call fn_word,$(2),1) HOST=$(HOST) DEBUG=$(DEBUG) $(call __fn_lib_proj_environment,$(1))
 # ==============================================================================
 endef
 
@@ -521,7 +509,7 @@ ifeq ($(__R),0)
     # Header file scanning is not required on recursive calls
     ifeq ($(PROJ_TYPE),lib)
         DIST_INCLUDE_DIRS := $(sort $(DIST_INCLUDE_DIRS))
-        distFiles += $(strip $(foreach distIncludeDir,$(DIST_INCLUDE_DIRS),$(shell sh -c "cd $(distIncludeDir); find . -type f -name '*.h' -or -name '*.hpp' 2> /dev/null | sed 's:./::' | xargs -I {} echo $(defaultIncludeDir)/\{\}:$(distIncludeDir)/\{\}")))
+        distFiles += $(strip $(foreach distIncludeDir,$(DIST_INCLUDE_DIRS),$(shell cd $(distIncludeDir); find . -type f -name '*.h' -or -name '*.hpp' 2> /dev/null | sed 's:./::' | xargs -I {} echo $(defaultIncludeDir)/\{\}:$(distIncludeDir)/\{\})))
     endif
 endif
 # ------------------------------------------------------------------------------
