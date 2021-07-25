@@ -31,7 +31,7 @@ ifeq ($(CROSS_COMPILE), )
         ifeq ($(hostArch), x86)
             CROSS_COMPILE := i686-w64-mingw32-
         else
-            __preBuild += echo "[ERROR] Missing CROSS_COMPILE for HOST '$(HOST)'"; exit 1;
+            _preBuildError := Missing CROSS_COMPILE for HOST '$(HOST)'
         endif
     endif
 endif

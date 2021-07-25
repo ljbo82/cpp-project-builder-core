@@ -35,7 +35,7 @@ ifeq ($(CROSS_COMPILE), )
                     cFlags   += -m32
                     ldFlags  += -m32
                 else
-                    __preBuild += echo "[ERROR] Missing CROSS_COMPILE for HOST '$(HOST)'"; exit 1;
+                    _preBuildError := Missing CROSS_COMPILE for HOST '$(HOST)'
                 endif
             else ifeq ($(hostArch), x64)
                 ifeq ($(nativeArch), x86)
@@ -43,10 +43,10 @@ ifeq ($(CROSS_COMPILE), )
                     cFlags   += -m64
                     ldFlags  += -m64
                 else
-                    __preBuild += echo "[ERROR] Missing CROSS_COMPILE for HOST '$(HOST)'"; exit 1;
+                    _preBuildError := Missing CROSS_COMPILE for HOST '$(HOST)'
                 endif
             else
-                __preBuild += echo "[ERROR] Missing CROSS_COMPILE for HOST '$(HOST)'"; exit 1;
+                _preBuildError := Missing CROSS_COMPILE for HOST '$(HOST)'
             endif
         endif
     endif

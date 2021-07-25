@@ -449,9 +449,7 @@ Below are the list the input variables for advanced usage:
 
   This variable defines the name of the file inside [`HOSTS_DIR`](#HOSTS_DIR) which must be included for selected [`HOST`](#HOST).
 
-  For almost 100% of use-cases, default value is enough. For details regarding default behavior, see [hosts](#hosts) section.
-
-  NOTE: Changing this variable is rarely required. Changing this variable is really an advanced topic and it is usually performed when creating a custom build system on top of gcc-project-builder (e.g.: [arduino-gcc-project-builder](https://github.com/ljbo82/arduino-gcc-project-builder)).
+  For details regarding default behavior, see [hosts](#hosts) section.
 
 <a name="HOST_MK_REQUIRED"></a>
 * **`HOST_MK_REQUIRED`**
@@ -469,7 +467,7 @@ Below are the list the input variables for advanced usage:
   * Common declaration: Makefile
   * Default value: _(depends on selected [`HOST`](#HOST))_
 
-  This variable defines the name of host-specific makefile included by builder which contains instructions how to build artifacts.
+  This variable defines the name (including the path relative to project's Makefile) of host-specific makefile included by builder which contains instructions how to build artifacts.
 
   For almost 100% of use-cases, default value is enough. For details regarding default behavior, see [hosts](#hosts) section.
 

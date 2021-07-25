@@ -19,7 +19,7 @@ _include_functions_mk := 1
 
 # Cuts a string based on given delimiter
 # Syntax: $(call fn_cut,base_string,delimiter,index)
-fn_cut = $(shell sh -c "echo $(1) | cut -d'$(2)' -f$(3)")
+fn_cut = $(shell sh -c "echo $(1) | cut -s -d'$(2)' -f$(3)")
 
 # Returns 1 if version is a valid semantic version. Otherwise, returns 0
 # Syntax: $(call fn_version_valid,semanticVersion)
