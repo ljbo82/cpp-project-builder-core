@@ -295,6 +295,15 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+ifeq ($(__R),0)
+    # Source file scanning is not required on recursive calls
+    SRC_DIRS := $(sort $(SRC_DIRS))
+    $(foreach srcDir,$(SRC_DIRS),$(if $(call fn_subdir,$(srcDir),$(shell pwd)),,$(error Source directory ($(srcDir)) is outside project tree)))
+    srcFiles := $(sort $(strip $(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f -name '*.c' -or -name '*.cpp' -or -name '*.S' 2> /dev/null))))
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 ifeq ($(BUILDER_HOST_MK),)
     ifneq ($(wildcard $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk),)
         BUILDER_HOST_MK := $(_project_mk_dir)$(defaultHostsDir)/$(HOST).mk
@@ -329,15 +338,6 @@ endif
 
 ifneq (1,$(words $(ARTIFACT_NAME)))
     $(error ARTIFACT_NAME cannot have spaces)
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifeq ($(__R),0)
-    # Source file scanning is not required on recursive calls
-    SRC_DIRS := $(sort $(SRC_DIRS))
-    $(foreach srcDir,$(SRC_DIRS),$(if $(call fn_subdir,$(srcDir),$(shell pwd)),,$(error Source directory ($(srcDir)) is outside project tree)))
-    srcFiles := $(sort $(strip $(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f -name '*.c' -or -name '*.cpp' -or -name '*.S' 2> /dev/null))))
 endif
 # ------------------------------------------------------------------------------
 
@@ -394,10 +394,12 @@ endef
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(PROJ_TYPE),app)
-    distFiles += bin/$(ARTIFACT_NAME):$(buildDir)/$(ARTIFACT_NAME)
-else
-    distFiles += lib/$(ARTIFACT_NAME):$(buildDir)/$(ARTIFACT_NAME)
+ifneq ($(srcFiles),)
+    ifeq ($(PROJ_TYPE),app)
+        distFiles += bin/$(ARTIFACT_NAME):$(buildDir)/$(ARTIFACT_NAME)
+    else
+        distFiles += lib/$(ARTIFACT_NAME):$(buildDir)/$(ARTIFACT_NAME)
+    endif
 endif
 # ------------------------------------------------------------------------------
 
@@ -693,17 +695,19 @@ endif
 # Build artifact ===============================================================
 ifeq ($(__R),0)
 $(buildDir)/$(ARTIFACT_NAME): $(buildDeps) $(objFiles)
-    ifeq ($(PROJ_TYPE),lib)
-        ifeq ($(LIB_TYPE),shared)
+    ifneq ($(srcFiles),)
+        ifeq ($(PROJ_TYPE),lib)
+            ifeq ($(LIB_TYPE),shared)
+	            @printf "$(nl)[LD] $@\n"
+	            $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(ldFlags))
+            else
+	            @printf "$(nl)[AR] $@\n"
+	            $(v)$(CROSS_COMPILE)$(AR) $(strip $(arFlags) $@ $(objFiles))
+            endif
+        else
 	        @printf "$(nl)[LD] $@\n"
 	        $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(ldFlags))
-        else
-	        @printf "$(nl)[AR] $@\n"
-	        $(v)$(CROSS_COMPILE)$(AR) $(strip $(arFlags) $@ $(objFiles))
         endif
-    else
-	    @printf "$(nl)[LD] $@\n"
-	    $(v)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(objFiles) $(ldFlags))
     endif
 endif
 # ==============================================================================
