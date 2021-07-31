@@ -436,7 +436,7 @@ endif
 # ------------------------------------------------------------------------------
 
 # LIB_PROJ_DIRS entry sintax:
-# project_dir[:makefile][:target][:env_var1=env_var1][:env_var2=env_var2]...
+# project_dir[:makefile[:target[:env_var1=env_var1[:env_var2=env_var2]...]]]]
 
 LIB_PROJ_DIRS := $(call fn_unique,$(LIB_PROJ_DIRS))
 LIBS          := $(call fn_unique,$(LIBS))
