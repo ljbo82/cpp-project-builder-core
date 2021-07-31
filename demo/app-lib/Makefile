@@ -18,11 +18,11 @@ PROJ_NAME = app-lib
 PROJ_TYPE = app
 
 LIB_PROJ_DIRS += lib/libA
-LIB_PROJ_DIRS += lib/libB
 
-#NOTE:
-# libB depends on libC (which, in turn depends on libD). Transient dependencies
-# are handled automatically!
+# lib/libB depends on lib/libC (which in turn has its own dependencies but it
+# is not required to declare all of them here because gcc-project-builder
+# will resolve them internally).
+LIB_PROJ_DIRS += lib/libB
 
 include ../../project.mk
 

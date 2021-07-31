@@ -434,12 +434,18 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+# Declared dependencies on linker-wide libraries
+LIBS := $(call fn_unique,$(LIBS))
 
-# LIB_PROJ_DIRS entry sintax:
-# project_dir[:makefile[:target[:env_var1=env_var1[:env_var2=env_var2]...]]]]
-
-LIB_PROJ_DIRS := $(call fn_unique,$(LIB_PROJ_DIRS))
-LIBS          := $(call fn_unique,$(LIBS))
+# Declared dependency on library projects
+#
+# Entry sintax:
+#     project_dir[:makefile[:target[:env_var1=env_var1[:env_var2=env_var2]...]]]]
+#
+# Default values:
+#     makefile: Makefile
+#     target: none (use makefile's default target)
+LIB_PROJ_DIRS := $(strip $(call fn_unique,$(LIB_PROJ_DIRS)))
 
 ifneq ($(LIB_PROJ_DIRS),)
     ldFlags      += -L$(O)/dist/$(HOST)/lib

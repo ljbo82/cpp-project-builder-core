@@ -17,6 +17,8 @@
 PROJ_NAME := B
 PROJ_TYPE := lib
 
+# ../libC depends on ../libD, but it is not required to declare it here
+# because gcc-project-builder will resolve it internally.
 LIB_PROJ_DIRS += ../libC
 
 include ../../../../project.mk

@@ -62,13 +62,13 @@ When present, these directories (relative to project's Makefile) are used (by de
 * **src/**
 
   Contains source files and private headers used by application during build. Any kind of file can be placed into this directory, but only source files with standard filename extensions are compiled (case-sensitive): **.c** (C source file), **.cpp** (C++ source file), and **.S** (Assembly source file). This directory is also added to compiler's include search path.
-  
+
   Additional source directories can be added to the project through [`SRC_DIRS`](#SRC_DIRS) [input variable](#input-variables).
 
 * **include/**
 
   Contains public includes (header files) used by application during build. If project is a library, header files (**\*.h** or **\*.hpp**) inside this directory will be copied to [distribution directory](#dir-dist). Any kind of file can be placed into this directory, but no compilation will be performed at all. This directory is added to compiler's include search path.
-  
+
   Additional include directories can be added to the project through [`INCLUDE_DIRS`](#INCLUDE_DIRS) and [`DIST_INCLUDE_DIRS`](#DIST_INCLUDE_DIRS) [input variables](#input-variables).
 
 > **Skip default source & include directories**
@@ -80,7 +80,7 @@ When present, these directories (relative to project's Makefile) are used (by de
 All generated files are placed (by default) into **output/** base directory. This directory can be changed through [`O`](#O) enviroment variable.
 
 > **Version control**
-> 
+>
 > Output base directory shall be ignored by your source code version control system.
 
 Inside output base directory (**`$(O)/`**) you may find some directories according to project type (note that listed directories depends on [`HOST`](#HOST) [variable](#input-variables)):
@@ -104,7 +104,7 @@ Inside output base directory (**`$(O)/`**) you may find some directories accordi
   * **`$(O)/dist/$(HOST)/$(DIST_DIR)/lib/`**
 
     If project builds a library (either static o shared), resulting binary is placed into this directory.
-  
+
   * **`$(O)/dist/$(HOST)/$(DIST_DIR)/include/`**
 
     If project builds a library (either static of shared), companion headers are placed into this directory.
@@ -247,7 +247,7 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Extra flags to be passed to the linker. 
+  Extra flags to be passed to the linker.
 
   NOTE: Linker executable will be either `$(CROSS_COMPILE)gcc` (if project contains only C source files) or `$(CROSS_COMPILE)g++` (if project containts C++ source files).
 
@@ -304,7 +304,7 @@ Below are the list the commonly used input variables:
   * Default value: _(empty)_
 
   Commands to be executed during [post-build](#post-build) [target](#targets).
-  
+
   NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
 <a name="POST_BUILD_DEPS"></a>
@@ -322,7 +322,7 @@ Below are the list the commonly used input variables:
   * Default value: _(empty)_
 
   Commands to be executed during [pre-dist](#pre-dist) [target](#targets).
-  
+
   NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
 <a name="PRE_DIST_DEPS"></a>
@@ -348,7 +348,7 @@ Below are the list the commonly used input variables:
   * Default value: _(empty)_
 
   Commands to be executed during [post-dist](#post-dist) [target](#targets).
-  
+
   NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
 
 <a name="POST_DIST_DEPS"></a>
@@ -381,7 +381,18 @@ Below are the list the commonly used input variables:
   * Common declaration: Makefile
   * Default value: _(empty)_
 
-  Lists the directories containing Makefiles used to build a library project, which a project depends on. Directories shall point to library projects (`PROJ_TYPE == lib`).
+  Lists dependencies on library projects (which uses gcc-project-builder for building).
+
+  Each entry has the following syntax (items inside brackets are optional):
+
+  ```
+  project_dir[:makefile[:target[:env_var1=env_var1[:env_var2=env_var2]...]]]]
+  ```
+
+  * `project_dir`: Project directory containing a **Makefile** using gcc-project-builder.
+  * `makefile`: [Optional] Name of the makefile to be used (defaults to **Makefile**).
+  * `target`: [Optional] Name of the target to be called (defaults value is empty).
+  * `envX_var`: [Optional] Optional environment variables passed to `make` project.
 
 ### Advanced input variables
 
@@ -567,12 +578,12 @@ Below are the list the input variables for advanced usage:
 * **pre-clean**
 
   Executes all comands declared in [`PRE_CLEAN`](#PRE_CLEAN) variable.
-  
+
 <a name="post-clean"></a>
 * **post-clean**
 
   Executes all comands declared in [`POST_CLEAN`](#POST_CLEAN) variable.
-  
+
 <a name="build"></a>
 * **build**
 
@@ -582,7 +593,7 @@ Below are the list the input variables for advanced usage:
 * **pre-build**
 
   Executes all comands declared in [`PRE_BUILD`](#PRE_BUILD) variable. This target is preceeded by dependencies declared in [`PRE_BUILD_DEPS`](#PRE_BUILD_DEPS) variable.
-  
+
 <a name="post-build"></a>
 * **post-build**
 
@@ -598,7 +609,7 @@ Below are the list the input variables for advanced usage:
 * **pre-dist**
 
   Executes all comands declared in [`PRE_DIST`](#PRE_DIST) variable. This target is preceeded by dependencies declared in [`PRE_DIST_DEPS`](#PRE_DIST_DEPS) variable.
-  
+
 <a name="post-dist"></a>
 * **post-dist**
 
