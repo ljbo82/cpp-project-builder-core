@@ -494,11 +494,11 @@ ldFlags += $(foreach lib,$(libs),-l$(lib))
 ifeq ($(__R),0)
 # Syntax: $(call libProjDeps_template,libProjDirEntry,libProjDirProjName libProjDirArtifactName)
 define libProjDeps_template =
-buildDeps += __lib_($(call fn_word,$(2),1)
+buildDeps += __lib_$(call fn_word,$(2),1)
 
 # Library BUILD_DEPS ===========================================================
-.PHONY: __lib_($(call fn_word,$(2),1)
-__lib_($(call fn_word,$(2),1):
+.PHONY: __lib_$(call fn_word,$(2),1)
+__lib_$(call fn_word,$(2),1):
 	@printf "$$(nl)[LIBS] $$(O)/build/$$(HOST)/lib/$(call fn_word,$(2),1)\n"
 	$$(v)$$(MAKE) -C $(call __fn_lib_proj_dir,$(1)) $(call __fn_lib_proj_makefile,$(1)) $(call __fn_lib_proj_target,$(1)) O=$(abspath $(O)) BUILD_DIR=lib/$(call fn_word,$(2),1) HOST=$(HOST) DEBUG=$(DEBUG) $(call __fn_lib_proj_environment,$(1))
 # ==============================================================================
