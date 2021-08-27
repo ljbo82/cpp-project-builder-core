@@ -34,9 +34,14 @@ docOutputDir := $(O)/doc
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-ifeq ($(DOXYFILE), )
+ifeq ($(DOXYFILE),)
     DOXYFILE := Doxyfile
 endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+__doxyargs := $(strip OUTPUT_DIRECTORY=$(docOutputDir) $(DOXYARGS))
+__doxyargs := $(foreach arg,$(__doxyargs),echo cat $(arg); )
 # ------------------------------------------------------------------------------
 
 # DOC ==========================================================================
@@ -55,7 +60,7 @@ post-doc: pre-doc $(DOC_DEPS) $(POST_DOC_DEPS)
 	    $(error [ERROR] $(DOXYFILE) not found)
     else
 	    @mkdir -p $(docOutputDir)
-	    $(v)( cat $(DOXYFILE); echo OUTPUT_DIRECTORY = $(docOutputDir) ) | doxygen -
+	    $(v)( cat $(DOXYFILE); $(__doxyargs) ) | doxygen -
         ifneq ($(POST_DOC), )
 	        $(v)$(POST_DOC)
         endif
@@ -63,4 +68,3 @@ post-doc: pre-doc $(DOC_DEPS) $(POST_DOC_DEPS)
 # ==============================================================================
 
 endif # _include_doxygen_mk
-

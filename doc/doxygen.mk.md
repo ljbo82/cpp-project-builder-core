@@ -8,6 +8,7 @@ This file provides standard targets to generate source documentation based on [d
 |---------------------------------------------|-----------|------------|-----------------------------------------------------------------------------------------|
 | <a name="O"></a>`O`                         | no        | `output`   | Base directory where generated documentation shall be placed into **doc/** subdirectory |
 | <a name="DOXYFILE"></a>`DOXYFILE`           | no        | `Doxyfile` | Path of doxygen configuration file                                                      |
+| <a name="DOXYARGS"></a>`DOXYARGS`           | no        | _(empty)_  | Doxyfile variables to be passed to doxygen command (syntax: `VAR_NAME=VAR_VALUE`)       |
 | <a name="DOC_DEPS"></a>`DOC_DEPS`           | no        | _(empty)_  | Project-specific depdencies for internal doc rules                                      |
 | <a name="PRE_DOC"></a>`PRE_DOC`             | no        | _(empty)_  | Commands to be executed on [pre-doc](#pre-doc)                                          |
 | <a name="PRE_DOC_DEPS"></a>`PRE_DOC_DEPS`   | no        | _(empty)_  | Project-specific depdencies for [pre-doc](#pre-doc) target                              |
