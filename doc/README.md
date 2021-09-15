@@ -500,6 +500,14 @@ Below are the list the input variables for advanced usage:
 
   List of tokens in format `distFile:srcFile` where `distFile` is a path inside `$(O)/dist/$(HOST)/$(DIST_DIR)` and `srcFile` is a path inside project's tree which will be copied into `distFile`. This variable is useful to add custom files into distribution directory.
 
+<a name="DIST_DIRS"></a>
+* **`DIST_DIRS`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value: _(empty)_
+
+  List of tokens in format `distDir:srcDir` where `distDir` is a directory inside `$(O)/dist/$(HOST)/$(DIST_DIR)` and `srcDir` is a path inside project's tree whose contents will be copied into `distDir`. This variable is useful to add custom files/directories into distribution directory.
+
 <a name="SKIP_DEFAULT_SRC_DIR"></a>
 * **`SKIP_DEFAULT_SRC_DIR`**
   * Mandatory: no

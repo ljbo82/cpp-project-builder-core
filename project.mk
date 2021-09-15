@@ -582,6 +582,13 @@ ldFlags  := $(strip $(ldFlags) $(LDFLAGS))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+DIST_DIRS := $(strip $(sort $(DIST_DIRS)))
+ifeq ($(__R),0)
+    distFiles += $(foreach tmpDistDir,$(DIST_DIRS),$(shell cd $(call fn_cut,$(tmpDistDir),:,2);find . -type f 2> /dev/null | sed 's:./::' | xargs -I {} echo $(call fn_cut,$(tmpDistDir),:,1)/\{\}:$(call fn_cut,$(tmpDistDir),:,2)/\{\}))
+endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 distFiles := $(strip $(sort $(distFiles) $(DIST_FILES)))
 
 ifeq ($(__R),0)
