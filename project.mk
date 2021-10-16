@@ -298,8 +298,10 @@ endif
 ifeq ($(__R),0)
     # Source file scanning is not required on recursive calls
     SRC_DIRS := $(sort $(SRC_DIRS))
+    SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
     $(foreach srcDir,$(SRC_DIRS),$(if $(call fn_subdir,$(srcDir),$(shell pwd)),,$(error Source directory ($(srcDir)) is outside project tree)))
     srcFiles := $(sort $(strip $(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f -name '*.c' -or -name '*.cpp' -or -name '*.S' 2> /dev/null))))
+    srcFiles := $(filter-out $(SKIPPED_SRC_FILES),$(srcFiles))
 endif
 # ------------------------------------------------------------------------------
 
