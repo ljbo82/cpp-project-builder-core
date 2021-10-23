@@ -14,22 +14,22 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-ifndef _include_common_mk
-_include_common_mk := 1
+ifndef __include_common_mk__
+__include_common_mk__ := 1
 
 defaultV := 0
 
-ifeq ($(V), )
+ifeq ($(V),)
     V := $(defaultV)
 endif
 
-ifneq ($(V), 0)
-    ifneq ($(V), 1)
+ifneq ($(V),0)
+    ifneq ($(V),1)
         $(error ERROR: Invalid value for V: $(V))
     endif
 endif
 
-ifeq ($(V), 0)
+ifeq ($(V),0)
     v  := @
     nl :=
 else
@@ -37,4 +37,4 @@ else
     nl := \n
 endif
 
-endif # _include_common_mk
+endif # __include_common_mk__

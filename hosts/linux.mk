@@ -14,11 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-ifndef _include_hosts_linux_mk
-_include_hosts_linux_mk := 1
+ifndef __include_hosts_linux_mk__
+__include_hosts_linux_mk__ := 1
 
 # ------------------------------------------------------------------------------
-ifeq ($(_project_mk_dir),)
+ifeq ($(__project_mk_dir__),)
     $(error project.mk not included yet)
 endif
 # ------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ ifeq ($(CROSS_COMPILE),)
                     cFlags   += -m32
                     ldFlags  += -m32
                 else
-                    _preBuildError := Missing CROSS_COMPILE for HOST '$(HOST)'
+                    __preBuildError__ := Missing CROSS_COMPILE for HOST '$(HOST)'
                 endif
             else ifeq ($(hostArch),x64)
                 ifeq ($(nativeArch),x86)
@@ -43,10 +43,10 @@ ifeq ($(CROSS_COMPILE),)
                     cFlags   += -m64
                     ldFlags  += -m64
                 else
-                    _preBuildError := Missing CROSS_COMPILE for HOST '$(HOST)'
+                    __preBuildError__ := Missing CROSS_COMPILE for HOST '$(HOST)'
                 endif
             else
-                _preBuildError := Missing CROSS_COMPILE for HOST '$(HOST)'
+                __preBuildError__ := Missing CROSS_COMPILE for HOST '$(HOST)'
             endif
         endif
     endif
@@ -55,13 +55,13 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(PROJ_TYPE),app)
-    __postTargets := 0
+    __postTargets__ := 0
     ifeq ($(ARTIFACT_NAME),)
         ARTIFACT_NAME := $(ARTIFACT_BASE_NAME)
     endif
 else
     ifeq ($(LIB_TYPE),static)
-        __postTargets := 0
+        __postTargets__ := 0
         ifeq ($(ARTIFACT_NAME),)
             ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).a
         endif
@@ -69,21 +69,21 @@ else
         ifeq ($(ARTIFACT_NAME),)
             ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).so.$(projVersionMinor).$(projVersionPatch)
             ifneq ($(srcFiles),)
-                __postTargets := 1
-                postBuildDeps += $(buildDir)/lib$(ARTIFACT_BASE_NAME).so
-                postDistDeps  += $(distDir)/lib/lib$(ARTIFACT_BASE_NAME).so
+                __postTargets__ := 1
+                postBuildDeps   += $(buildDir)/lib$(ARTIFACT_BASE_NAME).so
+                postDistDeps    += $(distDir)/lib/lib$(ARTIFACT_BASE_NAME).so
             else
-                __postTargets := 0
+                __postTargets__ := 0
             endif
         else
-            __postTargets := 0
+            __postTargets__ := 0
         endif
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # postBuildDeps ================================================================
-ifeq ($(__postTargets),1)
+ifeq ($(__postTargets__),1)
 $(buildDir)/lib$(ARTIFACT_BASE_NAME).so: $(buildDir)/$(ARTIFACT_NAME)
 	@printf "$(nl)[BUILD] $@\n"
 	$(v)ln -sf $(notdir $<) $@
@@ -91,7 +91,7 @@ endif
 # ==============================================================================
 
 # postDistDeps =================================================================
-ifeq ($(__postTargets),1)
+ifeq ($(__postTargets__),1)
 $(distDir)/lib/lib$(ARTIFACT_BASE_NAME).so: $(buildDir)/lib$(ARTIFACT_BASE_NAME).so
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
@@ -99,6 +99,6 @@ $(distDir)/lib/lib$(ARTIFACT_BASE_NAME).so: $(buildDir)/lib$(ARTIFACT_BASE_NAME)
 endif
 # ==============================================================================
 
-undefine __postTargets
+undefine __postTargets__
 
-endif #_include_hosts_linux_mk
+endif #__include_hosts_linux_mk__

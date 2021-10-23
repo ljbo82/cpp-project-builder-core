@@ -14,11 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-ifndef _include_hosts_windows_mk
-_include_hosts_windows_mk := 1
+ifndef __include_hosts_windows_mk__
+__include_hosts_windows_mk__ := 1
 
 # ------------------------------------------------------------------------------
-ifeq ($(_project_mk_dir),)
+ifeq ($(__project_mk_dir__),)
     $(error project.mk not included yet)
 endif
 # ------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ ifeq ($(CROSS_COMPILE),)
         ifeq ($(hostArch),x86)
             CROSS_COMPILE := i686-w64-mingw32-
         else
-            _preBuildError := Missing CROSS_COMPILE for HOST '$(HOST)'
+            __preBuildError__ := Missing CROSS_COMPILE for HOST '$(HOST)'
         endif
     endif
 endif
@@ -39,13 +39,13 @@ endif
 
 # ------------------------------------------------------------------------------
 ifeq ($(PROJ_TYPE),app)
-    __postTargets := 0
+    __postTargets__ := 0
     ifeq ($(ARTIFACT_NAME),)
         ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).exe
     endif
 else
     ifeq ($(LIB_TYPE),static)
-        __postTargets := 0
+        __postTargets__ := 0
         ifeq ($(ARTIFACT_NAME),)
             ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).a
         endif
@@ -53,23 +53,23 @@ else
         ifeq ($(ARTIFACT_NAME),)
             ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).dll
             ifneq ($(srcFiles),)
-                __postTargets := 1
-                ldFlags       += -Wl,--out-implib,$(buildDir)/$(ARTIFACT_NAME).lib
-                ldFlags       += -Wl,--output-def,$(buildDir)/$(ARTIFACT_NAME).def
-                postDistDeps  += $(distDir)/lib/$(ARTIFACT_NAME).lib
-                postDistDeps  += $(distDir)/lib/$(ARTIFACT_NAME).def
+                __postTargets__ := 1
+                ldFlags         += -Wl,--out-implib,$(buildDir)/$(ARTIFACT_NAME).lib
+                ldFlags         += -Wl,--output-def,$(buildDir)/$(ARTIFACT_NAME).def
+                postDistDeps    += $(distDir)/lib/$(ARTIFACT_NAME).lib
+                postDistDeps    += $(distDir)/lib/$(ARTIFACT_NAME).def
             else
-                __postTargets := 0
+                __postTargets__ := 0
             endif
         else
-            __postTargets := 0
+            __postTargets__ := 0
         endif
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # postDistDeps =================================================================
-ifeq ($(__postTargets),1)
+ifeq ($(__postTargets__),1)
 $(distDir)/lib/$(ARTIFACT_NAME).lib: $(buildDir)/$(ARTIFACT_NAME).lib
 	@printf "$(nl)[DIST] $@\n"
 	@mkdir -p $(distDir)/lib
@@ -82,6 +82,6 @@ $(distDir)/lib/$(ARTIFACT_NAME).def: $(buildDir)/$(ARTIFACT_NAME).def
 endif
 # ==============================================================================
 
-undefine __postTargets
+undefine __postTargets__
 
-endif #_include_hosts_windows_mk
+endif #__include_hosts_windows_mk__

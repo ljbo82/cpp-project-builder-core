@@ -14,20 +14,16 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-ifndef _include_doxygen_mk
-_include_doxygen_mk := 1
+ifndef __include_doxygen_mk__
+__include_doxygen_mk__ := 1
 
 # ------------------------------------------------------------------------------
-_doxygen_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-include $(_doxygen_mk_dir)common.mk
+include $(dir $(lastword $(MAKEFILE_LIST)))common.mk
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 defaultDocOutputDirBase := output
-ifeq ($(O), )
+ifeq ($(O),)
     O := $(defaultDocOutputDirBase)
 endif
 docOutputDir := $(O)/doc
@@ -40,8 +36,8 @@ endif
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-__doxyargs := $(strip OUTPUT_DIRECTORY=$(docOutputDir) $(DOXYARGS))
-__doxyargs := $(foreach arg,$(__doxyargs),echo cat $(arg); )
+__doxyargs__ := $(strip OUTPUT_DIRECTORY=$(docOutputDir) $(DOXYARGS))
+__doxyargs__ := $(foreach arg,$(__doxyargs__),echo cat $(arg); )
 # ------------------------------------------------------------------------------
 
 # DOC ==========================================================================
@@ -50,21 +46,18 @@ doc: post-doc
 
 .PHONY: pre-doc
 pre-doc: $(PRE_DOC_DEPS)
-    ifneq ($(PRE_DOC), )
-	    $(v)$(PRE_DOC)
-    endif
 
-.PHONY: post-doc
-post-doc: pre-doc $(DOC_DEPS) $(POST_DOC_DEPS)
+.PHONY: __doc__
+__doc__: pre-doc $(DOC_DEPS)
     ifeq ($(wildcard $(DOXYFILE)), )
 	    $(error [ERROR] $(DOXYFILE) not found)
     else
 	    @mkdir -p $(docOutputDir)
-	    $(v)( cat $(DOXYFILE); $(__doxyargs) ) | doxygen -
-        ifneq ($(POST_DOC), )
-	        $(v)$(POST_DOC)
-        endif
+	    $(v)( cat $(DOXYFILE); $(__doxyargs__) ) | doxygen -
     endif
+
+.PHONY: post-doc
+post-doc: __doc__ $(POST_DOC_DEPS)
 # ==============================================================================
 
-endif # _include_doxygen_mk
+endif # __include_doxygen_mk__

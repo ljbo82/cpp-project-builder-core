@@ -1,5 +1,4 @@
 gcc-project-builder TODO
 
-* Document HOSTS section
-* Document PHONY_LIBS var
+* Document "Cross Compilations" section
 * Document jni.mk

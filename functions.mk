@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-ifndef _include_functions_mk
-_include_functions_mk := 1
+ifndef __include_functions_mk__
+__include_functions_mk__ := 1
 
 # Cuts a string based on given delimiter
 # Syntax: $(call fn_cut,base_string,delimiter,index)
@@ -65,4 +65,4 @@ fn_word = $(call fn_cut,$(1), ,$(2))
 # Syntax: $(call fn_unique,list_of_words)
 fn_unique = $(strip $(if $(1),$(firstword $(1)) $(call fn_unique,$(filter-out $(firstword $(1)),$(1)))))
 
-endif # _include_functions_mk
+endif # __include_functions_mk__
