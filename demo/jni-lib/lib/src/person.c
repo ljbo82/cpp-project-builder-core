@@ -34,6 +34,10 @@ struct __person {
 	int  age;
 };
 
+void person_init() {}
+
+void person_deinit() {}
+
 person_t* person_new(cstring_t name, int age) {
 	person_t* person = malloc(sizeof(person_t));
 	__DEBUG("[NATIVE] person_new");

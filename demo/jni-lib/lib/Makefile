@@ -14,10 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-PROJ_NAME    := jni-demo
+PROJ_NAME    := mylib
+PROJ_TYPE    := lib
+LIB_TYPE     := shared
 PROJ_VERSION := 0.1.0
 
-LDFLAGS +=-Wl,-rpath,lib
-LIB_PROJ_DIRS += ../lib
-
-include ../../../jni.mk
+include ../../../project.mk

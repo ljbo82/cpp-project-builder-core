@@ -20,53 +20,76 @@ package com.github.ljbo82;
 public class JniPerson {
 	// CLASS SCOPE =============================================================
 	static {
-		Jni.init();
+		JniLib.init();
 	}
 
-	private static native long person_new(String name, int age);
+	private static native long native_new(String name, int age);
 
-	private static native void person_delete(long person);
+	private static native void native_delete(long person);
 
-	private static native String person_get_name(long person);
+	private static native String native_get_name(long person);
 
-	private static native void person_set_name(long person, String name);
+	private static native void native_set_name(long person, String name);
 
-	private static native int person_get_age(long person);
+	private static native int native_get_age(long person);
 
-	private static native void person_set_age(long person, int age);
+	private static native void native_set_age(long person, int age);
 	// =========================================================================
 
-	private final long nativePersonPtr;
+	private long nativePersonPtr;
+
+	private void checkDisposed() {
+		if (nativePersonPtr == 0)
+			throw new NullPointerException("Instance already disposed");
+	}
 
 	public JniPerson(String name, int age) {
-		nativePersonPtr = person_new(name, age);
+		nativePersonPtr = native_new(name, age);
+	}
+
+	public void dispose() {
+		checkDisposed();
+
+		native_delete(nativePersonPtr);
+		nativePersonPtr = 0;
 	}
 
 	@Override
 	protected void finalize() throws Throwable {
-		person_delete(nativePersonPtr);
+		dispose();
 	}
 
 	public String getName() {
-		return person_get_name(nativePersonPtr);
+		checkDisposed();
+
+		return native_get_name(nativePersonPtr);
 	}
 
 	public JniPerson setName(String name) {
-		person_set_name(nativePersonPtr, name);
+		checkDisposed();
+
+		native_set_name(nativePersonPtr, name);
 		return this;
 	}
 
 	public int getAge() {
-		return person_get_age(nativePersonPtr);
+		checkDisposed();
+
+		return native_get_age(nativePersonPtr);
 	}
 
 	public JniPerson setAge(int age) {
-		person_set_age(nativePersonPtr, age);
+		checkDisposed();
+
+		native_set_age(nativePersonPtr, age);
 		return this;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("name: %s, age: %d", getName(), getAge());
+		if (nativePersonPtr == 0)
+			return "(DISPOSED INSTANCE)";
+
+		return String.format("name: %s, age: %d", native_get_name(nativePersonPtr), native_get_age(nativePersonPtr));
 	}
 }

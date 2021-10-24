@@ -15,17 +15,31 @@
     You should have received a copy of the GNU General Public License
     along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 */
-package com.github.ljbo82;
+#pragma once
 
-public class Jni {
-	private Jni() {}
+typedef struct __person person_t;
+typedef const char*     cstring_t;
 
-	private static boolean initialized = false;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-	public static synchronized void init() {
-		if (!initialized) {
-			LibLoader.load(".", "jnidemo0");
-			initialized = true;
-		}
-	}
+void person_init();
+
+void person_deinit();
+
+person_t* person_new(cstring_t name, int age);
+
+void person_delete(person_t* person);
+
+cstring_t person_get_name(person_t* person);
+
+int person_get_age(person_t* person);
+
+void person_set_name(person_t* person, cstring_t name);
+
+void person_set_age(person_t* person, int age);
+
+#ifdef __cplusplus
 }
+#endif

@@ -28,12 +28,12 @@ public class LibLoader {
 		OS = OperatingSystem.getNative();
 	}
 
-	public static void load(String dir, String basename) {
-		File libFile = new File(dir, OS.libPrefix + basename + OS.libSuffix);
+	public static void load(String dir, String libname) {
+		File libFile = new File(dir, OS.libPrefix + libname + OS.libSuffix);
 		System.load(libFile.getAbsolutePath());
 	}
 
-	public static void load(String basename) {
-		System.load(basename);
+	public static void load(String libname) {
+		System.loadLibrary(libname);
 	}
 }

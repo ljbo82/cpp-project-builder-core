@@ -15,10 +15,29 @@
     You should have received a copy of the GNU General Public License
     along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 */
-#include <com_github_ljbo82_JniVector2D.h>
+package com.github.ljbo82;
 
-#include <math.h>
+public class JniLib {
+	private JniLib() {}
 
-JNIEXPORT jdouble JNICALL Java_com_github_ljbo82_JniVector2D_vector_1get_1magnitude(JNIEnv* env, jclass cls, jdouble x, jdouble y) {
-	return sqrt(pow(x, 2) + pow(y, 2));
+	private static native void nativeInit();
+
+	private static native void nativeDeinit();
+
+	private static boolean initialized = false;
+
+	public static synchronized void init() {
+		if (!initialized) {
+			LibLoader.load("lib", "jni-demo0");
+			nativeInit();
+			initialized = true;
+		}
+	}
+
+	public static synchronized void deinit() {
+		if (initialized) {
+			nativeDeinit();
+			initialized = false;
+		}
+	}
 }

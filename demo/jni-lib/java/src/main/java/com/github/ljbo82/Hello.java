@@ -30,26 +30,16 @@ public class Hello {
 
 		System.out.println(tom.toString());
 		System.out.println(jerry.toString());
-	}
 
-	private static void runVector2D() {
-		JniVector2D v1 = new JniVector2D(1, 0);
-		JniVector2D v2 = new JniVector2D(0, 1);
-
-		System.out.println(v1.toString());
-		System.out.println(v2.toString());
-
-		v1.setX(3.2).setY(5.2);
-		v2.setX(-3.0);
-
-		System.out.println(v1.toString());
-		System.out.println(v2.toString());
+		tom.dispose();
+		jerry.dispose();
 	}
 
 	public static void main(String[] args) {
-		runPerson();
-		runVector2D();
-
-		System.gc(); // Causes finalize methods to be called on pending objects
+		try {
+			runPerson();
+		} finally {
+			JniLib.deinit();
+		}
 	}
 }

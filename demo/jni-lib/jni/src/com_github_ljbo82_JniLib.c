@@ -15,27 +15,13 @@
     You should have received a copy of the GNU General Public License
     along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 */
-#pragma once
+#include <com_github_ljbo82_JniLib.h>
+#include <person.h>
 
-typedef struct __person person_t;
-typedef const char*     cstring_t;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-person_t* person_new(cstring_t name, int age);
-
-void person_delete(person_t* person);
-
-cstring_t person_get_name(person_t* person);
-
-int person_get_age(person_t* person);
-
-void person_set_name(person_t* person, cstring_t name);
-
-void person_set_age(person_t* person, int age);
-
-#ifdef __cplusplus
+JNIEXPORT void JNICALL Java_com_github_ljbo82_JniLib_nativeInit(JNIEnv* env, jclass cls) {
+	person_init();
 }
-#endif
+
+JNIEXPORT void JNICALL Java_com_github_ljbo82_JniLib_nativeDeinit(JNIEnv* env, jclass cls) {
+	person_deinit();
+}

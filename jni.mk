@@ -14,81 +14,86 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-ifndef _include_jni_mk
-_include_jni_mk := 1
+ifndef __include_jni_mk__
+__include_jni_mk__ := 1
 
 # ------------------------------------------------------------------------------
-_jni_mk_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+__jni_mk_dir__ := $(dir $(lastword $(MAKEFILE_LIST)))
 # ------------------------------------------------------------------------------
 
-override PROJ_TYPE := lib
-override LIB_TYPE  := shared
-
-include $(_jni_mk_dir)/native_host.mk
-
-O ?= output
-
-ifeq ($(JDK_HOME),)
-    jni_mk_error := JDK_HOME not set
+# ------------------------------------------------------------------------------
+ifneq ($(PROJ_TYPE),)
+    ifneq ($(PROJ_TYPE), lib)
+        $(error Invalid PROJ_TYPE: $(PROJ_TYPE))
+    endif
+else
+    PROJ_TYPE := lib
 endif
+# ------------------------------------------------------------------------------
 
-ifneq ($(jni_mk_error),)
-    PRE_BUILD_DEPS += jni-mk-error
+# ------------------------------------------------------------------------------
+ifneq ($(LIB_TYPE),)
+    ifneq ($(LIB_TYPE), shared)
+        $(error Invalid LIB_TYPE: $(LIB_TYPE))
+    endif
+else
+     LIB_TYPE  := shared
 endif
+# ------------------------------------------------------------------------------
+include $(__jni_mk_dir__)/native_host.mk
 
 ifeq ($(nativeOS),)
     $(error Could not detect native operating system)
 else
     ifeq ($(nativeOS),windows)
-        jniPlatform := win32
+        jdkOS := win32
     else ifeq ($(nativeOS),linux)
-        jniPlatform := linux
+        jdkOS := linux
     else
         $(error Unsupported operating system: $(nativeOS))
     endif
 endif
+# ------------------------------------------------------------------------------
 
-OUTPUT_JAR_FILENAME ?= $(PROJ_NAME)-$(PROJ_VERSION).jar
-JAVA_SRC_DIR        ?= ../java/src/main/java
-JNI_OUTPUT_DIR      := $(O)/jni
-PRE_BUILD_DEPS      += $(JNI_OUTPUT_DIR)/$(OUTPUT_JAR_FILENAME)
-INCLUDE_DIRS        += $(JDK_HOME)/include $(JDK_HOME)/include/$(jniPlatform)
-INCLUDE_DIRS        += $(JNI_OUTPUT_DIR)/include
-
-include $(_jni_mk_dir)/project.mk
-
-ifneq ($(JDK_HOME),)
-    javac := $(JDK_HOME)/bin/javac
-    jar   := $(JDK_HOME)/bin/jar
-else
-    javac := javac
-    jar   := jar
+# ------------------------------------------------------------------------------
+ifeq ($(JDK_HOME),)
+    ifeq ($(shell sh -c "java -version > /dev/null 2>&1 && echo 1 || echo 0"),0)
+        __preBuildError__ := Could not detect JDK_HOME
+    else
+        include $(__jni_mk_dir__)/functions.mk
+        JDK_HOME := $(strip $(call fn_cut,$(shell java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home'),=,2))
+    endif
 endif
+# ------------------------------------------------------------------------------
 
-javaSrcFiles   := $(sort $(strip $(shell find $(JAVA_SRC_DIR) -type f -name '*.java' 2> /dev/null)))
-jniHeaderDeps  := $(foreach javaSrcFile,$(javaSrcFiles),$(JNI_OUTPUT_DIR)/include/$(subst /,_,$(javaSrcFile:$(JAVA_SRC_DIR)/%.java=%.h)))
+# ------------------------------------------------------------------------------
+JAVA_PROJ_DIR       ?= ../java
+JAVA_PROJ_BUILD_CMD ?= mvn package
+JAVA_PROJ_CLEAN_CMD ?= mvn clean
+JAVA_PROJ_JAR       ?= $(JAVA_PROJ_DIR)/target/$(PROJ_NAME)-$(PROJ_VERSION).jar
+JAVA_PROJ_SRC_DIR   ?= $(JAVA_PROJ_DIR)/src/main
+JNI_HEADERS_DIR     ?= $(JAVA_PROJ_DIR)/target/headers
+PRE_BUILD_DEPS      += $(JAVA_PROJ_JAR)
+CLEAN_DEPS          += jni-clean
+INCLUDE_DIRS        += $(JDK_HOME)/include $(JDK_HOME)/include/$(jdkOS) $(JNI_HEADERS_DIR)
 
-# $(call jniHeaderDep_template,dep)
-define jniHeaderDep_template=
-$(1)
-	@printf "$$(nl)[JAVAC] $$@\n"
-	@mkdir -p $$(JNI_OUTPUT_DIR)/class
-	@mkdir -p $$(JNI_OUTPUT_DIR)/include
-	$$(v)$$(javac) -d $$(JNI_OUTPUT_DIR)/class -cp $$(JAVA_SRC_DIR) -h $$(JNI_OUTPUT_DIR)/include $$<
-	@touch $$@
-endef
-
-$(foreach javaSrcFile,$(javaSrcFiles),$(eval $(call jniHeaderDep_template,$(JNI_OUTPUT_DIR)/include/$(subst /,_,$(javaSrcFile:$(JAVA_SRC_DIR)/%.java=%.h)): $(javaSrcFile))))
-
-ifneq ($(jni_mk_error),)
-.PHONY: jni-mk-error
-jni-mk-error:
-	$(error $(jni_mk_error))
+ifneq ($(wildcard $(JAVA_PROJ_DIR)/pom.xml),)
+    javaSrcFiles := $(JAVA_PROJ_DIR)/pom.xml
 endif
+javaSrcFiles := $(strip $(javaSrcFiles) $(sort $(shell find $(JAVA_PROJ_SRC_DIR) -type f 2> /dev/null)))
 
-$(JNI_OUTPUT_DIR)/$(OUTPUT_JAR_FILENAME): $(jniHeaderDeps)
-	@printf "$(nl)[JAR] $@\n"
-	@mkdir -p $(dir $@)
-	$(v)$(jar) -cf $@ -C $(JNI_OUTPUT_DIR)/class $(strip $(JAR_FLAGS)) .
+include $(__jni_mk_dir__)/project.mk
+# ------------------------------------------------------------------------------
 
-endif # _include_jni_mk
+# ------------------------------------------------------------------------------
+.PHONY: jni-clean
+jni-clean:
+	$(v)cd $(JAVA_PROJ_DIR) && $(JAVA_PROJ_CLEAN_CMD)
+
+$(JAVA_PROJ_JAR): $(javaSrcFiles)
+	@printf "$(nl)[JAVA] $@\n"
+	@mkdir -p $(distDir)
+	$(v)cd $(JAVA_PROJ_DIR) && JAVA_HOME=$(JDK_HOME) $(JAVA_PROJ_BUILD_CMD)
+	@ln -f $@ $(distDir)
+endif # __include_jni_mk__
+# ------------------------------------------------------------------------------
