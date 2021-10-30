@@ -153,8 +153,9 @@ ifeq ($(HOST),)
         $(error Cannot detect native architecture)
     endif
 
-    hostOS   := $(nativeOS)
-    hostArch := $(nativeArch)
+    hostOS        := $(nativeOS)
+    hostArch      := $(nativeArch)
+    __cleanHost__ := 0
 
     HOST := $(hostOS)-$(hostArch)
 else
@@ -162,8 +163,9 @@ else
         $(error Invalid HOST: $(HOST))
     endif
 
-    hostOS   := $(call fn_host_os,$(HOST))
-    hostArch := $(call fn_host_arch,$(HOST))
+    __cleanHost__ := 1
+    hostOS        := $(call fn_host_os,$(HOST))
+    hostArch      := $(call fn_host_arch,$(HOST))
 endif
 # ------------------------------------------------------------------------------
 
@@ -649,7 +651,11 @@ pre-clean: $(preCleanDeps)
 
 .PHONY: __clean__
 __clean__: pre-clean $(cleanDeps)
-	$(v)rm -rf $(O)
+    ifeq ($(__cleanHost__),0)
+	    $(v)rm -rf $(O)
+    else
+	    $(v)rm -rf $(buildDir) $(distDir)
+    endif
 
 .PHONY: post-clean
 post-clean: __clean__ $(postCleanDeps)
