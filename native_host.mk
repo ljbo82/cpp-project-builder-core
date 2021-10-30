@@ -14,18 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-ifndef _include_native_host_mk
-_include_native_host_mk := 1
+ifndef __include_native_host_mk__
+__include_native_host_mk__ := 1
 
 ifeq ($(OS), Windows_NT)
     nativeOS := windows
 else
-    __native_uname_s := $(shell uname -s)
-    ifeq ($(__native_uname_s), Linux)
+    __native_uname_s__ := $(shell uname -s)
+    ifeq ($(__native_uname_s__), Linux)
         nativeOS := linux
     endif
 endif
-undefine __native_uname_s
+undefine __native_uname_s__
 
 ifeq ($(nativeOS), windows)
     ifeq ($(PROCESSOR_ARCHITECTURE), AMD64)
@@ -36,16 +36,15 @@ ifeq ($(nativeOS), windows)
         endif
     endif
 else
-    __native_uname_m := $(shell uname -m)
-    ifeq ($(__native_uname_m), x86_64)
+    __native_uname_m__ := $(shell uname -m)
+    ifeq ($(__native_uname_m__), x86_64)
         nativeArch := x64
     else
-        ifneq ($(filter %86, $(__native_uname_m)),)
+        ifneq ($(filter %86, $(__native_uname_m__)),)
             nativeArch := x86
         endif
     endif
 endif
-undefine __native_uname_m
+undefine __native_uname_m__
 
-endif # _include_native_host_mk
-
+endif # __include_native_host_mk__

@@ -14,27 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-ifndef __include_common_mk__
-__include_common_mk__ := 1
+PROJ_NAME    := mylib
+PROJ_TYPE    := lib
+LIB_TYPE     := shared
+PROJ_VERSION := 0.1.0
 
-defaultV := 0
-
-ifeq ($(V),)
-    V := $(defaultV)
-endif
-
-ifneq ($(V),0)
-    ifneq ($(V),1)
-        $(error ERROR: Invalid value for V: $(V))
-    endif
-endif
-
-ifeq ($(V),0)
-    v  := @
-    nl :=
-else
-    v  :=
-    nl := \n
-endif
-
-endif # __include_common_mk__
+include ../../../project.mk

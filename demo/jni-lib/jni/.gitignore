@@ -1,0 +1,7 @@
+/output/
+/.settings/
+/.cproject
+/.project
+/nbproject/
+.DS_Store
+

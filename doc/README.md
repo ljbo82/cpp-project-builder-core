@@ -11,7 +11,7 @@ For details, check [official repository](https://github.com/ljbo82/gcc-project-b
 * [Usage](#usage)
 * [Default source directories](#default-source-directories)
 * [Output directories](#output-directories)
-* [Hosts](#hosts)
+* [Cross compilations](#cross-compilations)
 * [Input variables](#input-variables)
   * [Common input variables](#common-input-variables)
   * [Advanced input variables](#advanced-input-variables)
@@ -25,6 +25,14 @@ For details, check [official repository](https://github.com/ljbo82/gcc-project-b
 ## License
 
 gcc-project-builder is distributed under version 2 of the General Public License. Please see the [LICENSE](../LICENSE) file for details on copying and distribution.
+
+> **Usage in closed-source projects**
+>
+> A project using 'gcc-project-builder' in order to compile its source files
+is NOT considered a derivative work, therefore it is not obligated to
+comply with GPL V2 terms.
+>
+> Although, creating a custom build system project using gcc-project-builder IS CONSIDERED a derivative work, therefore the new build system project must comply with GPL V2 terms.
 
 ## Cloning
 
@@ -113,7 +121,8 @@ Inside output base directory (**`$(O)/`**) you may find some directories accordi
 
     Companion headers must have either **.h** or **.hpp** filename extensions.
 
-## Hosts
+<a name="cross-compilations"></a>
+## Cross compilations
 
 _To be documented_
 
@@ -191,7 +200,7 @@ Below are the list the commonly used input variables:
 
   Sets the name which identifies the host for build artifacts (used for cross-compiling).
 
-  The value must follow the syntax `<os>-<arch>`. For more details, see [hosts](#hosts) section.
+  The value must follow the syntax `<os>-<arch>`. For more details, see [cross compilations](#cross-compilations) section.
 
 <a name="INCLUDE_DIRS"></a>
 * **`INCLUDE_DIRS`**
@@ -251,122 +260,6 @@ Below are the list the commonly used input variables:
 
   NOTE: Linker executable will be either `$(CROSS_COMPILE)gcc` (if project contains only C source files) or `$(CROSS_COMPILE)g++` (if project containts C++ source files).
 
-<a name="PRE_CLEAN"></a>
-* **`PRE_CLEAN`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Commands to be executed during [pre-clean](#pre-clean) [target](#targets).
-
-  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
-
-<a name="POST_CLEAN"></a>
-* **`POST_CLEAN`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Commands to be executed during [post-clean](#post-clean) [target](#targets).
-
-  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
-
-<a name="PRE_BUILD"></a>
-* **`PRE_BUILD`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Commands to be executed during [pre-build](#pre-build) [target](#targets).
-
-  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
-
-<a name="PREBUILD_DEPS"></a>
-* **`PRE_BUILD_DEPS`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Project-specific dependencies for [pre-build](#pre-build) [target](#targets).
-
-<a name="BUILD_DEPS"></a>
-* **`BUILD_DEPS`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Project-specific dependencies for [build](#build) [target](#targets).
-
-<a name="POST_BUILD"></a>
-* **`POST_BUILD`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Commands to be executed during [post-build](#post-build) [target](#targets).
-
-  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
-
-<a name="POST_BUILD_DEPS"></a>
-* **`POST_BUILD_DEPS`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Project-specific dependencies for [post-build](#post-build) [target](#targets).
-
-<a name="PRE_DIST"></a>
-* **`PRE_DIST`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Commands to be executed during [pre-dist](#pre-dist) [target](#targets).
-
-  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
-
-<a name="PRE_DIST_DEPS"></a>
-* **`PRE_DIST_DEPS`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Project-specific dependencies for [pre-dist](#pre-dist) [target](#targets).
-
-<a name="DIST_DEPS"></a>
-* **`DIST_DEPS`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Project-specific dependencies for [dist](#dist) [target](#targets).
-
-<a name="POST_DIST"></a>
-* **`POST_DIST`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Commands to be executed during [post-dist](#post-dist) [target](#targets).
-
-  NOTE: Commands must be delimited by shell command delimiter (usually `&&` or `;`).
-
-<a name="POST_DIST_DEPS"></a>
-* **`POST_DIST_DEPS`**
-  * Mandatory: no
-  * Common declaration: Makefile
-  * Default value: _(empty)_
-
-  Project-specific dependencies for [post-dist](#post-dist) [target](#targets).
-
-<a name="O"></a>
-* **`O`**
-  * Mandatory: no
-  * Common declaration: Environment
-  * Default value: `output`
-
-  Sets the name of the base [output directory](#output-directories) (relative to project Makefile directory), where all generated artifacts will be placed into.
-
 <a name="LIBS"></a>
 * **`LIBS`**
   * Mandatory: no
@@ -398,13 +291,93 @@ Below are the list the commonly used input variables:
 
 Below are the list the input variables for advanced usage:
 
+<a name="O"></a>
+* **`O`**
+  * Mandatory: no
+  * Common declaration: Environment
+  * Default value: `output`
+
+  Sets the name of the base [output directory](#output-directories) (relative to project Makefile directory), where all generated artifacts will be placed into.
+
+<a name="PRE_CLEAN_DEPS"></a>
+* **`PRE_CLEAN_DEPS`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value:  _(empty)_
+
+  Sets custom dependencies for [pre-clean](#pre-clean) target.
+
+<a name="CLEAN_DEPS"></a>
+* **`CLEAN_DEPS`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value:  _(empty)_
+
+  Sets custom dependencies for [clean](#clean) internal rules.
+
+<a name="POST_CLEAN_DEPS"></a>
+* **`POST_CLEAN_DEPS`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value:  _(empty)_
+
+  Sets custom dependencies for [post-clean](#post-clean) target.
+
+<a name="PRE_BUILD_DEPS"></a>
+* **`PRE_BUILD_DEPS`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value:  _(empty)_
+
+  Sets custom dependencies for [pre-build](#pre-build) target.
+
+<a name="BUILD_DEPS"></a>
+* **`BUILD_DEPS`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value:  _(empty)_
+
+  Sets custom dependencies for [build](#build) internal rules.
+
+<a name="POST_BUILD_DEPS"></a>
+* **`POST_BUILD_DEPS`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value:  _(empty)_
+
+  Sets custom dependencies for [post-build](#post-build) target.
+
+<a name="PRE_DIST_DEPS"></a>
+* **`PRE_DIST_DEPS`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value:  _(empty)_
+
+  Sets custom dependencies for [pre-dist](#pre-dist) target.
+
+<a name="DIST_DEPS"></a>
+* **`DIST_DEPS`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value:  _(empty)_
+
+  Sets custom dependencies for [dist](#dist) internal rules.
+
+<a name="POST_DIST_DEPS"></a>
+* **`POST_DIST_DEPS`**
+  * Mandatory: no
+  * Common declaration: Makefile
+  * Default value:  _(empty)_
+
+  Sets custom dependencies for [post-dist](#post-dist) target.
+
 <a name="BUILD_DIR"></a>
 * **`BUILD_DIR`**
   * Mandatory: no
   * Common declaration: Makefile
   * Default value:  _(empty)_
 
-  Sets name for a directory (inside `$(O)/build/$(HOST)`) where build artifacts shall be placed.
+  Sets the name of the directory (inside `$(O)/build/$(HOST)`) where build artifacts shall be placed.
 
 <a name="DIST_DIR"></a>
 * **`DIST_DIR`**
@@ -412,7 +385,7 @@ Below are the list the input variables for advanced usage:
   * Common declaration: Makefile
   * Default value:  _(empty)_
 
-  Sets name for a directory (inside `$(O)/dist/$(HOST)`) where distribution artifacts shall be placed.
+  Sets the name of the directory (inside `$(O)/dist/$(HOST)`) where distribution artifacts shall be placed.
 
 <a name="VARS"></a>
 * **`VARS`**
@@ -568,9 +541,11 @@ Below are the list the input variables for advanced usage:
 
 ## Make targets
 
-**project.mk** provides standard targets used for almost all kind of C/C++ projects:
+**project.mk** provides standard targets used for almost all kind of C/C++ projects.
 
-![Targets overview](project_mk_targets.png)
+Following are described all targets and their dependencies:
+
+![Target overview](project_mk_targets.png)
 
 <a name="all"></a>
 * **all**
@@ -580,55 +555,53 @@ Below are the list the input variables for advanced usage:
 <a name="clean"></a>
 * **clean**
 
-  Removes all compiled artifacts. It is preceeded by [pre-clean](#pre-clean) and followed by [post-clean](#post-clean). Internal cleaning rules basically, removes the [base output directory](#output-directories).
+  Removes all compiled artifacts. Its internal rules are preceeded by [pre-clean](#pre-clean) and followed by [post-clean](#post-clean). Internal clean rules' dependencies are declared through [`CLEAN_DEPS`](#CLEAN_DEPS) variable (it basically, removes the [base output directory](#output-directories)).
 
-<a name="pre-clean"></a>
-* **pre-clean**
+    <a name="pre-clean"></a>
+    * **pre-clean**
 
-  Executes all comands declared in [`PRE_CLEAN`](#PRE_CLEAN) variable.
+    Its dependencies are declared through [`PRE_CLEAN_DEPS`](#PRE_CLEAN_DEPS) variable.
 
-<a name="post-clean"></a>
-* **post-clean**
+    <a name="post-clean"></a>
+    * **post-clean**
 
-  Executes all comands declared in [`POST_CLEAN`](#POST_CLEAN) variable.
+    Its dependencies are declared through [`POST_CLEAN_DEPS`](#POST_CLEAN_DEPS) variable.
 
 <a name="build"></a>
 * **build**
 
-  Compiles all source files and generate target binary (executable or library). Internal build rules are preceeded by [pre-build](#pre-build) target and is is followed by [post-build](#post-build) target.
+  Compiles all source files and generate target binary (executable or library). Its internal rules are preceeded by [pre-build](#pre-build) and followed by [post-build](#post-build). Internal build rules' dependencies are declared through [`BUILD_DEPS`](#BUILD_DEPS) variable.
 
-<a name="pre-build"></a>
-* **pre-build**
+    <a name="pre-build"></a>
+    * **pre-build**
 
-  Executes all comands declared in [`PRE_BUILD`](#PRE_BUILD) variable. This target is preceeded by dependencies declared in [`PRE_BUILD_DEPS`](#PRE_BUILD_DEPS) variable.
+    Its dependencies are declared through [`PRE_BUILD_DEPS`](#PRE_BUILD_DEPS) variable.
 
-<a name="post-build"></a>
-* **post-build**
+    <a name="post-build"></a>
+    * **post-build**
 
-  Executes all comands declared in [`POST_BUILD`](#POST_BUILD) variable. This target is preceeded by dependencies declared in [`POST_BUILD_DEPS`](#POST_BUILD_DEPS) variable.
+    Its dependencies are declared through [`POST_BUILD_DEPS`](#POST_BUILD_DEPS) variable.
 
 
 <a name="dist"></a>
 * **dist**
 
-  Generate distribuition tree. It depends on [build](#build) target. Internal distribution rules are preceeded by [pre-dist](#pre-dist) target and is followed by [post-dist](#post-dist) target.
+  Generate distribuition tree. It depends on [build](#build) target and its internal rules are preceeded by [pre-dist](#pre-dist) and followed by [post-dist](#post-dist). Internal dist rules' dependencies are declared through [`DIST_DEPS`](#DIST_DEPS) variable.
 
-<a name="pre-dist"></a>
-* **pre-dist**
+    <a name="pre-dist"></a>
+    * **pre-dist**
 
-  Executes all comands declared in [`PRE_DIST`](#PRE_DIST) variable. This target is preceeded by dependencies declared in [`PRE_DIST_DEPS`](#PRE_DIST_DEPS) variable.
+    Its dependencies are declared through [`PRE_DIST_DEPS`](#PRE_DIST_DEPS) variable.
 
-<a name="post-dist"></a>
-* **post-dist**
+    <a name="post-dist"></a>
+    * **post-dist**
 
-  Executes all comands declared in [`POST_DIST`](#POST_DIST) variable. This target is preceeded by dependencies declared in [`POST_DIST_DEPS`](#POST_DIST_DEPS) variable.
+    Its dependencies are declared through [`POST_DIST_DEPS`](#POST_DIST_DEPS) variable.
 
 <a name="printvars"></a>
 * **printvars**
 
-  This target is used internally when solving dependencies. For general usage, this target is used mostly for debugging purposes.
-
-  List the values for variables selected through `VARS` environment variable.
+  This target is used mostly for debugging purposes. It prints the contents of the variables declared in enviroment variable`VARS`.
 
   For example, to get the value of both [`srcFiles`](#srcFiles) and [`objFiles`](#objFiles):
 

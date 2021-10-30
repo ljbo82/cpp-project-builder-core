@@ -14,15 +14,15 @@
 # You should have received a copy of the GNU General Public License
 # along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
 
-ifndef _include_git_mk
-_include_git_mk := 1
+ifndef __include_git_mk__
+__include_git_mk__ := 1
 
-ifeq ($(REPO_DIR), )
+ifeq ($(REPO_DIR),)
     REPO_DIR := .
-endif 
+endif
 
-__gitRepoAvailable := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1; echo $$?)
-ifeq ($(__gitRepoAvailable), 0)
+__gitRepoAvailable__ := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1; echo $$?)
+ifeq ($(__gitRepoAvailable__), 0)
     gitCommit := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD > /dev/null 2>&1; echo $$?)
     ifeq ($(gitCommit), 0)
         gitCommit := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD)
@@ -42,9 +42,8 @@ ifeq ($(__gitRepoAvailable), 0)
         endif
     else
         gitCommit :=
-    endif    
+    endif
 endif
-undefine __gitRepoAvailable
+undefine __gitRepoAvailable__
 
-endif # _include_git_mk
-
+endif # __include_git_mk__
