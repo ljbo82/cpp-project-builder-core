@@ -22,7 +22,7 @@
 	<groupId>com.github.ljbo82</groupId>
 	<artifactId>jnidemo</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
-	
+
 	<packaging>jar</packaging>
 
 	<properties>
