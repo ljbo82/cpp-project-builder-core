@@ -1,6 +1,6 @@
-# git.mk
+# native-host.mk
 
-This file inspects project's directory tree and exposes git repository information (current commit, tag, status, etc) through output variables.
+This file inspects current execution environment and identifies the native host. Identified info is exposed through read-only variables.
 
 ## Variables
 
@@ -16,43 +16,32 @@ Following are described all variables used/exported by this makefile:
 > * **Allowed origins:** defines where variable is allowed to be defined (command line, environment, makefile, etc).
 > * **Restrictions:** Contain information about restrictions on which kind of values that can be stored in the variable.
 
-<a name="GIT_REPO_DIR"></a>
-* **`GIT_REPO_DIR`**
+<a name="NATIVE_OS"></a>
+* **`NATIVE_OS`**
 
-  * **Description:** Defines directory to be inspected.
-  * **Mandatory:** no
-  * **Default value:** `.` _(current directory)_
-  * **Allowed origins:** _(any)_
-  * **Restrictions:** Value shall not contain whitespaces nor can be an empty string.
-
-<a name="GIT_STATUS"></a>
-* **`GIT_STATUS`**
-
-  * **Description:** Contains repository status. Possible values are:
-
-    * `clean` : Repository does not contain uncommited changes
-    * `dirty` : Repository contains uncommited changes.
-
-    If [`$(GIT_REPO_DIR)`](#GIT_REPO_DIR) is not versioned by git, variable will be undefined.
-
+  * **Description:** Native operating system. Possible/supported values are `linux`, `osx`, and `windows`. If native operating system is not supported by this makefile, variable will be undefined.
   * **Mandatory:** _(N/A)_
   * **Default value:** _(N/A)_
   * **Allowed origins:** _(N/A)_
   * **Restrictions:** This is a read-only variable. Its value is set by this makefile and cannot be modified.
 
-<a name="GIT_COMMIT"></a>
-* **`GIT_COMMIT`**
+<a name="NATIVE_ARCH"></a>
+* **`NATIVE_ARCH`**
 
-  * **Description:** Contains current commit for the repository. If directory is not versioned by git, variable will be undefined
+  * **Description:** Native processor architecture. Possible/supported values are `x86`, `x64`, `arm`, and `arm64`. If native processor architecture is not supported by this makefile, variable will be undefined.
   * **Mandatory:** _(N/A)_
   * **Default value:** _(N/A)_
   * **Allowed origins:** _(N/A)_
   * **Restrictions:** This is a read-only variable. Its value is set by this makefile and cannot be modified.
 
-<a name="GIT_TAG"></a>
-* **`GIT_TAG`**
+<a name="NATIVE_HOST"></a>
+* **`NATIVE_HOST`**
 
-  * **Description:** Contains current tag for the repository. If directory is not versioned by git, variable will be undefined
+  * **Description:** Contains the concatenation `$(NATIVE_OS)-$(NATIVE_ARCH)`.
+
+    * If only [`$(NATIVE_OS)`](#NATIVE_OS) was detected, value will be [`$(NATIVE_OS)`](#NATIVE_OS).
+    * If  [`$(NATIVE_OS)`](#NATIVE_OS) was not detected, variable will be undefined.
+
   * **Mandatory:** _(N/A)_
   * **Default value:** _(N/A)_
   * **Allowed origins:** _(N/A)_

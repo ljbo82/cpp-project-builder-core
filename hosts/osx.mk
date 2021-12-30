@@ -18,35 +18,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Common definitions
+# Linux host standard definitions
 
-ifndef __common_mk__
-__common_mk__ := 1
+ifndef __hosts_osx_mk__
+__hosts_osx_mk__ := 1
 
-# Enable/Disable verbose mode --------------------------------------------------
-V ?= 0
-ifeq ($(V),)
-    $(error [V] Missing value)
-endif
-ifneq ($(V),0)
-    ifneq ($(V),1)
-        $(error [V] Invalid value: $(V))
-    endif
-endif
-ifdef O_VERBOSE
-    $(error [O_VERBOSE] Reserved variable)
-endif
-O_VERBOSE = $(if $(filter 0,$(V)),@,)
-# ------------------------------------------------------------------------------
+# NOTE: The only difference between osx and linux build system customizations
+#       is the suffix used for shared libraries
 
-# Output base directory --------------------------------------------------------
-O ?= output
-ifeq ($(O),)
-    $(error [O] Missing value)
-endif
-ifneq ($(words $(O)),1)
-    $(error [O] Value cannot have whitespaces: $(O))
-endif
-# ------------------------------------------------------------------------------
+__hosts_linux_mk_shared_lib_suffix__ := .dylib
+include $(dir $(lastword $(MAKEFILE_LIST)))linux.mk
 
-endif # ifndef __common_mk__
+endif # ifndef __hosts_osx_mk__

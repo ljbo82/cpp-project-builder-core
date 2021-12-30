@@ -20,14 +20,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
+#include <print.h>
+#include <iostream>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void println(const char* cstr);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
+void print(const std::string& str) {
+    std::cout << str;
+}

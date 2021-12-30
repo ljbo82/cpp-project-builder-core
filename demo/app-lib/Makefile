@@ -1,41 +1,44 @@
-# This file is part of gcc-project-builder.
-# Copyright (C) 2021 Leandro José Britto de Oliveira
+# Copyright (c) 2022 Leandro José Britto de Oliveira
 #
-# gcc-project-builder is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 2 of the License, or
-# (at your option) any later version.
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-# gcc-project-builder is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 #
-# You should have received a copy of the GNU General Public License
-# along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-PROJ_NAME = app-lib
-PROJ_TYPE = app
+PROJ_NAME := hello
+PROJ_TYPE := app
 
-LIB_PROJ_DIRS += lib/libA
+# Declare dependency on libraries. Syntax: libname[:libDir[:includeDirs]]
+LIBS += mylib0:$(O_DIST_DIR)/lib:$(O_DIST_DIR)/include
 
-# lib/libB depends on lib/libC (which in turn has its own dependencies but it
-# is not required to declare all of them here because gcc-project-builder
-# will resolve them internally).
-LIB_PROJ_DIRS += lib/libB
+# Forces build of mylib before application build
+PRE_BUILD_DEPS += lib
 
-include ../../project.mk
-
-ifeq ($(LIB_TYPE), )
-    LIB_TYPE := shared
-endif
+# Library source directory
+LIB_DIR ?= ../lib
 
 # ==============================================================================
-.PHONY: run
-run: all
-    ifeq ($(LIB_TYPE), shared)
-	    $(v)LD_LIBRARY_PATH=$(O)/dist/$(HOST)/lib $(O)/dist/$(HOST)/bin/$(ARTIFACT_NAME)
-    else
-	    $(v)$(O)/dist/$(HOST)/bin/$(ARTIFACT_NAME)
-    endif
+.PHONY: lib
+lib:
+	@echo [PRE-BUILD] lib
+    # NOTE: Uses a custom BUILD_DIR in order to isolate library object files from application ones.
+	$(O_VERBOSE)$(MAKE) -C $(LIB_DIR) BUILD_DIR=build/lib O=$(shell realpath -m --relative-to=$(LIB_DIR) $(O))
 # ==============================================================================
+
+__SELF_DIR__ := $(dir $(lastword $(MAKEFILE_LIST)))
+GCC_PROJECT_BUILDER ?= $(__SELF_DIR__)../..
+
+include $(GCC_PROJECT_BUILDER)/builder.mk

@@ -18,35 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Common definitions
+PROJ_NAME := hello
+PROJ_TYPE := app
 
-ifndef __common_mk__
-__common_mk__ := 1
+__SELF_DIR__ := $(dir $(lastword $(MAKEFILE_LIST)))
+GCC_PROJECT_BUILDER ?= $(__SELF_DIR__)../..
 
-# Enable/Disable verbose mode --------------------------------------------------
-V ?= 0
-ifeq ($(V),)
-    $(error [V] Missing value)
-endif
-ifneq ($(V),0)
-    ifneq ($(V),1)
-        $(error [V] Invalid value: $(V))
-    endif
-endif
-ifdef O_VERBOSE
-    $(error [O_VERBOSE] Reserved variable)
-endif
-O_VERBOSE = $(if $(filter 0,$(V)),@,)
-# ------------------------------------------------------------------------------
-
-# Output base directory --------------------------------------------------------
-O ?= output
-ifeq ($(O),)
-    $(error [O] Missing value)
-endif
-ifneq ($(words $(O)),1)
-    $(error [O] Value cannot have whitespaces: $(O))
-endif
-# ------------------------------------------------------------------------------
-
-endif # ifndef __common_mk__
+include $(GCC_PROJECT_BUILDER)/builder.mk

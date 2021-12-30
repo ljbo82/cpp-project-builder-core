@@ -1,87 +1,52 @@
-# This file is part of gcc-project-builder.
-# Copyright (C) 2021 Leandro José Britto de Oliveira
+# Copyright (c) 2022 Leandro José Britto de Oliveira
 #
-# gcc-project-builder is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 2 of the License, or
-# (at your option) any later version.
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-# gcc-project-builder is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 #
-# You should have received a copy of the GNU General Public License
-# along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-ifndef __include_hosts_windows_mk__
-__include_hosts_windows_mk__ := 1
+# Windows host standard definitions
 
-# ------------------------------------------------------------------------------
-ifeq ($(__project_mk_dir__),)
-    $(error project.mk not included yet)
-endif
-# ------------------------------------------------------------------------------
+ifndef __hosts_windows_mk__
+__hosts_windows_mk__ := 1
 
-# ------------------------------------------------------------------------------
-ifeq ($(CROSS_COMPILE),)
-    ifeq ($(hostArch),x64)
-        CROSS_COMPILE := x86_64-w64-mingw32-
-    else
-        ifeq ($(hostArch),x86)
-            CROSS_COMPILE := i686-w64-mingw32-
-        else
-            __preBuildError__ := Missing CROSS_COMPILE for HOST '$(HOST)'
-        endif
-    endif
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
 ifeq ($(PROJ_TYPE),app)
-    __postTargets__ := 0
-    ifeq ($(ARTIFACT_NAME),)
-        ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).exe
+    ifndef TARGET
+        TARGET := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).exe
     endif
-else
+endif
+
+ifeq ($(PROJ_TYPE),lib)
+    LIB_TYPE ?= shared
+
     ifeq ($(LIB_TYPE),static)
-        __postTargets__ := 0
-        ifeq ($(ARTIFACT_NAME),)
-            ARTIFACT_NAME := lib$(ARTIFACT_BASE_NAME).a
-        endif
-    else
-        ifeq ($(ARTIFACT_NAME),)
-            ARTIFACT_NAME := $(ARTIFACT_BASE_NAME).dll
-            ifneq ($(srcFiles),)
-                __postTargets__ := 1
-                ldFlags         += -Wl,--out-implib,$(buildDir)/$(ARTIFACT_NAME).lib
-                ldFlags         += -Wl,--output-def,$(buildDir)/$(ARTIFACT_NAME).def
-                postDistDeps    += $(distDir)/lib/$(ARTIFACT_NAME).lib
-                postDistDeps    += $(distDir)/lib/$(ARTIFACT_NAME).def
-            else
-                __postTargets__ := 0
-            endif
-        else
-            __postTargets__ := 0
+        ifndef TARGET
+            TARGET := lib$(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).a
         endif
     endif
+
+    ifeq ($(LIB_TYPE),shared)
+        ifndef TARGET
+            TARGET := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).dll
+        endif
+        LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(TARGET).lib
+        LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(TARGET).def
+        EXTRA_DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(TARGET).lib:lib/$(TARGET).lib,)
+        EXTRA_DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(TARGET).def:lib/$(TARGET).def)
+    endif
 endif
-# ------------------------------------------------------------------------------
 
-# postDistDeps =================================================================
-ifeq ($(__postTargets__),1)
-$(distDir)/lib/$(ARTIFACT_NAME).lib: $(buildDir)/$(ARTIFACT_NAME).lib
-	@printf "$(nl)[DIST] $@\n"
-	@mkdir -p $(distDir)/lib
-	$(v)ln -f $< $@
-
-$(distDir)/lib/$(ARTIFACT_NAME).def: $(buildDir)/$(ARTIFACT_NAME).def
-	@printf "$(nl)[DIST] $@\n"
-	@mkdir -p $(distDir)/lib
-	$(v)ln -f $< $@
-endif
-# ==============================================================================
-
-undefine __postTargets__
-
-endif #__include_hosts_windows_mk__
+endif #__hosts_windows_mk__

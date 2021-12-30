@@ -1,68 +1,91 @@
-# This file is part of gcc-project-builder.
-# Copyright (C) 2021 Leandro José Britto de Oliveira
+# Copyright (c) 2022 Leandro José Britto de Oliveira
 #
-# gcc-project-builder is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 2 of the License, or
-# (at your option) any later version.
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-# gcc-project-builder is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 #
-# You should have received a copy of the GNU General Public License
-# along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-ifndef __include_functions_mk__
-__include_functions_mk__ := 1
+# General purpose functions
 
-# Cuts a string based on given delimiter
-# Syntax: $(call fn_cut,base_string,delimiter,index)
-fn_cut = $(shell echo $(1) | cut -s -d'$(2)' -f$(3))
+ifndef __functions_mk__
+__functions_mk__ := 1
 
-# Returns 1 if version is a valid semantic version. Otherwise, returns 0
-# Syntax: $(call fn_version_valid,semanticVersion)
-fn_version_valid = $(shell echo $(1) | grep -oP '^[0-9]+\.[0-9]+\.[0-9]+.*$$' > /dev/null && echo 1 || echo 0)
+# Text functions ---------------------------------------------------------------
 
-# Returns the major component for given version
-# Syntax: $(call fn_version_major,semanticVersion)
-fn_version_major = $(call fn_cut,$(1),.,1)
+# Returns a token on delimited string.
+# Syntax: $(call FN_TOKEN,baseString,delimiter,cutIndex)
+ifdef FN_TOKEN
+    $(error [FN_TOKEN] Reserved variable)
+endif
+FN_TOKEN = $(shell echo $(1) | cut -s -d'$(2)' -f$(3))
 
-# Returns the minor component for given version
-# Syntax: $(call fn_version_minor,semanticVersion)
-fn_version_minor = $(call fn_cut,$(1),.,2)
+# Removes duplicate words without sorting.
+# Syntax: $(call FN_UNIQUE,list_of_words)
+ifdef FN_UNIQUE
+    $(error [FN_UNIQUE] Reserved variable)
+endif
+FN_UNIQUE = $(strip $(if $(1),$(firstword $(1)) $(call FN_UNIQUE,$(filter-out $(firstword $(1)),$(1)))))
 
-# Returns the patch component for given version
-# Syntax: $(call fn_version_patch,semanticVersion)
-fn_version_patch = $(call fn_cut,$(1),.,3-)
+# If str1 equals str2, returns str1. Otherwise, returns an empty value.
+# Syntax: $(call FN_EQ,srt1,str2)
+ifdef FN_EQ
+    $(error [FN_EQ] Reserved variable)
+endif
+FN_EQ = $(shell [ '$(1)' = '$(2)' ] && echo '$(1)')
+# ------------------------------------------------------------------------------
 
-# Returns 1 if host is a valid host string. Otherwise, returns 0
-# Syntax: $(call fn_host_valid,host)
-fn_host_valid = $(shell echo $(1) | grep -oP '^[a-zA-Z0-9]+\-[a-zA-Z0-9]+.*$$' > /dev/null && echo 1 || echo 0)
+# Semantic version functions ---------------------------------------------------
 
-# Returns the OS component for given host
-# Syntax: $(call fn_host_os,host)
-fn_host_os  = $(call fn_cut,$(1),-,1)
+# Checks if a semantic version string is valid (returns the string if valid, otherwise returns an empty value).
+# Syntax: $(call FN_SEMVER_CHECK,semanticVersion)
+ifdef FN_SEMVER_CHECK
+    $(error [FN_SEMVER_CHECK] Reserved variable)
+endif
+FN_SEMVER_CHECK = $(strip $(if $(call FN_EQ,$(words $(1)),1),$(shell echo $(1) | grep -oP '^[0-9]+\.[0-9]+\.[0-9]+.*$$' > /dev/null && echo $(1)),))
 
-# Returns the ARCH component for given host
-# Syntax: $(call fn_host_arch,host)
-fn_host_arch = $(call fn_cut,$(1),-,2-)
+# Returns the major component for given version.
+# Syntax: $(call FN_SEMVER_MAJOR,semanticVersion)
+ifdef FN_SEMVER_MAJOR
+    $(error [FN_SEMVER_MAJOR] Reserved variable)
+endif
+FN_SEMVER_MAJOR = $(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,1)
 
-# If childDir is a subdirectory inside parentDir, returns childDir. Otherwise, returns an empty value
-# Syntax: $(call fn_subdir,childDir,parentDir)
-fn_subdir = $(shell echo $(abspath $(1)) | grep -oP '^$(abspath $(2))[/]*' > /dev/null && echo $(1))
+# Returns the minor component for given version.
+# Syntax: $(call FN_SEMVER_MINOR,semanticVersion)
+ifdef FN_SEMVER_MINOR
+    $(error [FN_SEMVER_MINOR] Reserved variable)
+endif
+FN_SEMVER_MINOR = $(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,2)
 
-# If str1 equals str2, returns str1. Otherwise, returns an empty value
-# Syntax: $(call fn_str_eq,srt1,str2)
-fn_eq = $(shell [ '$(1)' = '$(2)' ] && echo '$(1)')
+# Returns the patch component for given version.
+# Syntax: $(call FN_SEMVER_PATCH,semanticVersion)
+ifdef FN_SEMVER_PATCH
+    $(error [FN_SEMVER_PATCH] Reserved variable)
+endif
+FN_SEMVER_PATCH = $(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,3-)
+# ------------------------------------------------------------------------------
 
-# Returns the n-th word in a string
-# Syntax: $(call fn_word,base_string,index)
-fn_word = $(call fn_cut,$(1), ,$(2))
+# File system functions --------------------------------------------------------
 
-# Removes duplicate words without sorting
-# Syntax: $(call fn_unique,list_of_words)
-fn_unique = $(strip $(if $(1),$(firstword $(1)) $(call fn_unique,$(filter-out $(firstword $(1)),$(1)))))
+# Lists files in a directory.
+# Syntax: $(call FN_FIND_FILES,directory,findFlags)
+ifdef FN_FIND_FILES
+    $(error [FN_FIND_FILES] Reserved variable)
+endif
+FN_FIND_FILES = $(shell cd $(1); find . -type f $(2) | sed 's:./::')
+# ------------------------------------------------------------------------------
 
-endif # __include_functions_mk__
+endif # ifndef __functions_mk__

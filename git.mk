@@ -1,49 +1,72 @@
-# This file is part of gcc-project-builder.
-# Copyright (C) 2021 Leandro José Britto de Oliveira
+# Copyright (c) 2022 Leandro José Britto de Oliveira
 #
-# gcc-project-builder is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 2 of the License, or
-# (at your option) any later version.
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-# gcc-project-builder is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 #
-# You should have received a copy of the GNU General Public License
-# along with gcc-project-builder.  If not, see <https://www.gnu.org/licenses/>
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-ifndef __include_git_mk__
-__include_git_mk__ := 1
+# Git repository info
 
-ifeq ($(REPO_DIR),)
-    REPO_DIR := .
+ifndef __git_mk__
+__git_mk__ := 1
+
+GIT_REPO_DIR ?= .
+ifeq ($(GIT_REPO_DIR),)
+    $(error [GIT_REPO_DIR] Missing value)
 endif
 
-__gitRepoAvailable__ := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1; echo $$?)
-ifeq ($(__gitRepoAvailable__), 0)
-    gitCommit := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD > /dev/null 2>&1; echo $$?)
-    ifeq ($(gitCommit), 0)
-        gitCommit := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD)
-        gitStatus := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git status -s)
-        ifeq ($(gitStatus),)
-            # Clean tree
-            gitStatus := 0
-        else
-            # Dirty tree
-            gitStatus := 1
+ifneq ($(words $(GIT_REPO_DIR)),1)
+    $(error [GIT_REPO_DIR] Value cannot have whitespaces: $(GIT_REPO_DIR)
+endif
+
+__git_mk_repo_available__ := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1 && echo y)
+ifneq ($(__git_mk_repo_available__),)
+    ifdef GIT_COMMIT
+        $(error [GIT_COMMIT] Reserved variable)
+    endif
+
+    GIT_COMMIT := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD > /dev/null 2>&1 && echo y)
+    ifneq ($(GIT_COMMIT),)
+        GIT_COMMIT := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD)
+
+        ifdef GIT_STATUS
+            $(error [GIT_STATUS] Reserved variable)
         endif
-        gitTag := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git describe --tags > /dev/null 2>&1; echo $$?)
-        ifeq ($(gitTag), 0)
-            gitTag := $(shell cd $(REPO_DIR) > /dev/null 2>&1; git describe --tags)
+
+        GIT_STATUS := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status -s)
+        ifeq ($(GIT_STATUS),)
+            GIT_STATUS := clean
         else
-            gitTag :=
+            GIT_STATUS := dirty
+        endif
+
+        ifdef GIT_TAG
+            $(error [GIT_TAG] Reserved variable)
+        endif
+
+        GIT_TAG := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git describe --tags > /dev/null 2>&1 && echo y)
+        ifneq ($(GIT_TAG),)
+            GIT_TAG := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git describe --tags)
+        else
+            undefine GIT_TAG
         endif
     else
-        gitCommit :=
+        undefine GIT_COMMIT
     endif
 endif
-undefine __gitRepoAvailable__
+undefine __git_mk_repo_available__
 
-endif # __include_git_mk__
+endif # ifndef __git_mk__

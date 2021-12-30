@@ -22,11 +22,13 @@ SOFTWARE.
 
 #pragma once
 
+#include <string>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void println(const char* cstr);
+void print(const std::string& str);
 
 #ifdef __cplusplus
 } // extern "C"
