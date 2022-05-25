@@ -745,6 +745,13 @@ __builder_mk_dist_files__ := $(__builder_mk_dist_files__) $(foreach distDirEntry
 __builder_mk_dist_files__ := $(call FN_UNIQUE,$(foreach distFileEntry,$(__builder_mk_dist_files__),$(call __builder_mk_fn_dist_adjust_file_entry__,$(distFileEntry))))
 __builder_mk_dist_files__ := $(call FN_UNIQUE,$(foreach distFileEntry,$(__builder_mk_dist_files__),$(call FN_TOKEN,$(distFileEntry),:,1):$(O_DIST_DIR)/$(call FN_TOKEN,$(distFileEntry),:,2)))
 
+# NOTE: Windows does not have standardized support for hard links
+ifeq ($(NATIVE_OS),windows)
+    __builder_mk_ln_f__ := cp
+else
+    __builder_mk_ln_f__ ?= ln -f
+endif
+
 # Template for distribution artifacts targets
 # $(call __builder_mk_dist_deps_template__,src,dest)
 define __builder_mk_dist_deps_template__
@@ -753,11 +760,13 @@ __builder_mk_dist_deps__ += $(2)
 $(2): $(1)
 	@echo [DIST] $$@
 	@mkdir -p $$(dir $$@)
-	$(O_VERBOSE)ln -f $$< $$@
+	$(O_VERBOSE)$(__builder_mk_ln_f__) $$< $$@
 endef
 
 $(foreach distFileEntry,$(__builder_mk_dist_files__),$(eval $(call __builder_mk_dist_deps_template__,$(call FN_TOKEN,$(distFileEntry),:,1),$(call FN_TOKEN,$(distFileEntry),:,2))))
 __builder_mk_dist_deps__ := $(call FN_UNIQUE,$(__builder_mk_dist_deps__))
+
+undefine __builder_mk_ln_f__
 
 ifdef PRE_DIST_DEPS
     ifneq ($(origin PRE_DIST_DEPS),file)

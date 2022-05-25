@@ -449,7 +449,6 @@ The following variables must be defined exclusively inside a makefile (either `$
   * **Ready for layers:** no
   * **Allowed origins:** makefile
   * **Restrictions:**
-    * When building libraries for linux and osx, this variable will be modified in order to include generated symbolic links into distribution (see [`POST_BUILD_DEPS`](#POST_BUILD_DEPS)).
     * When building shared libraries on windows, this variable will be modified in order to include import library and .def files into distribution.
     * In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable (using `+=` makefile operator) instead of setting a value directly.
     * NOTE that `DEST_FILE` component is optional for entries. Omitting it will, will cause a file to be copied to `$(O_DIST_DIR)/$(basename ORIGIN_FILE)`.
@@ -503,9 +502,7 @@ The following variables must be defined exclusively inside a makefile (either `$
   * **Default value:** _Depends on select target host and [`PROJ_TYPE`](#PROJ_TYPE)._
   * **Ready for layers:** no
   * **Allowed origins:** makefile
-  * **Restrictions:**
-    * When building libraries for linux and osx, this variable will be modified in order to add a step to create associated symbolic AFTER library is built.
-    * Since variable is intended to hold a list of values (whitespace-delimited string), it is recommend to use the `+=` operator while adding values to the variable.
+  * **Restrictions:** Since variable is intended to hold a list of values (whitespace-delimited string), it is recommend to use the `+=` operator while adding values to the variable.
 
 <a name="POST_CLEAN_DEPS"></a>
 * **`POST_CLEAN_DEPS`**
