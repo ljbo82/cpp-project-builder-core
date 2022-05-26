@@ -611,7 +611,7 @@ pre-build: $(PRE_BUILD_DEPS)
         endif
     endif
 
---__builder_mk_build__: pre-build $(if $(SRC_FILES),$(O_BUILD_DIR)/$(TARGET),)
+--__builder_mk_build__: $(if $(SRC_FILES),$(O_BUILD_DIR)/$(TARGET),)
 
 --__builder_mk_post_build__: --__builder_mk_build__ $(POST_BUILD_DEPS)
 
@@ -619,7 +619,7 @@ define __builder_mk_build_target__
 .PHONY: build
 build: --__builder_mk_post_build__
 ifneq ($(SRC_FILES),)
-$(O_BUILD_DIR)/$(TARGET): $(__builder_mk_obj_files__)
+$(O_BUILD_DIR)/$(TARGET): pre-build $(__builder_mk_obj_files__)
     ifeq ($(PROJ_TYPE),lib)
         ifeq ($(LIB_TYPE),shared)
 	        @echo [LD] $$@
