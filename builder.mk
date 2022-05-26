@@ -413,8 +413,6 @@ else
     __builder_mk_origin_as__ := $(origin AS)
     ifeq ($(__builder_mk_origin_as__),default)
         AS := as
-    else ifeq ($(__builder_mk_origin_as__),command line)
-        $(error [AS] Cannot be defined through command line)
     else ifeq ($(AS),)
         $(error [AS] Missing value)
     endif
@@ -427,8 +425,6 @@ else
     __builder_mk_origin_ar__ := $(origin AR)
     ifeq ($(__builder_mk_origin_ar__),default)
         AR := ar
-    else ifeq ($(__builder_mk_origin_ar__),command line)
-        $(error [AR] Cannot be defined through command line)
     else ifeq ($(AR),)
         $(error [AR] Missing value)
     endif
@@ -441,8 +437,6 @@ else
     __builder_mk_origin_cc__ := $(origin CC)
     ifeq ($(__builder_mk_origin_cc__),default)
         CC := gcc
-    else ifeq ($(__builder_mk_origin_cc__),command line)
-        $(error [CC] Cannot be defined through command line)
     else ifeq ($(CC),)
         $(error [CC] Missing value)
     endif
@@ -455,8 +449,6 @@ else
     __builder_mk_origin_cxx__ := $(origin CXX)
     ifeq ($(__builder_mk_origin_cxx__),default)
         CXX := g++
-    else ifeq ($(__builder_mk_origin_cxx__),command line)
-        $(error [CXX] Cannot be defined through command line)
     else ifeq ($(CXX),)
         $(error [CXX] Missing value)
     endif
@@ -482,27 +474,9 @@ else
     __builder_mk_origin_ld__ := $(origin LD)
     ifeq ($(__builder_mk_origin_ld__),default)
         LD := $(__builder_mk_ld__)
-    else ifeq ($(__builder_mk_origin_ld__),command line)
-        $(error [LD] Cannot be defined through command line)
     else ifeq ($(LD),)
         $(error [LD] Missing value)
     endif
-endif
-
-ifeq ($(origin CFLAGS),command line)
-    $(error [CFLAGS] Cannot be defined through command line)
-endif
-
-ifeq ($(origin CXXFLAGS),command line)
-    $(error [CXXFLAGS] Cannot be defined through command line)
-endif
-
-ifeq ($(origin ASFLAGS),command line)
-    $(error [ASFLAGS] Cannot be defined through command line)
-endif
-
-ifeq ($(origin LDFLAGS),command line)
-    $(error [LDFLAGS] Cannot be defined through command line)
 endif
 
 __builder_mk_cflags__ += -Wall
@@ -535,10 +509,10 @@ endif
 
 __builder_mk_include_flags__ := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
 
-CFLAGS   := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cflags__) $(CFLAGS))
-CXXFLAGS := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cxxflags__) $(CXXFLAGS))
-ASFLAGS  := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_asflags__) $(ASFLAGS))
-LDFLAGS  := $(call FN_UNIQUE, $(__builder_mk_ldflags__) $(LDFLAGS))
+override CFLAGS   := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cflags__) $(CFLAGS))
+override CXXFLAGS := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cxxflags__) $(CXXFLAGS))
+override ASFLAGS  := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_asflags__) $(ASFLAGS))
+override LDFLAGS  := $(call FN_UNIQUE, $(__builder_mk_ldflags__) $(LDFLAGS))
 
 undefine __builder_mk_cflags__
 undefine __builder_mk_cxxflags__

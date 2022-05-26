@@ -614,7 +614,7 @@ The following variables allows compiler configuration:
   * **Mandatory:** no
   * **Default value:** `ar`
   * **Ready for layers:** no
-  * **Allowed origins:** _Any, EXCEPT command-line._
+  * **Allowed origins:** _Any_
   * **Restrictions:** Value cannot be empty.
     * Modifications are rarely needed (when cross compiling, the name of executable is usually customized through [`CROSS_COMPILE`](#CROSS_COMPILE) variable).
 
@@ -624,7 +624,7 @@ The following variables allows compiler configuration:
   * **Mandatory:** no
   * **Default value:** `as`
   * **Ready for layers:** no
-  * **Allowed origins:** _Any, EXCEPT command-line._
+  * **Allowed origins:** _Any_
   * **Restrictions:** Value cannot be empty.
     * Modifications are rarely needed (when cross compiling, the name of executable is usually customized through [`CROSS_COMPILE`](#CROSS_COMPILE) variable).
 
@@ -634,7 +634,7 @@ The following variables allows compiler configuration:
   * **Mandatory:** no
   * **Default value:** _Depends on build configuration and [project type](#PROJ_TYPE)._
   * **Ready for layers:** no
-  * **Allowed origins:** _Any, EXCEPT command-line._
+  * **Allowed origins:** _Any_
   * **Restrictions:** In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable (using `+=` makefile operator) instead of setting a value directly.
 
 <a name="CC"></a>
@@ -643,7 +643,7 @@ The following variables allows compiler configuration:
   * **Mandatory:** no
   * **Default value:** `gcc`
   * **Ready for layers:** no
-  * **Allowed origins:** _Any, EXCEPT command-line._
+  * **Allowed origins:** _Any_
   * **Restrictions:** Value cannot be empty.
     * Modifications are rarely needed (when cross compiling, the name of executable is usually customized through [`CROSS_COMPILE`](#CROSS_COMPILE) variable).
 
@@ -653,7 +653,7 @@ The following variables allows compiler configuration:
   * **Mandatory:** no
   * **Default value:** _Depends on build configuration and [project type](#PROJ_TYPE)._
   * **Ready for layers:** no
-  * **Allowed origins:** _Any, EXCEPT command-line._
+  * **Allowed origins:** _Any_
   * **Restrictions:** In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable (using `+=` makefile operator) instead of setting a value directly.
 
 <a name="CROSS_COMPILE"></a>
@@ -662,7 +662,7 @@ The following variables allows compiler configuration:
   * **Mandatory:** no
   * **Default value:** _(undefined)_
   * **Ready for layers:** no
-  * **Allowed origins:** _Any, EXCEPT command-line._
+  * **Allowed origins:** _Any_
   * **Restrictions:** Cannot be left undefined for cross compilation.
 
 <a name="CXX"></a>
@@ -671,7 +671,7 @@ The following variables allows compiler configuration:
   * **Mandatory:** no
   * **Default value:** `g++`
   * **Ready for layers:** no
-  * **Allowed origins:** _Any, EXCEPT command-line._
+  * **Allowed origins:** _Any_
   * **Restrictions:** Value cannot be empty.
     * Modifications are rarely needed (when cross compiling, the name of executable is usually customized through [`CROSS_COMPILE`](#CROSS_COMPILE) variable).
 
@@ -681,7 +681,7 @@ The following variables allows compiler configuration:
   * **Mandatory:** no
   * **Default value:** _Depends on build configuration and [project type](#PROJ_TYPE)._
   * **Ready for layers:** no
-  * **Allowed origins:** _Any, EXCEPT command-line._
+  * **Allowed origins:** _Any_
   * **Restrictions:** In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable (using `+=` makefile operator) instead of setting a value directly.
 
 <a name="LD"></a>
@@ -690,7 +690,7 @@ The following variables allows compiler configuration:
   * **Mandatory:** no
   * **Default value:** `gcc` _(for pure C or Assemlby projects)_, `g++` _(for projects containing C++ sources)_.
   * **Ready for layers:** no
-  * **Allowed origins:** _Any, EXCEPT command-line._
+  * **Allowed origins:** _Any_
   * **Restrictions:** Value cannot be empty.
     * Modifications are rarely needed (when cross compiling, the name of executable is usually customized through [`CROSS_COMPILE`](#CROSS_COMPILE) variable).
 
@@ -700,7 +700,7 @@ The following variables allows compiler configuration:
   * **Mandatory:** no
   * **Default value:** _Depends on build configuration and [project type](#PROJ_TYPE)._
   * **Ready for layers:** no
-  * **Allowed origins:** _Any, EXCEPT command-line._
+  * **Allowed origins:** _Any_
   * **Restrictions:** In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable (using `+=` makefile operator) instead of setting a value directly.
 
 ### Advanced Variables
