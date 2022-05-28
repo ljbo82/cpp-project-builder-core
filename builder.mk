@@ -239,16 +239,16 @@ ifeq ($(PROJ_TYPE),lib)
 endif
 # ------------------------------------------------------------------------------
 
-# TARGET -----------------------------------------------------------------------
+# ARTIFACT -----------------------------------------------------------------------
 
-# NOTE: host may have set a default TARGET
+# NOTE: host may have set a default ARTIFACT
 
-TARGET ?= a.out
-ifeq ($(TARGET),)
-    $(error [TARGET] Missing value)
+ARTIFACT ?= a.out
+ifeq ($(ARTIFACT),)
+    $(error [ARTIFACT] Missing value)
 endif
-ifneq ($(words $(TARGET)),1)
-    $(error [TARGET] Value cannot have whitespaces: $(TARGET))
+ifneq ($(words $(ARTIFACT)),1)
+    $(error [ARTIFACT] Value cannot have whitespaces: $(ARTIFACT))
 endif
 # ------------------------------------------------------------------------------
 
@@ -532,7 +532,7 @@ all: dist
 # ==============================================================================
 
 # print-vars ===================================================================
-VARS ?= $(sort DEBUG HOST O V EXTRA_DIST_DIRS EXTRA_DIST_FILES INCLUDE_DIRS LIB_TYPE LIBS POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS O_BUILD_DIR O_DIST_DIR HOST_MK HOSTS_DIR OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE TARGET)
+VARS ?= $(sort DEBUG HOST O V EXTRA_DIST_DIRS EXTRA_DIST_FILES INCLUDE_DIRS LIB_TYPE LIBS POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS O_BUILD_DIR O_DIST_DIR HOST_MK HOSTS_DIR OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE ARTIFACT)
 .PHONY: print-vars
 print-vars:
     ifeq ($(VARS),)
@@ -611,7 +611,7 @@ pre-build: $(PRE_BUILD_DEPS)
         endif
     endif
 
---__builder_mk_build__: $(if $(SRC_FILES),$(O_BUILD_DIR)/$(TARGET),)
+--__builder_mk_build__: $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT),)
 
 --__builder_mk_post_build__: --__builder_mk_build__ $(POST_BUILD_DEPS)
 
@@ -619,7 +619,7 @@ define __builder_mk_build_target__
 .PHONY: build
 build: --__builder_mk_post_build__
 ifneq ($(SRC_FILES),)
-$(O_BUILD_DIR)/$(TARGET): pre-build $(__builder_mk_obj_files__)
+$(O_BUILD_DIR)/$(ARTIFACT): pre-build $(__builder_mk_obj_files__)
     ifeq ($(PROJ_TYPE),lib)
         ifeq ($(LIB_TYPE),shared)
 	        @echo [LD] $$@
@@ -696,9 +696,9 @@ ifdef EXTRA_DIST_FILES
 endif
 ifneq ($(SRC_FILES),)
     ifeq ($(PROJ_TYPE),app)
-        __builder_mk_dist_files__ := $(O_BUILD_DIR)/$(TARGET):bin/$(TARGET)
+        __builder_mk_dist_files__ := $(O_BUILD_DIR)/$(ARTIFACT):bin/$(ARTIFACT)
     else ifeq ($(PROJ_TYPE),lib)
-        __builder_mk_dist_files__ := $(O_BUILD_DIR)/$(TARGET):lib/$(TARGET)
+        __builder_mk_dist_files__ := $(O_BUILD_DIR)/$(ARTIFACT):lib/$(ARTIFACT)
     endif
 endif
 __builder_mk_dist_files__ := $(call FN_UNIQUE,$(__builder_mk_dist_files__) $(EXTRA_DIST_FILES))

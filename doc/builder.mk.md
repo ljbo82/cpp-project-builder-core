@@ -348,7 +348,7 @@ Here are listed variables that can be perfectly defined inside a makefile, altho
 <a name="LIB_TYPE"></a>
 * **`LIB_TYPE`**
   * **Description:** For library projects ([`PROJ_TYPE`](#PROJ_TYPE) `== lib`), defines the type of generated library.
-    * Its value will be used to set the name of [final artifact](#TARGET) if it is left undefined (on linux, osx, and windows hosts).
+    * Its value will be used to set the name of [final artifact](#ARTIFACT) if it is left undefined (on linux, osx, and windows hosts).
   * **Mandatory:** no
   * **Default value:** `shared`
   * **Ready for layers:** no
@@ -554,7 +554,7 @@ The following variables must be defined exclusively inside a makefile (either `$
 <a name="PROJ_NAME"></a>
 * **`PROJ_NAME`**
   * **Description:** Defines project name.
-    * Its value will be used (on `linux`, `osx`, and `windows` hosts) to set the name of [final artifact](#TARGET) if it is left undefined.
+    * Its value will be used (on `linux`, `osx`, and `windows` hosts) to set the name of [final artifact](#ARTIFACT) if it is left undefined.
   * **Mandatory:** yes
   * **Default value:** _(undefined)_
   * **Ready for layers:** yes
@@ -564,7 +564,7 @@ The following variables must be defined exclusively inside a makefile (either `$
 <a name="PROJ_TYPE"></a>
 * **`PROJ_TYPE`**
   * **Description:** Defines the project type.
-    * Its value will be used (on `linux`, `osx`, and `windows` hosts) to set the name of [final artifact](#TARGET) if it is left undefined.
+    * Its value will be used (on `linux`, `osx`, and `windows` hosts) to set the name of [final artifact](#ARTIFACT) if it is left undefined.
   * **Mandatory:** yes
   * **Default value:** _(undefined)_
   * **Ready for layers:** yes
@@ -573,7 +573,7 @@ The following variables must be defined exclusively inside a makefile (either `$
 
 <a name="PROJ_VERSION"></a>
 * **`PROJ_VERSION`**
-  * **Description:** Defines the semantic version for the project. Its value will be used to set the name of [final artifact](#TARGET) if it is left undefined (on `linux`, `osx`, and `windows` hosts).
+  * **Description:** Defines the semantic version for the project. Its value will be used to set the name of [final artifact](#ARTIFACT) if it is left undefined (on `linux`, `osx`, and `windows` hosts).
   * **Mandatory:** no
   * **Default value:** `0.1.0`
   * **Ready for layers:** yes
@@ -707,6 +707,17 @@ The following variables allows compiler configuration:
 
 The following variables shall be changed as a feature of last resort, since they override common behavior expected for the build system:
 
+<a name="ARTIFACT"></a>
+* **`ARTIFACT`**
+  * **Description**  Defines the actual filename for target artifact.
+  * **Mandatory:** no
+  * **Default value:** _Varies according to [`$(HOST)`](#HOST), [`$(PROJ_NAME)`](#PROJ_NAME), [`$(PROJ_TYPE)`](#PROJ_TYPE), [`$(LIB_TYPE)`](#LIB_TYPE) (for libraries), and [`$(PROJ_VERSION)`](#PROJ_VERSION)._
+    * If [`$(HOST)`](#HOST) is not supported, defaults to `a.out`.
+  * **Ready for layers:** no
+  * **Allowed origins:** makefile
+  * **Restrictions:** Value shall not contain whitespaces nor can be an empty string.
+    * Note that default value depends on many variables. It is not recommended to change the artifact name unless you have a really good reason to do so.
+
 <a name="HOST_MK"></a>
 * **`HOST_MK`**
   * **Description:** Defines the name of [layer makefile](#layer-host-mk) that shall be included for a [platform layer](#multiplatform-projects).
@@ -789,14 +800,3 @@ The following variables shall be changed as a feature of last resort, since they
   * **Ready for layers:** no
   * **Allowed origins:** makefile
   * **Restrictions:**  Accepted values are `0` (do NOT strip release artifacts) and `1` (strip release artifacts)
-
-<a name="TARGET"></a>
-* **`TARGET`**
-  * **Description**  Defines the actual filename for target artifact.
-  * **Mandatory:** no
-  * **Default value:** _Varies according to [`$(HOST)`](#HOST), [`$(PROJ_NAME)`](#PROJ_NAME), [`$(PROJ_TYPE)`](#PROJ_TYPE), [`$(LIB_TYPE)`](#LIB_TYPE) (for libraries), and [`$(PROJ_VERSION)`](#PROJ_VERSION)._
-    * If [`$(HOST)`](#HOST) is not supported, defaults to `a.out`.
-  * **Ready for layers:** no
-  * **Allowed origins:** makefile
-  * **Restrictions:** Value shall not contain whitespaces nor can be an empty string.
-    * Note that default value depends on many variables. It is not recommended to change the artifact name unless you have a really good reason to do so.

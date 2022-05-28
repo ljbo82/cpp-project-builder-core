@@ -24,8 +24,8 @@ ifndef __hosts_windows_mk__
 __hosts_windows_mk__ := 1
 
 ifeq ($(PROJ_TYPE),app)
-    ifndef TARGET
-        TARGET := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).exe
+    ifndef ARTIFACT
+        ARTIFACT := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).exe
     endif
 endif
 
@@ -33,19 +33,19 @@ ifeq ($(PROJ_TYPE),lib)
     LIB_TYPE ?= shared
 
     ifeq ($(LIB_TYPE),static)
-        ifndef TARGET
-            TARGET := lib$(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).a
+        ifndef ARTIFACT
+            ARTIFACT := lib$(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).a
         endif
     endif
 
     ifeq ($(LIB_TYPE),shared)
-        ifndef TARGET
-            TARGET := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).dll
+        ifndef ARTIFACT
+            ARTIFACT := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).dll
         endif
-        LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(TARGET).lib
-        LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(TARGET).def
-        EXTRA_DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(TARGET).lib:lib/$(TARGET).lib,)
-        EXTRA_DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(TARGET).def:lib/$(TARGET).def)
+        LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
+        LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
+        EXTRA_DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT).lib:lib/$(ARTIFACT).lib,)
+        EXTRA_DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT).def:lib/$(ARTIFACT).def)
     endif
 endif
 

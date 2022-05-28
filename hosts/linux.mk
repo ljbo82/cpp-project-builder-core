@@ -26,8 +26,8 @@ __hosts_linux_mk__ := 1
 __hosts_linux_mk_target_base_name__ := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
 
 ifeq ($(PROJ_TYPE),app)
-    ifndef TARGET
-        TARGET := $(__hosts_linux_mk_target_base_name__)
+    ifndef ARTIFACT
+        ARTIFACT := $(__hosts_linux_mk_target_base_name__)
     endif
 endif
 
@@ -37,15 +37,15 @@ ifeq ($(PROJ_TYPE),lib)
     __hosts_linux_mk_target_base_name__ := lib$(__hosts_linux_mk_target_base_name__)
 
     ifeq ($(LIB_TYPE),static)
-        ifndef TARGET
-            TARGET := $(__hosts_linux_mk_target_base_name__).a
+        ifndef ARTIFACT
+            ARTIFACT := $(__hosts_linux_mk_target_base_name__).a
         endif
     endif
 
     ifeq ($(LIB_TYPE),shared)
-        ifndef TARGET
+        ifndef ARTIFACT
             __hosts_linux_mk_shared_lib_suffix__ ?= .so
-            TARGET := $(__hosts_linux_mk_target_base_name__)$(__hosts_linux_mk_shared_lib_suffix__)
+            ARTIFACT := $(__hosts_linux_mk_target_base_name__)$(__hosts_linux_mk_shared_lib_suffix__)
         endif
     endif
 endif
