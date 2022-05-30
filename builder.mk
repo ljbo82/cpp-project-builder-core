@@ -337,7 +337,7 @@ __builder_mk_include_dirs__ := $(__builder_mk_include_dirs__) $(__builder_mk_lib
 
 INCLUDE_DIRS := $(call FN_UNIQUE,$(__builder_mk_include_dirs__))
 
-LDFLAGS := $(foreach libDir,$(__builder_mk_libs_parse_entry_lib_dirs__),-L$(libDir)) $(foreach lib,$(__builder_mk_libs_parse_entry_ld_libs__),-l$(lib)) $(LDFLAGS)
+override LDFLAGS := $(foreach libDir,$(__builder_mk_libs_parse_entry_lib_dirs__),-L$(libDir)) $(foreach lib,$(__builder_mk_libs_parse_entry_ld_libs__),-l$(lib)) $(LDFLAGS)
 # ------------------------------------------------------------------------------
 
 # Identify source files --------------------------------------------------------
