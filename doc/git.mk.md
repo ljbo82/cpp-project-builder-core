@@ -49,6 +49,15 @@ Following are described all variables used/exported by this makefile:
   * **Allowed origins:** _(N/A)_
   * **Restrictions:** This is a read-only variable. Its value is set by this makefile and cannot be modified.
 
+<a name="GIT_COMMIT_SHORT"></a>
+* **`GIT_COMMIT_SHORT`**
+
+  * **Description:** Contains current short commit for the repository. If directory is not versioned by git, variable will be undefined
+  * **Mandatory:** _(N/A)_
+  * **Default value:** _(N/A)_
+  * **Allowed origins:** _(N/A)_
+  * **Restrictions:** This is a read-only variable. Its value is set by this makefile and cannot be modified.
+
 <a name="GIT_TAG"></a>
 * **`GIT_TAG`**
 

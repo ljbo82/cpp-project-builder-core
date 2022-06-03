@@ -42,6 +42,11 @@ ifneq ($(__git_mk_repo_available__),)
     ifneq ($(GIT_COMMIT),)
         GIT_COMMIT := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD)
 
+        ifdef GIT_COMMIT_SHORT
+            $(error [GIT_COMMIT_SHORT] Reserved variable)
+        endif
+        GIT_COMMIT_SHORT := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse --short HEAD)
+
         ifdef GIT_STATUS
             $(error [GIT_STATUS] Reserved variable)
         endif
