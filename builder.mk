@@ -319,9 +319,9 @@ __builder_mk_libs__ := $(call FN_UNIQUE,$(LIBS))
 # NOTE: LIBS entries' syntax: libname[:libDir[:includeDirs]]
 
 define __builder_mk_libs_parse_entry__
-__builder_mk_libs_parse_entry_ld_libs__      := $(if $(findstring :,$(1)),$$(call FN_TOKEN,$(1),:,1),$(1)) $$(__builder_mk_libs_parse_entry_ld_libs__)
-__builder_mk_libs_parse_entry_lib_dirs__     := $$(call FN_TOKEN,$(1),:,2) $$(__builder_mk_libs_parse_entry_lib_dirs__)
-__builder_mk_libs_parse_entry_lib_includes__ := $$(call FN_TOKEN,$(1),:,3-) $$(__builder_mk_libs_parse_entry_lib_includes__)
+__builder_mk_libs_parse_entry_ld_libs__      := $$(__builder_mk_libs_parse_entry_ld_libs__) $(if $(findstring :,$(1)),$$(call FN_TOKEN,$(1),:,1),$(1))
+__builder_mk_libs_parse_entry_lib_dirs__     := $$(__builder_mk_libs_parse_entry_lib_dirs__) $$(call FN_TOKEN,$(1),:,2)
+__builder_mk_libs_parse_entry_lib_includes__ := $$(__builder_mk_libs_parse_entry_lib_includes__) $$(call FN_TOKEN,$(1),:,3-)
 endef
 
 define __builder_mk_libs_parse_entries__
