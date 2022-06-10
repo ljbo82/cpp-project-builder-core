@@ -507,6 +507,14 @@ ifeq ($(PROJ_TYPE),lib)
     endif
 endif
 
+# If '-fPIC' was passed explicitly (e.g. building a static library with position-independent code),
+# both CFLAGS and CXXFLAGS must have it enabled (NOTE: duplicate -fPIC options will be removed
+# later)
+ifneq ($(or $(filter -fPIC,$(CFLAGS)),$(filter -fPIC,$(CXXFLAGS))),)
+    override CFLAGS   += -fPIC
+    override CXXFLAGS += -fPIC
+endif
+
 __builder_mk_include_flags__ := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
 
 override CFLAGS   := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cflags__) $(CFLAGS))
@@ -577,9 +585,11 @@ ifdef POST_BUILD_DEPS
         $(error [POST_BUILD_DEPS] Not defined in a makefile (origin: $(origin POST_BUILD_DEPS)))
     endif
 endif
+
 ifneq ($(SRC_FILES),)
     ifeq ($(PROJ_TYPE),lib)
-        ifeq ($(LIB_TYPE),shared)
+        # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
+        ifneq ($(filter -fPIC,$(CFLAGS)),)
             __builder_mk_obj_suffix__ := .lo
         else
             __builder_mk_obj_suffix__ := .o
@@ -591,7 +601,8 @@ ifneq ($(SRC_FILES),)
     __builder_mk_obj_files__ := $(SRC_FILES:%=$(O_BUILD_DIR)/%$(__builder_mk_obj_suffix__))
 
     ifeq ($(PROJ_TYPE),lib)
-        ifeq ($(LIB_TYPE),shared)
+        # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
+        ifneq ($(filter -fPIC,$(CFLAGS)),)
             __builder_mk_dep_files__ := $(__builder_mk_obj_files__:.lo=.d)
         else
             __builder_mk_dep_files__ := $(__builder_mk_obj_files__:.o=.d)
@@ -611,7 +622,7 @@ pre-build: $(PRE_BUILD_DEPS)
         endif
     endif
 
---__builder_mk_build__: $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT),)
+--__builder_mk_build__: pre-build $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT),)
 
 --__builder_mk_post_build__: --__builder_mk_build__ $(POST_BUILD_DEPS)
 
@@ -619,7 +630,7 @@ define __builder_mk_build_target__
 .PHONY: build
 build: --__builder_mk_post_build__
 ifneq ($(SRC_FILES),)
-$(O_BUILD_DIR)/$(ARTIFACT): pre-build $(__builder_mk_obj_files__)
+$(O_BUILD_DIR)/$(ARTIFACT): $(__builder_mk_obj_files__)
     ifeq ($(PROJ_TYPE),lib)
         ifeq ($(LIB_TYPE),shared)
 	        @echo [LD] $$@

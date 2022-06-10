@@ -44,7 +44,7 @@ FN_UNIQUE = $(strip $(if $(1),$(firstword $(1)) $(call FN_UNIQUE,$(filter-out $(
 ifdef FN_EQ
     $(error [FN_EQ] Reserved variable)
 endif
-FN_EQ = $(shell [ '$(1)' = '$(2)' ] && echo '$(1)')
+FN_EQ = $(and $(findstring $(1),$(2)),$(findstring $(2),$(1)))
 # ------------------------------------------------------------------------------
 
 # Semantic version functions ---------------------------------------------------
