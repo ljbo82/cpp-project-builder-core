@@ -226,13 +226,8 @@ ifneq ($(__builder_mk_hosts_mk_includes__),)
     include $(__builder_mk_hosts_mk_includes__)
 endif
 
-undefine __builder_mk_hosts_mk_includes__
-
+# NOTE: '__builder_mk_src_dirs__' will be used later
 __builder_mk_src_dirs__ := $(__builder_mk_hosts_src_dirs__)
-
-undefine __builder_mk_hosts_src_dirs__
-undefine __builder_mk_host_layers__
-undefine __builder_mk_layer_aux_parser__
 # ------------------------------------------------------------------------------
 
 # LIB_TYPE ----------------------------------------------------------------------
@@ -318,42 +313,8 @@ ifeq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
     endif
 endif
 
-# NOTE: LIBS may add entries to INCLUDE_DIRS
-
 __builder_mk_include_dirs__ := $(__builder_mk_include_dirs__) $(INCLUDE_DIRS)
-# ------------------------------------------------------------------------------
-
-# LIBS -------------------------------------------------------------------------
-ifdef LIBS
-    ifneq ($(origin LIBS),file)
-        $(error [LIBS] Not defined in a makefile (origin: $(origin LIBS)))
-    endif
-endif
-
-__builder_mk_libs__ := $(call FN_UNIQUE,$(LIBS))
-
-# NOTE: LIBS entries' syntax: libname[:libDir[:includeDirs]]
-
-define __builder_mk_libs_parse_entry__
-__builder_mk_libs_parse_entry_ld_libs__      := $$(__builder_mk_libs_parse_entry_ld_libs__) $(if $(findstring :,$(1)),$$(call FN_TOKEN,$(1),:,1),$(1))
-__builder_mk_libs_parse_entry_lib_dirs__     := $$(__builder_mk_libs_parse_entry_lib_dirs__) $$(call FN_TOKEN,$(1),:,2)
-__builder_mk_libs_parse_entry_lib_includes__ := $$(__builder_mk_libs_parse_entry_lib_includes__) $$(call FN_TOKEN,$(1),:,3)
-endef
-
-define __builder_mk_libs_parse_entries__
-$$(foreach libEntry,$(1),$$(eval $$(call __builder_mk_libs_parse_entry__,$$(libEntry))))
-__builder_mk_libs_parse_entry_ld_libs__ := $$(call FN_UNIQUE,$$(__builder_mk_libs_parse_entry_ld_libs__))
-__builder_mk_libs_parse_entry_lib_dirs__ := $$(call FN_UNIQUE,$$(__builder_mk_libs_parse_entry_lib_dirs__))
-__builder_mk_libs_parse_entry_lib_includes__ := $$(call FN_UNIQUE,$$(__builder_mk_libs_parse_entry_lib_includes__))
-endef
-
-$(eval $(call __builder_mk_libs_parse_entries__,$(__builder_mk_libs__)))
-
-__builder_mk_include_dirs__ := $(__builder_mk_include_dirs__) $(__builder_mk_libs_parse_entry_lib_includes__)
-
 INCLUDE_DIRS := $(call FN_UNIQUE,$(__builder_mk_include_dirs__))
-
-override LDFLAGS := $(foreach libDir,$(__builder_mk_libs_parse_entry_lib_dirs__),-L$(libDir)) $(foreach lib,$(__builder_mk_libs_parse_entry_ld_libs__),-l$(lib)) $(LDFLAGS)
 # ------------------------------------------------------------------------------
 
 # Identify source files --------------------------------------------------------
@@ -384,7 +345,6 @@ __builder_mk_invalid_src_files__ := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(
 ifneq ($(__builder_mk_invalid_src_files__),)
     $(error [SRC_FILES] Unsupported source file(s): $(__builder_mk_invalid_src_files__))
 endif
-undefine __builder_mk_invalid_src_files__
 # ------------------------------------------------------------------------------
 
 # Strips release build ---------------------------------------------------------
@@ -537,11 +497,6 @@ override CFLAGS   := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) 
 override CXXFLAGS := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cxxflags__) $(CXXFLAGS))
 override ASFLAGS  := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_asflags__) $(ASFLAGS))
 override LDFLAGS  := $(call FN_UNIQUE, $(__builder_mk_ldflags__) $(LDFLAGS))
-
-undefine __builder_mk_cflags__
-undefine __builder_mk_cxxflags__
-undefine __builder_mk_asflags__
-undefine __builder_mk_ldflags__
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -556,7 +511,7 @@ all: dist
 # ==============================================================================
 
 # print-vars ===================================================================
-VARS ?= $(sort DEBUG HOST O V EXTRA_DIST_DIRS EXTRA_DIST_FILES INCLUDE_DIRS LIB_TYPE LIBS POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS O_BUILD_DIR O_DIST_DIR HOSTS_DIRS OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE ARTIFACT)
+VARS ?= $(sort DEBUG HOST O V EXTRA_DIST_DIRS EXTRA_DIST_FILES INCLUDE_DIRS LIB_TYPE POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS O_BUILD_DIR O_DIST_DIR HOSTS_DIRS OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE ARTIFACT)
 .PHONY: print-vars
 print-vars:
     ifeq ($(VARS),)
@@ -714,6 +669,7 @@ ifeq ($(PROJ_TYPE),lib)
         endif
     endif
 endif
+
 __builder_mk_dist_dirs__ := $(call FN_UNIQUE,$(__builder_mk_dist_dirs__) $(EXTRA_DIST_DIRS))
 
 ifdef EXTRA_DIST_FILES
@@ -767,8 +723,6 @@ endef
 $(foreach distFileEntry,$(__builder_mk_dist_files__),$(eval $(call __builder_mk_dist_deps_template__,$(call FN_TOKEN,$(distFileEntry),:,1),$(call FN_TOKEN,$(distFileEntry),:,2))))
 __builder_mk_dist_deps__ := $(call FN_UNIQUE,$(__builder_mk_dist_deps__))
 
-undefine __builder_mk_ln_f__
-
 ifdef PRE_DIST_DEPS
     ifneq ($(origin PRE_DIST_DEPS),file)
         $(error [PRE_DIST_DEPS] Not defined in a makefile (origin: $(origin PRE_DIST_DEPS)))
@@ -801,44 +755,44 @@ $(eval $(LAZY))
 # ------------------------------------------------------------------------------
 
 undefine __builder_mk_self_dir__
-undefine __builder_mk_dist_deps__
+undefine __builder_mk_o__
+undefine __builder_mk_host_factorizer__
+undefine __builder_mk_host_factorizer_current__
+undefine __builder_mk_host_factorizer_previous__
+undefine __builder_mk_host_factorizer_factors__
+undefine __builder_mk_host_factorize__
+undefine __builder_mk_fn_host_factorize__
+undefine __builder_mk_host_layers__
+undefine __builder_mk_layer_aux_parser__
+undefine __builder_mk_hosts_mk_includes__
+undefine __builder_mk_hosts_src_dirs__
+undefine __builder_mk_src_dirs__
+undefine __builder_mk_include_dirs__
+undefine __builder_mk_invalid_src_files__
+undefine __builder_mk_origin_as__
+undefine __builder_mk_origin_ar__
+undefine __builder_mk_origin_cc__
+undefine __builder_mk_origin_cxx__
+undefine __builder_mk_is_cpp_project__
+undefine __builder_mk_ld__
+undefine __builder_mk_origin_ld__
+undefine __builder_mk_cflags__
+undefine __builder_mk_cxxflags__
+undefine __builder_mk_asflags__
+undefine __builder_mk_ldflags__
+undefine __builder_mk_include_flags__
+undefine __builder_mk_obj_suffix__
+undefine __builder_mk_obj_files__
+undefine __builder_mk_dep_files__
 undefine __builder_mk_build_target__
 undefine __builder_mk_cxx_template__
 undefine __builder_mk_as_template__
-undefine __builder_mk_o__
-undefine __builder_mk_src_dirs__
-undefine __builder_mk_skipped_src_files__
-undefine __builder_mk_skipped_src_dirs__
-undefine __builder_mk_std_host_includes__
-undefine __builder_mk_fn_host_factorize__
-undefine __builder_mk_host_factorize__
-undefine __builder_mk_host_factorizer__
-undefine __builder_mk_host_factorizer_factors__
-undefine __builder_mk_host_factorizer_previous__
-undefine __builder_mk_host_factorizer_current__
-undefine __builder_mk_libs__
-undefine __builder_mk_libs_parse_entry__
-undefine __builder_mk_libs_parse_entries__
-undefine __builder_mk_libs_parse_entry_lib_includes__
-undefine __builder_mk_libs_parse_entry_lib_dirs__
-undefine __builder_mk_libs_parse_entry_ld_libs__
 undefine __builder_mk_dist_dirs__
 undefine __builder_mk_dist_files__
 undefine __builder_mk_fn_dist_adjust_dir_entry__
 undefine __builder_mk_fn_dist_adjust_file_entry__
+undefine __builder_mk_ln_f__
 undefine __builder_mk_dist_deps_template__
 undefine __builder_mk_dist_deps__
-undefine __builder_mk_dep_files__
-undefine __builder_mk_obj_suffix__
-undefine __builder_mk_obj_files__
-undefine __builder_mk_origin_ar__
-undefine __builder_mk_origin_as__
-undefine __builder_mk_origin_cc__
-undefine __builder_mk_origin_cxx__
-undefine __builder_mk_origin_ld__
-undefine __builder_mk_ld__
-undefine __builder_mk_is_cpp_project__
-undefine __builder_mk_include_flags__
-undefine __builder_mk_include_dirs__
 
 endif # ifndef __builder_mk__

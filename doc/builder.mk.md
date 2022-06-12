@@ -460,7 +460,6 @@ The following variables must be defined exclusively inside a makefile (either `$
   * **Restrictions:**
     * This variable will be modified by build system in order to include detected default directories
     * In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable (using `+=` makefile operator) instead of setting a value directly.
-    * It is also possible to add header directories to compiler search path using [`LIBS`](#LIBS) variable.
     * A list is composed by values delimited by whitespaces (this is a GNU make restriction). For this reason, paths containing spaces are not supported.
 
 <a name="LAZY"></a>
@@ -473,23 +472,6 @@ The following variables must be defined exclusively inside a makefile (either `$
   * **Restrictions:**
     * Since this variable will hold makefile sections and can contains multiple lines, set/append value to this variable using [`define`](#https://www.gnu.org/software/make/manual/make.html#Multi_002dLine).
     * In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable (using `+=` makefile operator) instead of setting a value directly.
-
-<a name="LIBS"></a>
-* **`LIBS`**
-  * **Description:** Contains a whitespace-separated list of external library entries which project shall link to. Each entry in this variable has the syntax `[LIB_NAME[:LIB_DIR[:LIB_INCLUDE_DIR]]]`
-    * See a [demo Makefile](../demo/app-lib/Makefile) for an example.
-  * **Mandatory:** no
-  * **Default value:** _(undefined)_
-  * **Ready for layers:** no
-  * **Allowed origins:** makefile
-  * **Restrictions:**
-    * Entry tokens are delimited by a colon char (`:`).
-    * Definining single tokens in an entry:
-      * In order to define ONLY the include directory in an entry, define it like `::path/to/includes`.
-      * In order to define ONLY the libName in an entry, define it like `libName` (without colons).
-      * In order to define ONLY the LIB_DIR, define it like `:libDir`.
-    * Libraries can be defined too using [`INCLUDE_DIRS`](#INCLUDE_DIRS) and [`LDFLAGS`](#LDFLAGS).
-    * A list is composed by values delimited by whitespaces (this is a GNU make restriction). For this reason, paths containing spaces are not supported.
 
 <a name="POST_BUILD_DEPS"></a>
 * **`POST_BUILD_DEPS`**

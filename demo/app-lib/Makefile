@@ -21,8 +21,8 @@
 PROJ_NAME := hello
 PROJ_TYPE := app
 
-# Declare dependency on libraries. Syntax: libname[:libDir[:includeDirs]]
-LIBS += mylib0:$(O_DIST_DIR)/lib:$(O_DIST_DIR)/include
+INCLUDE_DIRS += $(O_DIST_DIR)/include
+LDFLAGS      += -L$(O_DIST_DIR)/lib -lmylib0
 
 # Forces build of mylib before application build
 PRE_BUILD_DEPS += lib
