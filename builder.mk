@@ -31,13 +31,14 @@ endif
 
 # Include auxiliary makefiles --------------------------------------------------
 __builder_mk_self_dir__ := $(dir $(lastword $(MAKEFILE_LIST)))
-__builder_mk_self_dir__ := $(if $(__builder_mk_self_dir__),$(__builder_mk_self_dir__),./)
-__builder_mk_self_dir__ := $(__builder_mk_self_dir__:/=)
 
+ifeq ($(__builder_mk_self_dir__),./)
+    undefine __builder_mk_self_dir__
+endif
 
-include $(__builder_mk_self_dir__)/common.mk
-include $(__builder_mk_self_dir__)/functions.mk
-include $(__builder_mk_self_dir__)/native-host.mk
+include $(__builder_mk_self_dir__)common.mk
+include $(__builder_mk_self_dir__)functions.mk
+include $(__builder_mk_self_dir__)native-host.mk
 # ------------------------------------------------------------------------------
 
 # Project name -----------------------------------------------------------------
@@ -203,7 +204,7 @@ ifeq ($(SKIP_DEFAULT_HOSTS_DIR),0)
         HOSTS_DIRS := hosts $(HOSTS_DIRS)
     endif
 endif
-HOSTS_DIRS := $(call FN_UNIQUE,$(HOSTS_DIRS) $(__builder_mk_self_dir__)/hosts)
+HOSTS_DIRS := $(call FN_UNIQUE,$(HOSTS_DIRS) $(__builder_mk_self_dir__)hosts)
 
 # Auxiliar checker for 'host.mk' and 'src' directory into a layer directory
 #
