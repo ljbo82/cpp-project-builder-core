@@ -213,13 +213,13 @@ HOSTS_DIRS := $(call FN_UNIQUE,$(HOSTS_DIRS) $(__builder_mk_self_dir__)hosts)
 #
 # Syntax $(call __builder_mk_layer_aux_parser__,hostsDir,layer)
 define __builder_mk_layer_aux_parser__
-__builder_mk_hosts_mk_includes__ += $(if $(wildcard $(1)/$(2)/host.mk),$(1)/$(2)/host.mk,)
+__builder_mk_hosts_mk_includes__ += $(if $(wildcard $(1)/$(2)/host.mk),$(abspath $(1)/$(2)/host.mk),)
 __builder_mk_hosts_src_dirs__    += $(if $(wildcard $(1)/$(2)/src),$(1)/$(2)/src,)
 endef
 
 $(foreach hostDir,$(HOSTS_DIRS),$(eval $$(foreach layer,$$(__builder_mk_host_layers__),$$(eval $$(call __builder_mk_layer_aux_parser__,$(hostDir),$$(layer))))))
 
-__builder_mk_hosts_mk_includes__ := $(strip $(__builder_mk_hosts_mk_includes__))
+__builder_mk_hosts_mk_includes__ := $(call FN_UNIQUE,$(strip $(__builder_mk_hosts_mk_includes__)))
 __builder_mk_hosts_src_dirs__    := $(strip $(__builder_mk_hosts_src_dirs__))
 
 ifneq ($(__builder_mk_hosts_mk_includes__),)
