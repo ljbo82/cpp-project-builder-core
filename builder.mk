@@ -218,6 +218,9 @@ endef
 
 $(foreach hostDir,$(HOSTS_DIRS),$(eval $$(foreach layer,$$(__builder_mk_host_layers__),$$(eval $$(call __builder_mk_layer_aux_parser__,$(hostDir),$$(layer))))))
 
+__builder_mk_hosts_mk_includes__ := $(strip $(__builder_mk_hosts_mk_includes__))
+__builder_mk_hosts_src_dirs__    := $(strip $(__builder_mk_hosts_src_dirs__))
+
 ifneq ($(__builder_mk_hosts_mk_includes__),)
     include $(__builder_mk_hosts_mk_includes__)
 endif
