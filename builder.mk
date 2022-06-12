@@ -213,7 +213,7 @@ HOSTS_DIRS := $(call FN_UNIQUE,$(HOSTS_DIRS) $(__builder_mk_self_dir__)hosts)
 #
 # Syntax $(call __builder_mk_layer_aux_parser__,hostsDir,layer)
 define __builder_mk_layer_aux_parser__
-__builder_mk_hosts_mk_includes__ += $(if $(wildcard $(1)/$(2)/host.mk),$(abspath $(1)/$(2)/host.mk),)
+__builder_mk_hosts_mk_includes__ += $(if $(wildcard $(1)/$(2)/host.mk),$(realpath $(1)/$(2)/host.mk),)
 __builder_mk_hosts_src_dirs__    += $(if $(wildcard $(1)/$(2)/src),$(1)/$(2)/src,)
 endef
 
@@ -337,7 +337,7 @@ __builder_mk_libs__ := $(call FN_UNIQUE,$(LIBS))
 define __builder_mk_libs_parse_entry__
 __builder_mk_libs_parse_entry_ld_libs__      := $$(__builder_mk_libs_parse_entry_ld_libs__) $(if $(findstring :,$(1)),$$(call FN_TOKEN,$(1),:,1),$(1))
 __builder_mk_libs_parse_entry_lib_dirs__     := $$(__builder_mk_libs_parse_entry_lib_dirs__) $$(call FN_TOKEN,$(1),:,2)
-__builder_mk_libs_parse_entry_lib_includes__ := $$(__builder_mk_libs_parse_entry_lib_includes__) $$(call FN_TOKEN,$(1),:,3-)
+__builder_mk_libs_parse_entry_lib_includes__ := $$(__builder_mk_libs_parse_entry_lib_includes__) $$(call FN_TOKEN,$(1),:,3)
 endef
 
 define __builder_mk_libs_parse_entries__

@@ -26,11 +26,11 @@ __functions_mk__ := 1
 # Text functions ---------------------------------------------------------------
 
 # Returns a token on delimited string.
-# Syntax: $(call FN_TOKEN,baseString,delimiter,cutIndex)
+# Syntax: $(call FN_TOKEN,baseString,delimiter,index)
 ifdef FN_TOKEN
     $(error [FN_TOKEN] Reserved variable)
 endif
-FN_TOKEN = $(shell echo $(1) | cut -s -d'$(2)' -f$(3))
+FN_TOKEN = $(word $(3),$(subst $(2), ,$(1)))
 
 # Removes duplicate words without sorting.
 # Syntax: $(call FN_UNIQUE,list_of_words)
@@ -54,7 +54,7 @@ FN_EQ = $(and $(findstring $(1),$(2)),$(findstring $(2),$(1)))
 ifdef FN_SEMVER_CHECK
     $(error [FN_SEMVER_CHECK] Reserved variable)
 endif
-FN_SEMVER_CHECK = $(strip $(if $(call FN_EQ,$(words $(1)),1),$(shell echo $(1) | grep -oP '^[0-9]+\.[0-9]+\.[0-9]+.*$$' > /dev/null && echo $(1)),))
+FN_SEMVER_CHECK = $(if $(filter-out 1 2 3,$(words $(subst ., ,$(1)))),,$(1))
 
 # Returns the major component for given version.
 # Syntax: $(call FN_SEMVER_MAJOR,semanticVersion)
@@ -75,7 +75,7 @@ FN_SEMVER_MINOR = $(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,2)
 ifdef FN_SEMVER_PATCH
     $(error [FN_SEMVER_PATCH] Reserved variable)
 endif
-FN_SEMVER_PATCH = $(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,3-)
+FN_SEMVER_PATCH = $(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,3)
 # ------------------------------------------------------------------------------
 
 # File system functions --------------------------------------------------------
