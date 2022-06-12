@@ -12,18 +12,20 @@ This is the main makefile exposed by the gcc-project-builder. It contains standa
 
 ## Summary
 
-* [Default directories](#default-directories)
-* [Output directories](#output-directories)
-* [Multiplatform projects](#multiplatform-projects)
-  * [Layer directories and files](#layer-directories-and-files)
-  * [CROSS_COMPILE variable](#cross_compile-variable)
-* [Make targets](#make-targets)
-* [Variables](#variables)
-  * [Command-line variables](#command-line-variables)
-  * [Read-only variables](#read-only-variables)
-  * [Makefile-exclusive variables](#makefile-exclusive-variables)
-  * [Compiler direct access](#compiler-direct-access)
-  * [Advanced variables](#advanced-variables)
+- [builder.mk](#buildermk)
+  - [Summary](#summary)
+  - [Default directories](#default-directories)
+  - [Output directories](#output-directories)
+  - [Multiplatform projects](#multiplatform-projects)
+    - [Layer directories and files](#layer-directories-and-files)
+    - [CROSS_COMPILE variable](#cross_compile-variable)
+  - [Make targets](#make-targets)
+  - [Variables](#variables)
+    - [Command-line variables](#command-line-variables)
+    - [Read-only variables](#read-only-variables)
+    - [Makefile-exclusive variables](#makefile-exclusive-variables)
+    - [Compiler direct access](#compiler-direct-access)
+    - [Advanced Variables](#advanced-variables)
 
 ## Default directories
 
@@ -35,7 +37,7 @@ When present, these directories will be used (by default) with the following pur
 
   Contains platform-independent public includes (header files) used by application during build.
 
-  This directory will be added to compiler's [include search path](#INCLUDE_DIRS).  
+  This directory will be added to compiler's [include search path](#INCLUDE_DIRS).
 
   By default, if project is a [library](#PROJ_TYPE), all files contained in this directory will be copied to the [output-directories](#output-directories).
 
@@ -67,11 +69,11 @@ When present, these directories will be used (by default) with the following pur
 
   For details regarding platform layers, see [multiplatform projects](#multiplatform-projects).
 
-  > **Changing the base directory for platform layers**
+  > **Skip default hosts directory**
   >
   > THIS IS A FEATURE OF LAST RESORT!
   >
-  > The path of this directory (relative to `$(PROJ_ROOT)`) can be changed through the definition of [`HOSTS_DIR`](#HOSTS_DIR) variable.
+  > Default hosts directory can be ignored by the build system through the definition of [`SKIP_DEFAULT_HOSTS_DIR`](#SKIP_DEFAULT_HOSTS_DIR) variable.
 
 ## Output directories
 
@@ -171,12 +173,6 @@ For each supported layer, there is expected to be a subdirectory inside [hosts d
 * **`$(PROJ_ROOT)/hosts/<layer-name>/host.mk`**
 
   If present, this makefile will be autoamtically included by the build system when layer is compatible with selected [`HOST`](#HOST). This is useful to add custom build flags and/or libraries for chosen layer.
-
-  > **Changing the name of layer-specific makefile**
-  >
-  > THIS IS A FEATURE OF LAST RESORT!
-  >
-  > The name of layer-specifc makefile (relative to `$(PROJ_ROOT)/$(HOSTS_DIR)/<layer-name>`) can be modified by defining [`HOST_MK`](#HOST_MK) variable.
 
   For example, while building a project (which has custom makefiles for the layers `linux`, `linux-arm` and `linux-arm-v7`) for the host `linux-arm-v7`, the following sequence of includes will be performed automatically by the build system:
 
@@ -718,23 +714,14 @@ The following variables shall be changed as a feature of last resort, since they
   * **Restrictions:** Value shall not contain whitespaces nor can be an empty string.
     * Note that default value depends on many variables. It is not recommended to change the artifact name unless you have a really good reason to do so.
 
-<a name="HOST_MK"></a>
-* **`HOST_MK`**
-  * **Description:** Defines the name of [layer makefile](#layer-host-mk) that shall be included for a [platform layer](#multiplatform-projects).
+<a name="HOSTS_DIRS"></a>
+* **`HOSTS_DIRS`**
+  * **Description:** Defines a list of [base directories for layers](#layer-directories-and-files).
   * **Mandatory:** no
-  * **Default value:** `host.mk`
+  * **Default value:** _(Depends on selected HOST)_
   * **Ready for layers:** yes
   * **Allowed origins:** makefile
-  * **Restrictions:** Value shall not contain whitespaces nor can be an empty string.
-
-<a name="HOSTS_DIR"></a>
-* **`HOSTS_DIR`**
-  * **Description:** Defines the [base directory for layers](#layer-directories-and-files).
-  * **Mandatory:** no
-  * **Default value:** `hosts`
-  * **Ready for layers:** yes
-  * **Allowed origins:** makefile
-  * **Restrictions:** Value shall not contain whitespaces nor can be an empty string.
+  * **Restrictions:** Since value is a list of paths, paths shall not contain whitespaces.
 
 <a name="OPTIMIZE_RELEASE"></a>
 * **`OPTIMIZE_RELEASE`**
@@ -753,6 +740,17 @@ The following variables shall be changed as a feature of last resort, since they
   * **Ready for layers:** no
   * **Allowed origins:** _(any)_
   * **Restrictions:** Values must be according to compiler accepted values.
+
+
+<a name="SKIP_DEFAULT_HOSTS_DIR"></a>
+* **`SKIP_DEFAULT_HOSTS_DIR`**
+  * **Description:** This variable defines if [default hosts directory](#default-directories) handling shall be ignored by build system.
+    * Once ignored, this directory still can be used as an include directory, but rather their usage must be declared explicitly (through [`HOSTS_DIRS`](#HOSTS_DIRS) variable).
+  * **Mandatory:** no
+  * **Default value:** `0`
+  * **Ready for layers:** yes
+  * **Allowed origins:** makefile
+  * **Restrictions:** Accepted values are **`0`** (do NOT skip default hosts directory) or **`1`** (skip default hosts directory).
 
 <a name="SKIP_DEFAULT_INCLUDE_DIR"></a>
 * **`SKIP_DEFAULT_INCLUDE_DIR`**

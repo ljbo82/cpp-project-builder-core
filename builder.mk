@@ -31,10 +31,13 @@ endif
 
 # Include auxiliary makefiles --------------------------------------------------
 __builder_mk_self_dir__ := $(dir $(lastword $(MAKEFILE_LIST)))
+__builder_mk_self_dir__ := $(if $(__builder_mk_self_dir__),$(__builder_mk_self_dir__),./)
+__builder_mk_self_dir__ := $(__builder_mk_self_dir__:/=)
 
-include $(__builder_mk_self_dir__)common.mk
-include $(__builder_mk_self_dir__)functions.mk
-include $(__builder_mk_self_dir__)native-host.mk
+
+include $(__builder_mk_self_dir__)/common.mk
+include $(__builder_mk_self_dir__)/functions.mk
+include $(__builder_mk_self_dir__)/native-host.mk
 # ------------------------------------------------------------------------------
 
 # Project name -----------------------------------------------------------------
@@ -148,75 +151,84 @@ O_DIST_DIR := $(__builder_mk_o__)/$(DIST_DIR)
 # 2. Build-system-specific host definitions (from most specific to most generic,
 #    for example: linux-arm > linux)
 
-# Factorizer auxiliary function template.
-# Syntax: $(call __builder_mk_host_factorizer__,token,delimiter)
+# Host layer factorizer auxiliary function template.
+#
+# This template will be called multiple times in order to prepare the list of acceptable layers.
+#
+# Syntax: $(call __builder_mk_host_factorizer__,hostLayer,delimiter)
 define __builder_mk_host_factorizer__
 __builder_mk_host_factorizer_current__  := $$(if $$(__builder_mk_host_factorizer_previous__),$$(__builder_mk_host_factorizer_previous__)$(2)$(1),$(1))
 __builder_mk_host_factorizer_previous__ := $$(__builder_mk_host_factorizer_current__)
 __builder_mk_host_factorizer_factors__  := $$(__builder_mk_host_factorizer_current__) $$(__builder_mk_host_factorizer_factors__)
 endef
 
-# Factorizer auxiliary function template for tokenized strings.
-# Syntax: $(call __builder_mk_host_factorize__,tokenizedString,delimiter)
-__builder_mk_host_factorize__ = $$(foreach token,$$(subst $(2), ,$(1)),$$(eval $$(call __builder_mk_host_factorizer__,$$(token),$(2))))
-
-# Factorizer function for tokenized strings.
-# Syntax: $(call __builder_mk_host_factorize__,tokenizedString,delimiter)
-__builder_mk_fn_host_factorize__ = $(eval $(call __builder_mk_host_factorize__,$(1),$(2)))$(__builder_mk_host_factorizer_factors__)
-
-# 1. Loads project-specific host definitions
-HOSTS_DIR ?= hosts
-ifneq ($(origin HOSTS_DIR),file)
-    $(error [HOSTS_DIR] Not defined in a makefile (origin: $(origin HOSTS_DIR)))
-endif
-ifeq ($(HOSTS_DIR),)
-    $(error [HOSTS_DIR] Missing value)
-endif
-ifneq ($(words $(HOSTS_DIR)),1)
-    $(error [HOSTS_DIR] Value cannot have whitespaces: $(HOSTS_DIR))
-endif
-
-HOST_MK ?= host.mk
-ifneq ($(origin HOST_MK),file)
-    $(error [HOST_MK] Not defined in a makefile (origin: $(origin HOST_MK)))
-endif
-ifeq ($(HOST_MK),)
-    $(error [HOST_MK] Missing value)
-endif
-ifneq ($(words $(HOST_MK)),1)
-    $(error [HOST_MK] Value cannot have whitespaces: $(HOST_MK))
-endif
-
-# Autixiliary function to add a project-specific host definitions.
-# Syntax: $(call __builder_mk_project_host_token__,hostToken)
-define __builder_mk_project_host_token__
-__builder_mk_project_host_token_src_dirs__ += $(if $(wildcard $(HOSTS_DIR)/$(1)/src),$(HOSTS_DIR)/$(1)/src,)
-__builder_mk_project_host_mk_includes__    += $(if $(wildcard $(HOSTS_DIR)/$(1)/$(HOST_MK)),$(HOSTS_DIR)/$(1)/$(HOST_MK),)
+# Host layer factorizer auxiliary function.
+#
+# This function will set the accepted layers in the variable __builder_mk_host_factorizer_factors__
+#
+# Syntax: $(call __builder_mk_host_factorize__,hostString,delimiter)
+define __builder_mk_host_factorize__
+    undefine __builder_mk_host_factorizer_current__
+    undefine __builder_mk_host_factorizer_previous__
+    undefine __builder_mk_host_factorizer_factors__
+    $$(foreach token,$$(subst $(2), ,$(1)),$$(eval $$(call __builder_mk_host_factorizer__,$$(token),$(2))))
 endef
 
-$(foreach hostToken,$(call __builder_mk_fn_host_factorize__,$(HOST),-),$(eval $(call __builder_mk_project_host_token__,$(hostToken))))
+# Factorizer function for a host.
+#
+# Function will return a list of accepted layers for a given host.
+#
+# Syntax: $(call __builder_mk_host_factorize__,hostString,delimiter)
+__builder_mk_fn_host_factorize__ = $(eval $(call __builder_mk_host_factorize__,$(1),$(2)))$(__builder_mk_host_factorizer_factors__)
 
-__builder_mk_project_host_token_src_dirs__ := $(__builder_mk_project_host_token_src_dirs__)
-__builder_mk_project_host_mk_includes__    := $(__builder_mk_project_host_mk_includes__)
+# Contains all valid layers for current HOST
+__builder_mk_host_layers__ := $(call __builder_mk_fn_host_factorize__,$(HOST),-)
 
-ifneq ($(__builder_mk_project_host_token_src_dirs__),)
-    __builder_mk_src_dirs__ := $(__builder_mk_project_host_token_src_dirs__)
+SKIP_DEFAULT_HOSTS_DIR ?= 0
+ifneq ($(origin SKIP_DEFAULT_HOSTS_DIR),file)
+    $(error [SKIP_DEFAULT_HOSTS_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_HOSTS_DIR)))
+endif
+ifneq ($(SKIP_DEFAULT_HOSTS_DIR),0)
+    ifneq ($(SKIP_DEFAULT_HOSTS_DIR),1)
+        $(error [SKIP_DEFAULT_HOSTS_DIR] Invalid value: $(SKIP_DEFAULT_HOSTS_DIR))
+    endif
+endif
+ifdef $(HOSTS_DIRS)
+    ifneq ($(origin HOSTS_DIRS),file)
+        $(error [HOSTS_DIRS] Not defined in a makefile (origin: $(origin HOSTS_DIRS)))
+    endif
+endif
+ifeq ($(SKIP_DEFAULT_HOSTS_DIR),0)
+    ifneq ($(wildcard hosts),)
+        HOSTS_DIRS := hosts $(HOSTS_DIRS)
+    endif
+endif
+HOSTS_DIRS := $(call FN_UNIQUE,$(HOSTS_DIRS) $(__builder_mk_self_dir__)/hosts)
+
+# Auxiliar checker for 'host.mk' and 'src' directory into a layer directory
+#
+# This function will add values to '__builder_mk_hosts_mk_includes__' and
+# '__builder_mk_hosts_src_dirs__' on each call
+#
+# Syntax $(call __builder_mk_layer_aux_parser__,hostsDir,layer)
+define __builder_mk_layer_aux_parser__
+__builder_mk_hosts_mk_includes__ += $(if $(wildcard $(1)/$(2)/host.mk),$(1)/$(2)/host.mk,)
+__builder_mk_hosts_src_dirs__    += $(if $(wildcard $(1)/$(2)/src),$(1)/$(2)/src,)
+endef
+
+$(foreach hostDir,$(HOSTS_DIRS),$(eval $$(foreach layer,$$(__builder_mk_host_layers__),$$(eval $$(call __builder_mk_layer_aux_parser__,$(hostDir),$$(layer))))))
+
+ifneq ($(__builder_mk_hosts_mk_includes__),)
+    include $(__builder_mk_hosts_mk_includes__)
 endif
 
-ifneq ($(__builder_mk_project_host_mk_includes__),)
-    include $(__builder_mk_project_host_mk_includes__)
-endif
+undefine __builder_mk_hosts_mk_includes__
 
-# 2. Loads standard (build-system) host definitions
+__builder_mk_src_dirs__ := $(__builder_mk_hosts_src_dirs__)
 
-# Autixiliary template to add a standard host definitions makefile.
-# Syntax: $(call __builder_mk_std_host_includes__,hostToken)
-__builder_mk_std_host_includes__ = $(if $(wildcard $(__builder_mk_self_dir__)hosts/$(1).mk),$(__builder_mk_self_dir__)hosts/$(1).mk,)
-__builder_mk_std_host_includes__ := $(strip $(foreach hostToken,$(call __builder_mk_fn_host_factorize__,$(HOST),-),$(call __builder_mk_std_host_includes__,$(hostToken))))
-
-ifneq ($(__builder_mk_std_host_includes__),)
-    include $(__builder_mk_std_host_includes__)
-endif
+undefine __builder_mk_hosts_src_dirs__
+undefine __builder_mk_host_layers__
+undefine __builder_mk_layer_aux_parser__
 # ------------------------------------------------------------------------------
 
 # LIB_TYPE ----------------------------------------------------------------------
@@ -540,7 +552,7 @@ all: dist
 # ==============================================================================
 
 # print-vars ===================================================================
-VARS ?= $(sort DEBUG HOST O V EXTRA_DIST_DIRS EXTRA_DIST_FILES INCLUDE_DIRS LIB_TYPE LIBS POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS O_BUILD_DIR O_DIST_DIR HOST_MK HOSTS_DIR OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE ARTIFACT)
+VARS ?= $(sort DEBUG HOST O V EXTRA_DIST_DIRS EXTRA_DIST_FILES INCLUDE_DIRS LIB_TYPE LIBS POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS O_BUILD_DIR O_DIST_DIR HOSTS_DIRS OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE ARTIFACT)
 .PHONY: print-vars
 print-vars:
     ifeq ($(VARS),)
@@ -800,9 +812,6 @@ undefine __builder_mk_host_factorizer__
 undefine __builder_mk_host_factorizer_factors__
 undefine __builder_mk_host_factorizer_previous__
 undefine __builder_mk_host_factorizer_current__
-undefine __builder_mk_project_host_mk_includes__
-undefine __builder_mk_project_host_token_src_dirs__
-undefine __builder_mk_project_host_token__
 undefine __builder_mk_libs__
 undefine __builder_mk_libs_parse_entry__
 undefine __builder_mk_libs_parse_entries__
