@@ -339,7 +339,10 @@ ifdef SRC_FILES
 endif
 
 SRC_DIRS := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS)))
-SRC_FILES := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S' 2> /dev/null)) $(SRC_FILES)))
+
+__builder_mk_src_file_filter__ := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
+
+SRC_FILES := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f $(__builder_mk_src_file_filter__) 2> /dev/null)) $(SRC_FILES)))
 
 __builder_mk_invalid_src_files__ := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
 ifneq ($(__builder_mk_invalid_src_files__),)
@@ -768,6 +771,7 @@ undefine __builder_mk_hosts_mk_includes__
 undefine __builder_mk_hosts_src_dirs__
 undefine __builder_mk_src_dirs__
 undefine __builder_mk_include_dirs__
+undefine __builder_mk_src_file_filter__
 undefine __builder_mk_invalid_src_files__
 undefine __builder_mk_origin_as__
 undefine __builder_mk_origin_ar__
