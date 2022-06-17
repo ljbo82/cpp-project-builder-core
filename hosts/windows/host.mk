@@ -23,6 +23,12 @@
 ifndef __hosts_windows_mk__
 __hosts_windows_mk__ := 1
 
+ifeq ($(HOST),windows-x86)
+    export CROSS_COMPILE ?= i686-w64-mingw32-
+else ifeq ($(HOST),windows-x64)
+    export CROSS_COMPILE ?= x86_64-w64-mingw32-
+endif
+
 ifeq ($(PROJ_TYPE),app)
     ifndef ARTIFACT
         ARTIFACT := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).exe
