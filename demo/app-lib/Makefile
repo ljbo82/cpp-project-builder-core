@@ -22,7 +22,7 @@ PROJ_NAME := hello
 PROJ_TYPE := app
 
 INCLUDE_DIRS += $(O_DIST_DIR)/include
-LDFLAGS      += -L$(O_DIST_DIR)/lib -lmylib0
+override LDFLAGS += -L$(O_DIST_DIR)/lib -lmylib0
 
 # Forces build of mylib before application build
 PRE_BUILD_DEPS += lib
