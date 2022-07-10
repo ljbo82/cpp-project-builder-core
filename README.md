@@ -107,9 +107,7 @@ See [doc/native-host.mk.md](doc/native-host.mk.md) for details.
 
 This file contains the project parser. It is automatically included by [builder.mk](doc/builder.mk.md).
 
-Including this file separately is useful when some logic must be processed after project is fully parsed, but before compilation takes place.
-
-See [doc/project.mk.md](doc/project.mk.md) for details.
+Including this file separately is useful when some logic must be processed after project is fully parsed (e.g. after host layers are processed), but before compiler management takes place.
 
 ## Examples
 

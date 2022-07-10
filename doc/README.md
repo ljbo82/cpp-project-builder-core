@@ -48,8 +48,6 @@ See [native-host.mk.md](native-host.mk.md) for details.
 
 This is the second most important makefile. It process the project and prepare variables to be processed by the builder.
 
-This file is automatically included by [builder.mk.md](builder.mk.md).
+This file is automatically included by [builder.mk](builder.mk.md).
 
-Including this file separately is useful when some logic must be processed after project is fully parsed, but before compilation takes place.
-
-See [project.mk.md](project.mk.md) for details
+Including this file separately is useful when some logic must be processed after project is fully parsed (e.g. after host layers are processed), but before compiler management takes place.
