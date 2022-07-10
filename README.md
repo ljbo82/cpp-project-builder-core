@@ -18,6 +18,7 @@ For details, check [official repository](https://github.com/ljbo82/gcc-project-b
   * [functions.mk](#functionsmk)
   * [git.mk](#gitmk)
   * [native-host.mk](#native-hostmk)
+  * [project.mk](#projectmk)
 * [Examples](#examples)
 
 ## License
@@ -101,6 +102,14 @@ This file inspects current execution environment and identifies the native host.
 > NOTE: This file is automatically included by `$(GCC_PROJECT_BUILDER)/builder.mk`
 
 See [doc/native-host.mk.md](doc/native-host.mk.md) for details.
+
+### project.mk
+
+This file contains the project parser. It is automatically included by [builder.mk](doc/builder.mk.md).
+
+Including this file separately is useful when some logic must be processed after project is fully parsed, but before compilation takes place.
+
+See [doc/project.mk.md](doc/project.mk.md) for details.
 
 ## Examples
 
