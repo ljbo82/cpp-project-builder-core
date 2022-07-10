@@ -23,6 +23,12 @@
 ifndef __common_mk__
 __common_mk__ := 1
 
+# Checks for whitespace in CWD -------------------------------------------------
+ifneq ($(words $(shell pwd)),1)
+    $(error Current directory ($(shell pwd)) contains one or more whitespaces)
+endif
+# ------------------------------------------------------------------------------
+
 # Enable/Disable verbose mode --------------------------------------------------
 V ?= 0
 ifeq ($(V),)
