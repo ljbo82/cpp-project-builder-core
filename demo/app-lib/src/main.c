@@ -23,6 +23,6 @@ SOFTWARE.
 #include <mylib.h>
 
 int main(int argc, char** argv) {
-    println("hello world!");
+    lib_println("hello world!");
     return 0;
 }

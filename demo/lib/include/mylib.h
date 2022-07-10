@@ -22,13 +22,48 @@ SOFTWARE.
 
 #pragma once
 
-#include "defs.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <inttypes.h>
+#include <stdlib.h>
+
+#if defined _WIN32 || defined __CYGWIN__
+	#if defined (BUILD_DLL) || defined (USE_DLL)
+		#ifdef BUILD_DLL
+			/** @internal */
+			#define PUBLIC __declspec(dllexport)
+		#else
+			/** @internal */
+			#define PUBLIC __declspec(dllimport)
+		#endif
+	#else
+		#define PUBLIC
+	#endif
+
+	/** @internal */
+	#define CALL __cdecl
+#else
+	#if __GNUC__ >= 4
+		/** @internal */
+		#define PUBLIC __attribute__ ((visibility ("default")))
+	#else
+		/** @internal */
+		#define PUBLIC
+	#endif
+
+	/** @internal */
+	#define CALL
+#endif
+
+/** @brief Standard C-string. */
+typedef const char* cstring_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-PUBLIC void CALL println(cstring_t cstr);
+PUBLIC void CALL lib_println(cstring_t cstr);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -24,10 +24,10 @@ SOFTWARE.
 
 #include <stdio.h>
 
-PRIVATE void CALL _println(cstring_t cstr) {
+PRIVATE void CALL _lib_println(cstring_t cstr) {
 	printf("%s\n", cstr);
 }
 
-PUBLIC void CALL println(cstring_t cstr) {
-	_println(cstr);
+PUBLIC void CALL lib_println(cstring_t cstr) {
+	_lib_println(cstr);
 }

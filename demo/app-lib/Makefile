@@ -24,23 +24,24 @@ PROJ_NAME := hello
 PROJ_TYPE := app
 
 INCLUDE_DIRS += $(O_DIST_DIR)/include
-LDFLAGS += -L$(O_DIST_DIR)/lib -lmylib0
-
-# Forces build of mylib before application build
-PRE_BUILD_DEPS += lib
-
-# Library source directory
-LIB_DIR ?= ../lib
+LDFLAGS      += -L$(O_DIST_DIR)/lib -lmylib0
 
 include $(GCC_PROJECT_BUILDER)/project.mk
 
+# Source code use special decorators when building a shared library
 ifeq ($(LIB_TYPE),shared)
     CFLAGS += -DUSE_DLL
 endif
 
+# Forces build of mylib before application build
+PRE_BUILD_DEPS += lib
+
 include $(GCC_PROJECT_BUILDER)/builder.mk
 
 # ==============================================================================
+# Library source directory
+LIB_DIR ?= ../lib
+
 .PHONY: lib
 lib:
 	@echo [PRE-BUILD] lib
