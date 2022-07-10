@@ -20,14 +20,54 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "mylib_private.h"
+/**
+ * @file
+ *
+ * @brief Library standard definitions.
+ */
+#pragma once
 
-#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <inttypes.h>
+#include <stdlib.h>
 
-PRIVATE void CALL _println(cstring_t cstr) {
-	printf("%s\n", cstr);
-}
+#if defined _WIN32 || defined __CYGWIN__
+	#if defined (BUILD_DLL) || defined (USE_DLL)
+		#ifdef BUILD_DLL
+			/** @internal */
+			#define PUBLIC __declspec(dllexport)
+		#else
+			/** @internal */
+			#define PUBLIC __declspec(dllimport)
+		#endif
+	#else
+		#define PUBLIC
+	#endif
 
-PUBLIC void CALL println(cstring_t cstr) {
-	_println(cstr);
-}
+	/** @internal */
+	#define CALL __cdecl
+#else
+	#if __GNUC__ >= 4
+		/** @internal */
+		#define PUBLIC __attribute__ ((visibility ("default")))
+	#else
+		/** @internal */
+		#define PUBLIC
+	#endif
+
+	/** @internal */
+	#define CALL
+#endif
+
+/** @brief Standard C-string. */
+typedef const char* cstring_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef __cplusplus
+} // extern "C"
+#endif

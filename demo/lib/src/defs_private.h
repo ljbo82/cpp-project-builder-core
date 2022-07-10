@@ -20,14 +20,32 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "mylib_private.h"
+/**
+ * @file
+ *
+ * @brief [PRIVATE] Library standard definitions.
+ */
+#pragma once
 
-#include <stdio.h>
+#include <defs.h>
 
-PRIVATE void CALL _println(cstring_t cstr) {
-	printf("%s\n", cstr);
-}
+#if defined _WIN32 || defined __CYGWIN__
+	/** @internal */
+	#define PRIVATE
+#else
+	#if __GNUC__ >= 4
+		/** @internal */
+		#define PRIVATE  __attribute__ ((visibility ("hidden")))
+	#else
+		/** @internal */
+		#define PRIVATE
+	#endif
+#endif
 
-PUBLIC void CALL println(cstring_t cstr) {
-	_println(cstr);
-}
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef __cplusplus
+} // extern "C"
+#endif

@@ -20,14 +20,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "mylib_private.h"
+#pragma once
 
-#include <stdio.h>
+#include "defs_private.h"
 
-PRIVATE void CALL _println(cstring_t cstr) {
-	printf("%s\n", cstr);
-}
+#include <mylib.h>
 
-PUBLIC void CALL println(cstring_t cstr) {
-	_println(cstr);
-}
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+PRIVATE void CALL _println(cstring_t cstr);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif

@@ -18,17 +18,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+GCC_PROJECT_BUILDER ?= ../..
+
 PROJ_NAME := hello
 PROJ_TYPE := app
 
 INCLUDE_DIRS += $(O_DIST_DIR)/include
-override LDFLAGS += -L$(O_DIST_DIR)/lib -lmylib0
+LDFLAGS += -L$(O_DIST_DIR)/lib -lmylib0
 
 # Forces build of mylib before application build
 PRE_BUILD_DEPS += lib
 
 # Library source directory
 LIB_DIR ?= ../lib
+
+include $(GCC_PROJECT_BUILDER)/project.mk
+
+ifeq ($(LIB_TYPE),shared)
+    CFLAGS += -DUSE_DLL
+endif
+
+include $(GCC_PROJECT_BUILDER)/builder.mk
 
 # ==============================================================================
 .PHONY: lib
@@ -37,8 +47,3 @@ lib:
     # NOTE: Uses a custom BUILD_DIR in order to isolate library object files from application ones.
 	$(O_VERBOSE)$(MAKE) -C $(LIB_DIR) BUILD_DIR=build/lib O=$(shell realpath -m --relative-to=$(LIB_DIR) $(O))
 # ==============================================================================
-
-__SELF_DIR__ := $(dir $(lastword $(MAKEFILE_LIST)))
-GCC_PROJECT_BUILDER ?= $(__SELF_DIR__)../..
-
-include $(GCC_PROJECT_BUILDER)/builder.mk

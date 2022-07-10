@@ -22,11 +22,13 @@ SOFTWARE.
 
 #pragma once
 
+#include "defs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void println(const char* cstr);
+PUBLIC void CALL println(cstring_t cstr);
 
 #ifdef __cplusplus
 } // extern "C"

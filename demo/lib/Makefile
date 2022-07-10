@@ -18,10 +18,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+GCC_PROJECT_BUILDER ?= ../..
+
+ifeq ($(GCC_PROJECT_BUILDER),)
+    $(error [GCC_PROJECT_BUILDER] Missing value)
+endif
+
 PROJ_NAME := mylib
 PROJ_TYPE := lib
 
-__SELF_DIR__ := $(dir $(lastword $(MAKEFILE_LIST)))
-GCC_PROJECT_BUILDER ?= $(__SELF_DIR__)../..
+include $(GCC_PROJECT_BUILDER)/project.mk
+
+ifeq ($(LIB_TYPE),shared)
+    CFLAGS += -DBUILD_DLL
+endif
 
 include $(GCC_PROJECT_BUILDER)/builder.mk

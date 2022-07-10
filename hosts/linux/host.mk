@@ -31,9 +31,9 @@ ifeq ($(PROJ_TYPE),app)
     endif
 endif
 
-ifeq ($(PROJ_TYPE),lib)
-    LIB_TYPE ?= shared
+LIB_TYPE ?= shared
 
+ifeq ($(PROJ_TYPE),lib)
     __hosts_linux_mk_target_base_name__ := lib$(__hosts_linux_mk_target_base_name__)
 
     ifeq ($(LIB_TYPE),static)

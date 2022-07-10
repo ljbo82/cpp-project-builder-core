@@ -222,18 +222,16 @@ __project_mk_src_dirs__ := $(__project_mk_hosts_src_dirs__)
 
 # NOTE: host may have set a default LIB_TYPE
 
-ifeq ($(PROJ_TYPE),lib)
-    LIB_TYPE ?= shared
-    ifeq ($(LIB_TYPE),)
-        $(error [LIB_TYPE] Missing value)
-    endif
-    ifneq ($(words $(LIB_TYPE)),1)
-        $(error [LIB_TYPE] Value cannot have whitespaces: $(LIB_TYPE))
-    endif
-    ifneq ($(LIB_TYPE),shared)
-        ifneq ($(LIB_TYPE),static)
-            $(error [LIB_TYPE] Invalid value: $(LIB_TYPE))
-        endif
+LIB_TYPE ?= shared
+ifeq ($(LIB_TYPE),)
+    $(error [LIB_TYPE] Missing value)
+endif
+ifneq ($(words $(LIB_TYPE)),1)
+    $(error [LIB_TYPE] Value cannot have whitespaces: $(LIB_TYPE))
+endif
+ifneq ($(LIB_TYPE),shared)
+    ifneq ($(LIB_TYPE),static)
+        $(error [LIB_TYPE] Invalid value: $(LIB_TYPE))
     endif
 endif
 # ------------------------------------------------------------------------------
