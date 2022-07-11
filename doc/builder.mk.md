@@ -188,7 +188,7 @@ When building for a custom target host other than native one, it is required to 
 
 The following diagram shows all targets exposed by this makefile and their dependencies:
 
-> NOTE: Dashed lines represent execution of one target after another, and not a dependency between targets.
+> NOTE: Dashed arrows represent execution of one target after another (target pointed by the arrow is executed before the target at arrow base), and not a dependency between targets.
 
 ```mermaid
 graph TD;
@@ -196,26 +196,29 @@ graph TD;
     clean[<b>clean</b>]:::cleanClass;
     postCleanDeps["$(POST_CLEAN_DEPS)"]:::cleanClass;
     intClean[<i>Internal execution</i>]:::cleanClass;
-    preClean[<b>pre-clean</b>]:::cleanClass;
-    preCleanDeps["$(PRE_BUILD_DEPS)"]:::cleanClass;
-    clean-->postCleanDeps-.->intClean-->preClean-->preCleanDeps;
+    preCleanDeps["$(PRE_CLEAN_DEPS)"]:::cleanClass;
+    clean-->postCleanDeps-.->intClean-->preCleanDeps;
+    clean-->intClean;
 
     classDef buildClass stroke:#416b70, fill:#8be6f0;
     build[<b>build</b>]:::buildClass;
     postBuildDeps["$(POST_BUILD_DEPS)"]:::buildClass;
+    artifactDeps["$(ARTIFACT_DEPS)"]:::buildClass;
     intBuild[<i>Internal execution</i>]:::buildClass;
-    preBuild[<b>pre-build</b>]:::buildClass;
     preBuildDeps["$(PRE_BUILD_DEPS)"]:::buildClass;
-    build-->postBuildDeps-.->intBuild-->preBuild-->preBuildDeps;
+    build-->postBuildDeps-.->intBuild-->artifactDeps-.->preBuildDeps;
+    build-->intBuild;
+    intBuild-->preBuildDeps;
 
     classDef distClass stroke:#548033, fill:#96e35b;
     dist[<b>dist</b>]:::distClass;
     postDistDeps["$(POST_DIST_DEPS)"]:::distClass;
     intDist[<i>Internal execution</i>]:::distClass;
-    preDist[<b>pre-dist</b>]:::distClass;
     preDistDeps["$(PRE_DIST_DEPS)"]:::distClass;
-    dist-->postDistDeps-.->intDist-->preDist-->preDistDeps;
-    preDistDeps-.->build
+    dist-->postDistDeps-.->intDist-->preDistDeps;
+    dist-->intDist;
+    preDistDeps-.->build;
+    intDist-->build;
 
 	classDef allClass stroke:#000000, fill:#000000, color:#ffffff;
     all[<b>all*</b>]:::allClass-->dist
@@ -232,32 +235,32 @@ graph TD;
 <a name="clean"></a>
 * **`clean`**
 
-  Removes all compiled artifacts. Its internal rules are preceeded by [pre-clean](#pre-clean) target and are followed by dependencies declared on [`POST_CLEAN_DEPS`](#POST_CLEAN_DEPS) variable.
+  Removes all compiled artifacts.
 
-    <a name="pre-clean"></a>
-    * **`pre-clean`**
+  Its internal rules are preceeded by the targets declared in [`PRE_CLEAN_DEPS`](#PRE_CLEAN_DEPS) variable, and are followed by the targets declared in [`POST_CLEAN_DEPS`](#POST_CLEAN_DEPS) variable.
 
-      This targets does nothing and it is preceeded by dependencies declared on [`PRE_CLEAN_DEPS`](#PRE_CLEAN_DEPS) variable.
 
 <a name="build"></a>
 * **`build`**
 
-  Compiles all source files and generate target binary (executable or library). Its internal rules are preceeded by [pre-build](#pre-build) target and are followed by dependencies declared on [`POST_BUILD_DEPS`](#POST_BUILD_DEPS) variable.
+  Compiles all source files and generates the target binary artifact (executable application or library).
 
-    <a name="pre-build"></a>
-    * **`pre-build`**
+  Its internal rules are preceeded by the targets declared in [PRE_BUILD_DEPS](#PRE_BUILD_DEPS) variable, and are followed by the targets declared in [`POST_BUILD_DEPS`](#POST_BUILD_DEPS) variable.
 
-      This targets does nothing and it is preceeded by dependencies declared on [`PRE_BUILD_DEPS`](#PRE_BUILD_DEPS) variable.
+  > **NOTES**
+  >
+  > * If project does not contain source files, no binary artifact will be generated (Howerver, targets declared in [PRE_BUILD_DEPS](#PRE_BUILD_DEPS) and [`POST_BUILD_DEPS`](#POST_BUILD_DEPS) will be executed)
+  >
+  > * Additional dependency targets for the binary artifact may be added through the [ARTIFACT_DEPS](#ARTIFACT_DEPS) variable.
 
 <a name="dist"></a>
 * **`dist`**
 
-  Generate distribuition tree. Its internal rules are preceeded by [pre-dist](#pre-dist) target are and followed by dependencies declared on [POST_DIST_DEPS](#POST_DIST_DEPS) variable (se [`EXTRA_DIST_DIRS`](#EXTRA_DIST_DIRS) and [`EXTRA_DIST_FILES`](#EXTRA_DIST_FILES)).
+  Generate distribuition tree.
 
-    <a name="pre-dist"></a>
-    * **`pre-dist`**
+  Its internal rules are preceeded by the targets declared in [PRE_DIST_DEPS](#PRE_DIST_DEPS) variable, and followed by dependencies declared on [POST_DIST_DEPS](#POST_DIST_DEPS) variable.
 
-      This targets does nothing and it is preceeded by dependencies declared on [`PRE_DIST_DEPS`](#PRE_DIST_DEPS) as well as the [build](#build) target.
+  > See [`EXTRA_DIST_DIRS`](#EXTRA_DIST_DIRS) and [`EXTRA_DIST_FILES`](#EXTRA_DIST_FILES) in order to check how to add extra files/directories to the distribution.
 
 <a name="print-vars"></a>
 * **`print-vars`**
@@ -427,6 +430,7 @@ The following variables must be defined exclusively inside a makefile (either `$
 * **`ARTIFACT_DEPS`**
   * **Description:** Contains a list of targets that must be executed BEFORE [`ARTIFACT`](#ARTIFACT) is built (see [`build`](#build) target). This is usefull when build an application that depends on libraries that shall be built together with the application.
     * See a [demo Makefile](../demo/app-lib/Makefile) for an example.
+    * See [make targets](#make-targets)
   * **Mandatory:** no
   * **Default value:**  _(undefined)_
   * **Ready for layers:** no
@@ -485,7 +489,8 @@ The following variables must be defined exclusively inside a makefile (either `$
 
 <a name="POST_BUILD_DEPS"></a>
 * **`POST_BUILD_DEPS`**
-  * **Description:** Contains a list of targets to be called AFTER target artifact is built (see [`build`](#build) target).
+  * **Description:** Contains a list of targets to be executed AFTER target artifact is built (see [`build`](#build) target).
+    * See [make targets](#make-targets)
   * **Mandatory:** no
   * **Default value:** _Depends on select target host and [`PROJ_TYPE`](#PROJ_TYPE)._
   * **Ready for layers:** no
@@ -494,7 +499,8 @@ The following variables must be defined exclusively inside a makefile (either `$
 
 <a name="POST_CLEAN_DEPS"></a>
 * **`POST_CLEAN_DEPS`**
-  * **Description:** Contains a list of targets to be called AFTER [`clean`](#clean) target.
+  * **Description:** Contains a list of targets to be executed AFTER [`clean`](#clean) target.
+    * See [make targets](#make-targets)
   * **Mandatory:** no
   * **Default value:**  _(undefined)_
   * **Ready for layers:** no
@@ -503,7 +509,8 @@ The following variables must be defined exclusively inside a makefile (either `$
 
 <a name="POST_DIST_DEPS"></a>
 * **`POST_DIST_DEPS`**
-  * **Description:** Contains a list of targets to be called AFTER [`dist`](#dist) target.
+  * **Description:** Contains a list of targets to be executed AFTER [`dist`](#dist) target.
+    * See [make targets](#make-targets)
   * **Mandatory:** no
   * **Default value:**  _(undefined)_
   * **Ready for layers:** no
@@ -512,8 +519,8 @@ The following variables must be defined exclusively inside a makefile (either `$
 
 <a name="PRE_BUILD_DEPS"></a>
 * **`PRE_BUILD_DEPS`**
-  * **Description:** Contains a list of targets to be called BEFORE [`build`](#build) target (see [`pre-build`](#pre-build) target). This is usefull to build dependencies before building the project itself (see [`BUILD_DIR`](#BUILD_DIR)).
-    * See a [demo Makefile](../demo/app-lib/Makefile) for an example.
+  * **Description:** Contains a list of targets to be executed BEFORE the internal rules of the [`build`](#build) target. This is usefull to build dependencies before building the target artifact itself.
+    * See [make targets](#make-targets)
   * **Mandatory:** no
   * **Default value:**  _(undefined)_
   * **Ready for layers:** no
@@ -523,7 +530,8 @@ The following variables must be defined exclusively inside a makefile (either `$
 
 <a name="PRE_CLEAN_DEPS"></a>
 * **`PRE_CLEAN_DEPS`**
-  * **Description:** Contains a list of targets to be called BEFORE [`clean`](#clean) target (see [`pre-clean`](#pre-clean) target).
+  * **Description:** Contains a list of targets to be executed BEFORE the internal rules of the [`clean`](#clean) target.
+    * See [make targets](#make-targets)
   * **Mandatory:** no
   * **Default value:**  _(undefined)_
   * **Ready for layers:** no
@@ -532,7 +540,8 @@ The following variables must be defined exclusively inside a makefile (either `$
 
 <a name="PRE_DIST_DEPS"></a>
 * **`PRE_DIST_DEPS`**
-  * **Description:** Contains a list of targets to be called BEFORE [`dist`](#dist) target (see [`pre-dist`](#pre-dist) target).
+  * **Description:** Contains a list of targets to be called BEFORE the internal rules of [`dist`](#dist) target.
+    * See [make targets](#make-targets)
   * **Mandatory:** no
   * **Default value:**  _(undefined)_
   * **Ready for layers:** no

@@ -178,10 +178,9 @@ ifdef POST_CLEAN_DEPS
     endif
 endif
 
-.PHONY: pre-clean
-pre-clean: $(PRE_CLEAN_DEPS)
+--__builder_mk_pre_clean__: $(PRE_CLEAN_DEPS)
 
---__builder_mk_clean__: pre-clean
+--__builder_mk_clean__: --__builder_mk_pre_clean__
 	$(O_VERBOSE)rm -rf $(O)
 
 --__builder_mk_post_clean__: --__builder_mk_clean__ $(POST_CLEAN_DEPS)
@@ -233,8 +232,7 @@ ifneq ($(SRC_FILES),)
     endif
 endif
 
-.PHONY: pre-build
-pre-build: $(PRE_BUILD_DEPS)
+--__builder_mk_pre_build__: $(PRE_BUILD_DEPS)
     ifneq ($(SRC_FILES),)
         ifneq ($(HOST),$(NATIVE_HOST))
             ifeq ($(origin CROSS_COMPILE),undefined)
@@ -243,7 +241,7 @@ pre-build: $(PRE_BUILD_DEPS)
         endif
     endif
 
---__builder_mk_build__: pre-build $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT),)
+--__builder_mk_build__: --__builder_mk_pre_build__ $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT),)
 
 --__builder_mk_post_build__: --__builder_mk_build__ $(POST_BUILD_DEPS)
 
@@ -383,15 +381,15 @@ ifdef POST_DIST_DEPS
         $(error [POST_DIST_DEPS] Not defined in a makefile (origin: $(origin POST_DIST_DEPS)))
     endif
 endif
-.PHONY: pre-dist
-pre-dist: build $(PRE_DIST_DEPS)
 
-$(eval --__builder_mk_dist__: pre-dist $(__builder_mk_dist_deps__))
+--__builder_mk_pre_dist__: build $(PRE_DIST_DEPS)
 
---__builder_mk_post-dist__: --__builder_mk_dist__ $(POST_DIST_DEPS)
+$(eval --__builder_mk_dist__: --__builder_mk_pre_dist__ $(__builder_mk_dist_deps__))
+
+--__builder_mk_post_dist__: --__builder_mk_dist__ $(POST_DIST_DEPS)
 
 .PHONY: dist
-dist: --__builder_mk_post-dist__
+dist: --__builder_mk_post_dist__
 # ==============================================================================
 
 undefine __builder_mk_origin_as__
