@@ -21,7 +21,6 @@
 PROJ_NAME := hello
 PROJ_TYPE := app
 
-__SELF_DIR__ := $(dir $(lastword $(MAKEFILE_LIST)))
-GCC_PROJECT_BUILDER ?= $(__SELF_DIR__)../..
+CPP_PROJECT_BUILDER ?= ../..
 
-include $(GCC_PROJECT_BUILDER)/builder.mk
+include $(CPP_PROJECT_BUILDER)/builder.mk

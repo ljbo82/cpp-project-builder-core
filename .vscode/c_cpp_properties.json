@@ -19,7 +19,7 @@
 				"${workspaceFolder}/demo/lib/src",
 				"${workspaceFolder}/demo/lib/include"
 			],
-            "defines": ["BUILD_DLL=1"],
+            "defines": ["BUILD_SHARED_LIB=1"],
             "compilerPath": "/usr/bin/x86_64-w64-mingw32-gcc",
             "cStandard": "gnu99",
             "cppStandard": "gnu++11",

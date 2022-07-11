@@ -1,6 +1,6 @@
-# gcc-project-builder/demo
+# cpp-project-builder/demo
 
-This directory contains example projects using gcc-project-builder:
+This directory contains example projects using cpp-project-builder:
 
 * **`app-lib/`**
 

@@ -18,19 +18,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-GCC_PROJECT_BUILDER ?= ../..
-
 PROJ_NAME := hello
 PROJ_TYPE := app
 
+# Library includes will be placed into $(O_DIST_DIR)/include
 INCLUDE_DIRS += $(O_DIST_DIR)/include
-LDFLAGS      += -L$(O_DIST_DIR)/lib -lmylib0
 
-include $(GCC_PROJECT_BUILDER)/project.mk
+# Library binaries will be placed into $(O_DIST_DIR)/lib
+LDFLAGS += -L$(O_DIST_DIR)/lib -lmylib0
 
-# Source code use special decorators when building a shared library
+CPP_PROJECT_BUILDER ?= ../..
+
+# Since LIB_TYPE will be defined after platform layers are processed,
+# includes project.mk instead of builder.mk in order to fully parse project
+# data prior to compiler management.
+include $(CPP_PROJECT_BUILDER)/project.mk
+
+# At this point, LIB_TYPE is defined, but compiler management did not took
+# place yet.
+
+# Source code use special decorators when using a shared library
 ifeq ($(LIB_TYPE),shared)
-    CFLAGS += -DUSE_DLL
+    CFLAGS += -DUSE_SHARED_LIB
 endif
 
 # ==============================================================================
@@ -52,4 +61,4 @@ $(O_DIST_DIR)/lib/$(LIB_ARTIFACT): --lib
 	$(O_VERBOSE)$(MAKE) -C $(LIB_DIR) BUILD_DIR=build/lib O=$(LIB_OUTPUT)
 # ==============================================================================
 
-include $(GCC_PROJECT_BUILDER)/builder.mk
+include $(CPP_PROJECT_BUILDER)/builder.mk

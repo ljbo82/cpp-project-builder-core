@@ -29,8 +29,8 @@ SOFTWARE.
 #include <stdlib.h>
 
 #if defined _WIN32 || defined __CYGWIN__
-	#if defined (BUILD_DLL) || defined (USE_DLL)
-		#ifdef BUILD_DLL
+	#if defined (BUILD_SHARED_LIB) || defined (USE_SHARED_LIB)
+		#ifdef BUILD_SHARED_LIB
 			/** @internal */
 			#define PUBLIC __declspec(dllexport)
 		#else

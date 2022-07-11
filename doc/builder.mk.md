@@ -1,6 +1,6 @@
 # builder.mk
 
-This is the main makefile exposed by the gcc-project-builder. It contains standard recipes to build C/C++/Assembly multiplatform projects using a GCC-based compiler.
+This is the main makefile exposed by the cpp-project-builder. It contains standard recipes to build C/C++/Assembly multiplatform projects using a GCC-based compiler.
 
 > **Assumptions**
 >
@@ -8,7 +8,7 @@ This is the main makefile exposed by the gcc-project-builder. It contains standa
 >
 > * From this point onwards, the project source root directory will be referred as `$(PROJ_ROOT)` and this is the directory where project's main makefile is located.
 >
-> * The directory where build system is installed will be referred as `$(GCC_PROJECT_BUILDER)`.
+> * The directory where build system is installed will be referred as `$(CPP_PROJECT_BUILDER)`.
 
 ## Summary
 

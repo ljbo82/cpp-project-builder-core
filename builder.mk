@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# gcc-project-builder main makefile
+# cpp-project-builder main makefile
 
 ifndef __builder_mk__
 __builder_mk__ := 1
