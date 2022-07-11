@@ -33,18 +33,23 @@ ifeq ($(LIB_TYPE),shared)
     CFLAGS += -DUSE_DLL
 endif
 
-# Forces build of mylib before application build
-PRE_BUILD_DEPS += lib
-
-include $(GCC_PROJECT_BUILDER)/builder.mk
-
 # ==============================================================================
 # Library source directory
 LIB_DIR ?= ../lib
+LIB_OUTPUT := $(shell realpath -m --relative-to=$(LIB_DIR) $(O))
+LIB_ARTIFACT := $(word 3, $(shell $(MAKE) -s -C $(LIB_DIR) print-vars VARS=ARTIFACT))
 
-.PHONY: lib
-lib:
-	@echo [PRE-BUILD] lib
+ARTIFACT_DEPS += $(O_DIST_DIR)/lib/$(LIB_ARTIFACT)
+
+# Empty phony target used with the sole purpose of forcing a dependent target
+# to be executed
+.PHONY: --lib
+--lib:
+
+$(O_DIST_DIR)/lib/$(LIB_ARTIFACT): --lib
+	@echo [BUILD] $@
     # NOTE: Uses a custom BUILD_DIR in order to isolate library object files from application ones.
-	$(O_VERBOSE)$(MAKE) -C $(LIB_DIR) BUILD_DIR=build/lib O=$(shell realpath -m --relative-to=$(LIB_DIR) $(O))
+	$(O_VERBOSE)$(MAKE) -C $(LIB_DIR) BUILD_DIR=build/lib O=$(LIB_OUTPUT)
 # ==============================================================================
+
+include $(GCC_PROJECT_BUILDER)/builder.mk
