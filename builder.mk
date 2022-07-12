@@ -265,6 +265,7 @@ $(O_BUILD_DIR)/$(ARTIFACT): $(ARTIFACT_DEPS) $(__builder_mk_obj_files__)
 	    $(O_VERBOSE)$(CROSS_COMPILE)$(LD) $$(strip -o $$@ $(__builder_mk_obj_files__) $(LDFLAGS))
     endif
 endif
+	@touch $(O_BUILD_DIR)/build.marker
 endef
 
 $(eval $(__builder_mk_build_target__))
@@ -350,13 +351,6 @@ __builder_mk_dist_files__ := $(__builder_mk_dist_files__) $(foreach distDirEntry
 __builder_mk_dist_files__ := $(call FN_UNIQUE,$(foreach distFileEntry,$(__builder_mk_dist_files__),$(call __builder_mk_fn_dist_adjust_file_entry__,$(distFileEntry))))
 __builder_mk_dist_files__ := $(call FN_UNIQUE,$(foreach distFileEntry,$(__builder_mk_dist_files__),$(call FN_TOKEN,$(distFileEntry),:,1):$(O_DIST_DIR)/$(call FN_TOKEN,$(distFileEntry),:,2)))
 
-# NOTE: Windows does not have standardized support for hard links
-ifeq ($(NATIVE_OS),windows)
-    __builder_mk_ln_f__ := cp
-else
-    __builder_mk_ln_f__ ?= ln -f
-endif
-
 # Template for distribution artifacts targets
 # $(call __builder_mk_dist_deps_template__,src,dest)
 define __builder_mk_dist_deps_template__
@@ -365,7 +359,7 @@ __builder_mk_dist_deps__ += $(2)
 $(2): $(1)
 	@echo [DIST] $$@
 	@mkdir -p $$(dir $$@)
-	$(O_VERBOSE)$(__builder_mk_ln_f__) $$< $$@
+	$(O_VERBOSE)\cp $$< $$@
 endef
 
 $(foreach distFileEntry,$(__builder_mk_dist_files__),$(eval $(call __builder_mk_dist_deps_template__,$(call FN_TOKEN,$(distFileEntry),:,1),$(call FN_TOKEN,$(distFileEntry),:,2))))
@@ -384,7 +378,14 @@ endif
 
 --__builder_mk_pre_dist__: build $(PRE_DIST_DEPS)
 
-$(eval --__builder_mk_dist__: --__builder_mk_pre_dist__ $(__builder_mk_dist_deps__))
+define __builder_mk_dist_marker__
+$(O_BUILD_DIR)/dist.marker: $(__builder_mk_dist_deps__)
+	@touch $$@
+endef
+
+$(eval $(__builder_mk_dist_marker__))
+
+--__builder_mk_dist__: --__builder_mk_pre_dist__ $(O_BUILD_DIR)/dist.marker
 
 --__builder_mk_post_dist__: --__builder_mk_dist__ $(POST_DIST_DEPS)
 
@@ -414,8 +415,8 @@ undefine __builder_mk_dist_dirs__
 undefine __builder_mk_dist_files__
 undefine __builder_mk_fn_dist_adjust_dir_entry__
 undefine __builder_mk_fn_dist_adjust_file_entry__
-undefine __builder_mk_ln_f__
 undefine __builder_mk_dist_deps_template__
 undefine __builder_mk_dist_deps__
+undefine __builder_mk_dist_marker__
 
 endif # ifndef __builder_mk__

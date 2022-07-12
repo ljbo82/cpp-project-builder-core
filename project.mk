@@ -369,6 +369,45 @@ ifneq ($(OPTIMIZE_RELEASE),0)
 endif
 # ------------------------------------------------------------------------------
 
+# LIB_PROJECTS -----------------------------------------------------------------
+
+# Syntax: $(call __project_mk_lib_projects_template__,directory,libName)
+define __project_mk_lib_projects_template__
+# ==============================================================================
+LDFLAGS += -l$(2)
+
+# Uses dist marker to check if application must be re-linked
+ARTIFACT_DEPS += $$(O_BUILD_DIR)/$(2)/dist.marker
+
+# dist marker
+$$(O_BUILD_DIR)/$(2)/dist.marker: --__project_mk_libs__
+	@echo [BUILD] $(2)
+    # NOTE: Uses a custom BUILD_DIR in order to isolate library object files from application ones.
+	$$(O_VERBOSE)$$(MAKE) -C $(1) BUILD_DIR=build/$(2) O=$$(shell realpath -m --relative-to=$(1) $$(O))
+# ==============================================================================
+
+endef
+
+ifdef LIB_PROJECTS
+    ifneq ($(origin LIB_PROJECTS),file)
+        $(error [LIB_PROJECTS] Not defined in a makefile (origin: $(origin LIB_PROJECTS)))
+    endif
+endif
+
+ifneq ($(LIB_PROJECTS),)
+    LIB_PROJECTS := $(call FN_UNIQUE,$(LIB_PROJECTS))
+
+    INCLUDE_DIRS += $(O_DIST_DIR)/include
+    LDFLAGS      += -L$(O_DIST_DIR)/lib
+
+    # Empty phony target used with the sole purpose of forcing a dependent
+    # target to be executed
+    --__project_mk_libs__:
+
+    $(eval $(foreach libProj,$(LIB_PROJECTS),$(call __project_mk_lib_projects_template__,$(call FN_TOKEN,$(libProj),:,1),$(call FN_TOKEN,$(libProj),:,2))))
+endif
+# ------------------------------------------------------------------------------
+
 # LAZY -------------------------------------------------------------------------
 ifdef LAZY
     ifneq ($(origin LAZY),file)
@@ -394,5 +433,6 @@ undefine __project_mk_src_dirs__
 undefine __project_mk_include_dirs__
 undefine __project_mk_src_file_filter__
 undefine __project_mk_invalid_src_files__
+undefine __project_mk_lib_projects_template__
 
 endif # ifndef __project_mk__

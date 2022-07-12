@@ -18,16 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+CPP_PROJECT_BUILDER ?= ../..
+
 PROJ_NAME := hello
 PROJ_TYPE := app
 
-# Library includes will be placed into $(O_DIST_DIR)/include
-INCLUDE_DIRS += $(O_DIST_DIR)/include
-
-# Library binaries will be placed into $(O_DIST_DIR)/lib
-LDFLAGS += -L$(O_DIST_DIR)/lib -lmylib0
-
-CPP_PROJECT_BUILDER ?= ../..
+LIB_PROJECTS += ../lib:mylib0
 
 # Since LIB_TYPE will be defined after platform layers are processed,
 # includes project.mk instead of builder.mk in order to fully parse project
@@ -41,24 +37,5 @@ include $(CPP_PROJECT_BUILDER)/project.mk
 ifeq ($(LIB_TYPE),shared)
     CFLAGS += -DUSE_SHARED_LIB
 endif
-
-# ==============================================================================
-# Library source directory
-LIB_DIR ?= ../lib
-LIB_OUTPUT := $(shell realpath -m --relative-to=$(LIB_DIR) $(O))
-LIB_ARTIFACT := $(word 3, $(shell $(MAKE) -s -C $(LIB_DIR) print-vars VARS=ARTIFACT))
-
-ARTIFACT_DEPS += $(O_DIST_DIR)/lib/$(LIB_ARTIFACT)
-
-# Empty phony target used with the sole purpose of forcing a dependent target
-# to be executed
-.PHONY: --lib
---lib:
-
-$(O_DIST_DIR)/lib/$(LIB_ARTIFACT): --lib
-	@echo [BUILD] $@
-    # NOTE: Uses a custom BUILD_DIR in order to isolate library object files from application ones.
-	$(O_VERBOSE)$(MAKE) -C $(LIB_DIR) BUILD_DIR=build/lib O=$(LIB_OUTPUT)
-# ==============================================================================
 
 include $(CPP_PROJECT_BUILDER)/builder.mk
