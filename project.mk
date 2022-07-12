@@ -104,31 +104,41 @@ else
     __project_mk_o__ := $(__project_mk_o__)/debug
 endif
 
-# Build directory
-BUILD_DIR ?= build
-ifneq ($(words $(BUILD_DIR)),1)
-    $(error [BUILD_DIR] Value cannot have whitespaces: $(BUILD_DIR)
+# Build sub-directory
+ifneq ($(BUILD_SUBDIR),)
+    ifneq ($(words $(BUILD_SUBDIR)),1)
+        $(error [BUILD_SUBDIR] Value cannot have whitespaces: $(BUILD_SUBDIR))
+    endif
 endif
-ifeq ($(BUILD_DIR),)
-    $(error [BUILD_DIR] Missing value)
+ifneq ($(filter ..,$(BUILD_SUBDIR)),)
+    $(error [BUILD_SUBDIR] Invalid value: $(BUILD_SUBDIR))
 endif
 ifdef O_BUILD_DIR
     $(error [O_BUILD_DIR] Reserved variable)
 endif
-O_BUILD_DIR := $(__project_mk_o__)/$(BUILD_DIR)
-
-# Distribution directory
-DIST_DIR ?= dist
-ifneq ($(words $(DIST_DIR)),1)
-    $(error [DIST_DIR] Value cannot have whitespaces: $(DIST_DIR)
+ifeq ($(BUILD_SUBDIR),)
+    O_BUILD_DIR := $(__project_mk_o__)/build
+else
+    O_BUILD_DIR := $(__project_mk_o__)/build/$(BUILD_SUBDIR)
 endif
-ifeq ($(DIST_DIR),)
-    $(error [DIST_DIR] Missing value)
+
+# Distribution sub-directory
+ifneq ($(DIST_SUBDIR),)
+    ifneq ($(words $(DIST_SUBDIR)),1)
+        $(error [DIST_SUBDIR] Value cannot have whitespaces: $(DIST_SUBDIR))
+    endif
+endif
+ifneq ($(filter ..,$(DIST_SUBDIR)),)
+    $(error [DIST_SUBDIR] Invalid value: $(DIST_SUBDIR))
 endif
 ifdef O_DIST_DIR
     $(error [O_DIST_DIR] Reserved variable)
 endif
-O_DIST_DIR := $(__project_mk_o__)/$(DIST_DIR)
+ifeq ($(DIST_SUBDIR),)
+    O_DIST_DIR := $(__project_mk_o__)/dist
+else
+    O_DIST_DIR := $(__project_mk_o__)/dist/$(DIST_SUBDIR)
+endif
 # ------------------------------------------------------------------------------
 
 # Loads host definitions -------------------------------------------------------
@@ -371,19 +381,22 @@ endif
 
 # LIB_PROJECTS -----------------------------------------------------------------
 
-# Syntax: $(call __project_mk_lib_projects_template__,directory,libName)
+# Syntax: $(call __project_mk_lib_projects_template__,directory,libName,entry)
 define __project_mk_lib_projects_template__
 # ==============================================================================
+$(if $(2),,$(error [LIB_PROJECTS] Missing library name (arg#2): $(3)))
+
 LDFLAGS += -l$(2)
 
+--__project_mk_$(2)_force__:
+
 # Uses dist marker to check if application must be re-linked
-ARTIFACT_DEPS += $$(O_BUILD_DIR)/$(2)/dist.marker
+ARTIFACT_DEPS += $(O_DIST_DIR)/../build/$(2)/dist.marker
 
 # dist marker
-$$(O_BUILD_DIR)/$(2)/dist.marker: --__project_mk_libs__
-	@echo [BUILD] $(2)
-    # NOTE: Uses a custom BUILD_DIR in order to isolate library object files from application ones.
-	$$(O_VERBOSE)$$(MAKE) -C $(1) BUILD_DIR=build/$(2) O=$$(shell realpath -m --relative-to=$(1) $$(O))
+$(O_DIST_DIR)/../build/$(2)/dist.marker: --__project_mk_$(2)_force__
+    # NOTE: Uses a custom BUILD_SUBDIR in order to isolate library object files from application ones.
+	$$(O_VERBOSE)$$(MAKE) -C $(1) BUILD_SUBDIR=$(2) O=$$(shell realpath -m --relative-to=$(1) $$(O))
 # ==============================================================================
 
 endef
@@ -400,11 +413,18 @@ ifneq ($(LIB_PROJECTS),)
     INCLUDE_DIRS += $(O_DIST_DIR)/include
     LDFLAGS      += -L$(O_DIST_DIR)/lib
 
-    # Empty phony target used with the sole purpose of forcing a dependent
-    # target to be executed
-    --__project_mk_libs__:
+    $(eval $(foreach libProj,$(LIB_PROJECTS),$(call __project_mk_lib_projects_template__,$(call FN_TOKEN,$(libProj),:,1),$(call FN_TOKEN,$(libProj),:,2),$(libProj))))
+endif
+# ------------------------------------------------------------------------------
 
-    $(eval $(foreach libProj,$(LIB_PROJECTS),$(call __project_mk_lib_projects_template__,$(call FN_TOKEN,$(libProj),:,1),$(call FN_TOKEN,$(libProj),:,2))))
+# LIBS -------------------------------------------------------------------------
+ifdef LIBS
+    ifneq ($(origin LIBS),file)
+        $(error [LIBS] Not defined in a makefile (origin: $(origin LIBS)))
+    endif
+endif
+ifneq ($(LIBS),)
+    LDFLAGS += $(foreach lib,$(LIBS),-l$(lib))
 endif
 # ------------------------------------------------------------------------------
 

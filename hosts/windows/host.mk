@@ -48,8 +48,8 @@ ifeq ($(PROJ_TYPE),lib)
         ifndef ARTIFACT
             ARTIFACT := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).dll
         endif
-        override LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
-        override LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
+        LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
+        LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
         EXTRA_DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT).lib:lib/$(ARTIFACT).lib,)
         EXTRA_DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT).def:lib/$(ARTIFACT).def)
     endif

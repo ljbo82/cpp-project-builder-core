@@ -132,16 +132,16 @@ endif
 # both CFLAGS and CXXFLAGS must have it enabled (NOTE: duplicate -fPIC options will be removed
 # later)
 ifneq ($(or $(filter -fPIC,$(CFLAGS)),$(filter -fPIC,$(CXXFLAGS))),)
-    override CFLAGS   += -fPIC
-    override CXXFLAGS += -fPIC
+    CFLAGS   += -fPIC
+    CXXFLAGS += -fPIC
 endif
 
 __builder_mk_include_flags__ := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
 
-override CFLAGS   := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cflags__) $(CFLAGS))
-override CXXFLAGS := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cxxflags__) $(CXXFLAGS))
-override ASFLAGS  := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_asflags__) $(ASFLAGS))
-override LDFLAGS  := $(call FN_UNIQUE, $(__builder_mk_ldflags__) $(LDFLAGS))
+CFLAGS   := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cflags__) $(CFLAGS))
+CXXFLAGS := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cxxflags__) $(CXXFLAGS))
+ASFLAGS  := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_asflags__) $(ASFLAGS))
+LDFLAGS  := $(call FN_UNIQUE, $(__builder_mk_ldflags__) $(LDFLAGS))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -249,23 +249,22 @@ define __builder_mk_build_target__
 .PHONY: build
 build: --__builder_mk_post_build__
 ifneq ($(SRC_FILES),)
-$(O_BUILD_DIR)/$(ARTIFACT): $(ARTIFACT_DEPS) $(__builder_mk_obj_files__)
-    ifeq ($(PROJ_TYPE),lib)
-        ifeq ($(LIB_TYPE),shared)
+    $(O_BUILD_DIR)/$(ARTIFACT): $(ARTIFACT_DEPS) $(__builder_mk_obj_files__)
+        ifeq ($(PROJ_TYPE),lib)
+            ifeq ($(LIB_TYPE),shared)
+	            @echo [LD] $$@
+	            $(O_VERBOSE)$(CROSS_COMPILE)$(LD) $$(strip -o $$@ $(__builder_mk_obj_files__) $(LDFLAGS))
+            endif
+            ifeq ($(LIB_TYPE),static)
+	            @echo [AR] $$@
+	            $(O_VERBOSE)$(CROSS_COMPILE)$(AR) rcs $$@ $(__builder_mk_obj_files__)
+            endif
+        endif
+        ifeq ($(PROJ_TYPE),app)
 	        @echo [LD] $$@
 	        $(O_VERBOSE)$(CROSS_COMPILE)$(LD) $$(strip -o $$@ $(__builder_mk_obj_files__) $(LDFLAGS))
         endif
-        ifeq ($(LIB_TYPE),static)
-	        @echo [AR] $$@
-	        $(O_VERBOSE)$(CROSS_COMPILE)$(AR) rcs $$@ $(__builder_mk_obj_files__)
-        endif
     endif
-    ifeq ($(PROJ_TYPE),app)
-	    @echo [LD] $$@
-	    $(O_VERBOSE)$(CROSS_COMPILE)$(LD) $$(strip -o $$@ $(__builder_mk_obj_files__) $(LDFLAGS))
-    endif
-endif
-	@touch $(O_BUILD_DIR)/build.marker
 endef
 
 $(eval $(__builder_mk_build_target__))
@@ -380,6 +379,7 @@ endif
 
 define __builder_mk_dist_marker__
 $(O_BUILD_DIR)/dist.marker: $(__builder_mk_dist_deps__)
+	@mkdir -p $$(dir $$@)
 	@touch $$@
 endef
 
