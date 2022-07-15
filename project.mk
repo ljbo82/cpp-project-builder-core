@@ -384,8 +384,6 @@ endif
 # Syntax: $(call __project_mk_lib_projects_template__,directory,libName,entry)
 define __project_mk_lib_projects_template__
 # ==============================================================================
-$(if $(2),,$(error [LIB_PROJECTS] Missing library name (arg#2): $(3)))
-
 LDFLAGS += -l$(2)
 
 --__project_mk_$(2)_force__:
