@@ -33,7 +33,7 @@ include $(CPP_PROJECT_BUILDER)/project.mk
 
 # Source code use special decorators when building a shared library
 ifeq ($(LIB_TYPE),shared)
-    CFLAGS += -DBUILD_SHARED_LIB
+    CFLAGS += -DBUILD_SHARED_LIB -fvisibility=hidden
 endif
 
 include $(CPP_PROJECT_BUILDER)/builder.mk

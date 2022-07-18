@@ -24,7 +24,7 @@ SOFTWARE.
 
 #include <stdio.h>
 
-PRIVATE void CALL _lib_println(cstring_t cstr) {
+void _lib_println(cstring_t cstr) {
 	printf("%s\n", cstr);
 }
 

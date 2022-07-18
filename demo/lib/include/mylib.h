@@ -44,9 +44,14 @@ SOFTWARE.
 	/** @internal */
 	#define CALL __cdecl
 #else
-	#if __GNUC__ >= 4
-		/** @internal */
-		#define PUBLIC __attribute__ ((visibility ("default")))
+	#ifdef BUILD_SHARED_LIB
+		#if __GNUC__ >= 4
+			/** @internal */
+			#define PUBLIC __attribute__ ((visibility ("default")))
+		#else
+			/** @internal */
+			#define PUBLIC
+		#endif
 	#else
 		/** @internal */
 		#define PUBLIC

@@ -24,24 +24,11 @@ SOFTWARE.
 
 #include <mylib.h>
 
-#if defined _WIN32 || defined __CYGWIN__
-	/** @internal */
-	#define PRIVATE
-#else
-	#if __GNUC__ >= 4
-		/** @internal */
-		#define PRIVATE  __attribute__ ((visibility ("hidden")))
-	#else
-		/** @internal */
-		#define PRIVATE
-	#endif
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-PRIVATE void CALL _lib_println(cstring_t cstr);
+void _lib_println(cstring_t cstr);
 
 #ifdef __cplusplus
 } // extern "C"
