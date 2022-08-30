@@ -358,7 +358,7 @@ __builder_mk_dist_deps__ += $(2)
 $(2): $(1)
 	@echo [DIST] $$@
 	@mkdir -p $$(dir $$@)
-	$(O_VERBOSE)\cp $$< $$@
+	$(O_VERBOSE)/bin/cp $$< $$@
 endef
 
 $(foreach distFileEntry,$(__builder_mk_dist_files__),$(eval $(call __builder_mk_dist_deps_template__,$(call FN_TOKEN,$(distFileEntry),:,1),$(call FN_TOKEN,$(distFileEntry),:,2))))
