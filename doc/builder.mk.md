@@ -460,8 +460,9 @@ The following variables must be defined exclusively inside a makefile (either `$
 <a name="LIB_PROJECTS"></a>
 * **`LIB_PROJECTS`**
   * **Description:** If your project depends on libraries that shall be be built along with your project, `LIB_PROJECTS` shall contains a list of library projects that shall be built as a dependency for your project's artifact.
-    * Each entry in the list must have the format `lib_project_directory:lib_name`.
+    * Each entry in the list must have the format `lib_project_directory[:lib_dir_alias]`.
     * Each referred project shall must be using gcc-project-builder in order to build it (using `make` command)
+    * Referred library header dir will be added to include path
     * For an example of real usage, see [app-lib demo makefile](../demo/app-lib/Makefile)
   * **Mandatory:** no
   * **Default value:** _(undefined)_
@@ -471,7 +472,7 @@ The following variables must be defined exclusively inside a makefile (either `$
 
   <a name="LIBS"></a>
 * **`LIBS`**
-  * **Description:** Contains a list of libraries (cannonical names) the project must link against. Although libraries can be added using [LDFLAGS](#LDFLAGS), prefere using `LIBS` variable.
+  * **Description:** Contains a list of libraries (cannonical names) the project must link against. Although libraries can be added using [LDFLAGS](#LDFLAGS), prefer using `LIBS` variable because it make easier the management of linker flags order.
   * **Mandatory:** no
   * **Default value:** _(undefined)_
   * **Ready for layers:** no

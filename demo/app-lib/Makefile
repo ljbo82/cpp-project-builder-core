@@ -23,7 +23,13 @@ CPP_PROJECT_BUILDER ?= ../..
 PROJ_NAME := hello
 PROJ_TYPE := app
 
-LIB_PROJECTS += ../lib:mylib0
+LIB_PROJECTS += ../lib
+
+ifeq ($(LIB_TYPE),static)
+    LIBS += :libmylib0.a
+else
+    LIBS += mylib0
+endif
 
 # Since LIB_TYPE will be defined after platform layers are processed,
 # includes project.mk instead of builder.mk in order to fully parse project

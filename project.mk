@@ -381,11 +381,8 @@ endif
 
 # LIB_PROJECTS -----------------------------------------------------------------
 
-# Syntax: $(call __project_mk_lib_projects_template__,directory,libName,entry)
+# Syntax: $(call __project_mk_lib_projects_template__,directory,libDirAlias)
 define __project_mk_lib_projects_template__
-# ==============================================================================
-LDFLAGS += -l$(2)
-
 --__project_mk_$(2)_force__:
 
 # Uses dist marker to check if application must be re-linked
@@ -395,9 +392,15 @@ ARTIFACT_DEPS += $(O_DIST_DIR)/../build/$(2)/dist.marker
 $(O_DIST_DIR)/../build/$(2)/dist.marker: --__project_mk_$(2)_force__
     # NOTE: Uses a custom BUILD_SUBDIR in order to isolate library object files from application ones.
 	$$(O_VERBOSE)$$(MAKE) -C $(1) BUILD_SUBDIR=$(2) O=$$(shell realpath -m --relative-to=$(1) $$(O))
-# ==============================================================================
+
 
 endef
+
+# Each entry in LIB_PROJECTS must have the syntax: lib_project_directory:lib_dir_alias.
+
+# Autixiliary function to adjust a lib project entry in LIB_PROJECTS.
+# Syntax: $(call __project_mk_fn_lib_project_adjust_entry__,libProjEntry)
+__project_mk_fn_lib_project_adjust_entry__ = $(if $(call FN_TOKEN,$(1),:,2),$(1),$(1):$(notdir $(abspath $(1))))
 
 ifdef LIB_PROJECTS
     ifneq ($(origin LIB_PROJECTS),file)
@@ -406,12 +409,12 @@ ifdef LIB_PROJECTS
 endif
 
 ifneq ($(LIB_PROJECTS),)
-    LIB_PROJECTS := $(call FN_UNIQUE,$(LIB_PROJECTS))
+    LIB_PROJECTS := $(call FN_UNIQUE,$(foreach libProjEntry,$(LIB_PROJECTS),$(call __project_mk_fn_lib_project_adjust_entry__,$(libProjEntry))))
 
     INCLUDE_DIRS += $(O_DIST_DIR)/include
     LDFLAGS      += -L$(O_DIST_DIR)/lib
 
-    $(eval $(foreach libProj,$(LIB_PROJECTS),$(call __project_mk_lib_projects_template__,$(call FN_TOKEN,$(libProj),:,1),$(call FN_TOKEN,$(libProj),:,2),$(libProj))))
+    $(eval $(foreach libProj,$(LIB_PROJECTS),$(call __project_mk_lib_projects_template__,$(call FN_TOKEN,$(libProj),:,1),$(call FN_TOKEN,$(libProj),:,2))))
 endif
 # ------------------------------------------------------------------------------
 
@@ -452,5 +455,6 @@ undefine __project_mk_include_dirs__
 undefine __project_mk_src_file_filter__
 undefine __project_mk_invalid_src_files__
 undefine __project_mk_lib_projects_template__
+undefine __project_mk_fn_lib_project_adjust_entry__
 
 endif # ifndef __project_mk__
