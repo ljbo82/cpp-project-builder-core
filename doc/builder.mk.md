@@ -618,12 +618,12 @@ The following variables allows compiler configuration:
 
 <a name="ASFLAGS"></a>
 * **`ASFLAGS`**
-  * **Description:** Extra flags to be passed to the assembler.
+  * **Description:** Flags to be passed to the assembler.
   * **Mandatory:** no
   * **Default value:** _Depends on build configuration and [project type](#PROJ_TYPE)._
   * **Ready for layers:** no
-  * **Allowed origins:** _Any_
-  * **Restrictions:** In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable (using `+=` makefile operator) instead of setting a value directly.
+  * **Allowed origins:** _enviroment_, _file_
+  * **Restrictions:** In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable instead of setting a value directly.
 
 <a name="CC"></a>
 * **`CC`**
@@ -637,12 +637,12 @@ The following variables allows compiler configuration:
 
 <a name="CFLAGS"></a>
 * **`CFLAGS`**
-  * **Description:** Extra flags to be passed to the C compiler.
+  * **Description:** Flags to be passed to the C compiler.
   * **Mandatory:** no
   * **Default value:** _Depends on build configuration and [project type](#PROJ_TYPE)._
   * **Ready for layers:** no
-  * **Allowed origins:** _Any_
-  * **Restrictions:** In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable (using `+=` makefile operator) instead of setting a value directly.
+  * **Allowed origins:** _enviroment_, _file_
+  * **Restrictions:** In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable instead of setting a value directly.
 
 <a name="CROSS_COMPILE"></a>
 * **`CROSS_COMPILE`**
@@ -665,12 +665,44 @@ The following variables allows compiler configuration:
 
 <a name="CXXFLAGS"></a>
 * **`CXXFLAGS`**
-  * **Description:** Extra flags to be passed to the C++ compiler.
+  * **Description:** Flags to be passed to the C++ compiler.
   * **Mandatory:** no
   * **Default value:** _Depends on build configuration and [project type](#PROJ_TYPE)._
   * **Ready for layers:** no
-  * **Allowed origins:** _Any_
-  * **Restrictions:** In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable (using `+=` makefile operator) instead of setting a value directly.
+  * **Allowed origins:** _enviroment_, _file_
+  * **Restrictions:** In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable instead of setting a value directly.
+
+  <a name="EXTRA_ASFLAGS"></a>
+* **`EXTRA_ASFLAGS`**
+  * **Description:** Extra assembler flags.
+  * **Mandatory:** no
+  * **Default value:** _(undefined)_
+  * **Ready for layers:** no
+  * **Allowed origins:** _Any, although it is strongly recommended to define this variable through command-line parameters._
+
+<a name="EXTRA_CFLAGS"></a>
+* **`EXTRA_CFLAGS`**
+  * **Description:** Extra C compiler flags.
+  * **Mandatory:** no
+  * **Default value:** _(undefined)_
+  * **Ready for layers:** no
+  * **Allowed origins:** _Any, although it is strongly recommended to define this variable through command-line parameters._
+
+<a name="EXTRA_CXXFLAGS"></a>
+* **`EXTRA_CXXFLAGS`**
+  * **Description:** Extra C++ compiler flags.
+  * **Mandatory:** no
+  * **Default value:** _(undefined)_
+  * **Ready for layers:** no
+  * **Allowed origins:** _Any, although it is strongly recommended to define this variable through command-line parameters._
+
+  <a name="EXTRA_LDFLAGS"></a>
+* **`EXTRA_CXXFLAGS`**
+  * **Description:** Extra linker flags.
+  * **Mandatory:** no
+  * **Default value:** _(undefined)_
+  * **Ready for layers:** no
+  * **Allowed origins:** _Any, although it is strongly recommended to define this variable through command-line parameters._
 
 <a name="LD"></a>
 * **`LD`**
@@ -684,12 +716,12 @@ The following variables allows compiler configuration:
 
 <a name="LDFLAGS"></a>
 * **`LDFLAGS`**
-  * **Description:** Extra flags to be passed to the linker.
+  * **Description:** Flags to be passed to the linker.
   * **Mandatory:** no
   * **Default value:** _Depends on build configuration and [project type](#PROJ_TYPE)._
   * **Ready for layers:** no
-  * **Allowed origins:** _Any_
-  * **Restrictions:** In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable (using `+=` makefile operator) instead of setting a value directly.
+  * **Allowed origins:** _enviroment_, _file_
+  * **Restrictions:** In order to achive flexibility on multiplatform projects, it is strongly recommeded to append values to this variable instead of setting a value directly.
 
 ### Advanced Variables
 

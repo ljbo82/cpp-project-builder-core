@@ -128,20 +128,36 @@ ifeq ($(PROJ_TYPE),lib)
     endif
 endif
 
-# If '-fPIC' was passed explicitly (e.g. building a static library with position-independent code),
-# both CFLAGS and CXXFLAGS must have it enabled (NOTE: duplicate -fPIC options will be removed
-# later)
-ifneq ($(or $(filter -fPIC,$(CFLAGS)),$(filter -fPIC,$(CXXFLAGS))),)
-    CFLAGS   += -fPIC
-    CXXFLAGS += -fPIC
+ifdef CFLAGS
+    ifeq ($(origin CFLAGS),command line)
+        $(error [CFLAGS] Defined in command line. Consider using EXTRA_CFLAGS)
+    endif
+endif
+
+ifdef CXXFLAGS
+    ifeq ($(origin CXXFLAGS),command line)
+        $(error [CXXFLAGS] Defined in command line. Consider using EXTRA_CXXFLAGS)
+    endif
+endif
+
+ifdef ASFLAGS
+    ifeq ($(origin ASFLAGS),command line)
+        $(error [ASFLAGS] Defined in command line. Consider using EXTRA_ASFLAGS)
+    endif
+endif
+
+ifdef LDFLAGS
+    ifeq ($(origin LDFLAGS),command line)
+        $(error [LDFLAGS] Defined in command line. Consider using EXTRA_LDFLAGS)
+    endif
 endif
 
 __builder_mk_include_flags__ := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
 
-CFLAGS   := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cflags__) $(CFLAGS))
-CXXFLAGS := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cxxflags__) $(CXXFLAGS))
-ASFLAGS  := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_asflags__) $(ASFLAGS))
-LDFLAGS  := $(call FN_UNIQUE, $(__builder_mk_ldflags__) $(LDFLAGS))
+CFLAGS   := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cflags__) $(CFLAGS) $(EXTRA_CFLAGS))
+CXXFLAGS := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_cxxflags__) $(CXXFLAGS) $(EXTRA_CXXFLAGS))
+ASFLAGS  := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__builder_mk_asflags__) $(ASFLAGS) $(EXTRA_ASFLAGS))
+LDFLAGS  := $(call FN_UNIQUE, $(__builder_mk_ldflags__) $(LDFLAGS) $(EXTRA_LDFLAGS))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
