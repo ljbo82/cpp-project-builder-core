@@ -362,9 +362,13 @@ __builder_mk_fn_dist_adjust_file_entry__ = $(if $(call FN_TOKEN,$(1),:,2),$(1),$
 
 __builder_mk_dist_dirs__ := $(call FN_UNIQUE,$(foreach distDirEntry,$(__builder_mk_dist_dirs__),$(call __builder_mk_fn_dist_adjust_dir_entry__,$(distDirEntry))))
 
+DIST_DIRS := $(__builder_mk_dist_dirs__)
+
 __builder_mk_dist_files__ := $(__builder_mk_dist_files__) $(foreach distDirEntry,$(__builder_mk_dist_dirs__),$(foreach distFile,$(call FN_FIND_FILES,$(call FN_TOKEN,$(distDirEntry),:,1)),$(call FN_TOKEN,$(distDirEntry),:,1)/$(distFile):$(if $(call FN_TOKEN,$(distDirEntry),:,2),$(call FN_TOKEN,$(distDirEntry),:,2)/,)$(distFile)))
 __builder_mk_dist_files__ := $(call FN_UNIQUE,$(foreach distFileEntry,$(__builder_mk_dist_files__),$(call __builder_mk_fn_dist_adjust_file_entry__,$(distFileEntry))))
 __builder_mk_dist_files__ := $(call FN_UNIQUE,$(foreach distFileEntry,$(__builder_mk_dist_files__),$(call FN_TOKEN,$(distFileEntry),:,1):$(O_DIST_DIR)/$(call FN_TOKEN,$(distFileEntry),:,2)))
+
+DIST_FILES := $(__builder_mk_dist_files__)
 
 # Template for distribution artifacts targets
 # $(call __builder_mk_dist_deps_template__,src,dest)

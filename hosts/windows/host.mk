@@ -50,8 +50,8 @@ ifeq ($(PROJ_TYPE),lib)
         endif
         LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
         LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
-        EXTRA_DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT).lib:lib/$(ARTIFACT).lib,)
-        EXTRA_DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT).def:lib/$(ARTIFACT).def)
+        DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT).lib:lib/$(ARTIFACT).lib,)
+        DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT).def:lib/$(ARTIFACT).def)
     endif
 endif
 
