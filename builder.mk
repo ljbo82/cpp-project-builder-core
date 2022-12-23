@@ -172,7 +172,7 @@ all: dist
 # ==============================================================================
 
 # print-vars ===================================================================
-VARS ?= $(sort ARTIFACT_DEPS DEBUG HOST O V EXTRA_DIST_DIRS EXTRA_DIST_FILES INCLUDE_DIRS LIB_PROJECTS LIBS LIB_TYPE POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS O_BUILD_DIR O_DIST_DIR HOSTS_DIRS OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE ARTIFACT)
+VARS ?= $(sort ARTIFACT_DEPS DEBUG HOST O V DIST_DIRS DIST_FILES INCLUDE_DIRS LIB_PROJECTS LIBS LIB_TYPE POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS O_BUILD_DIR O_DIST_DIR HOSTS_DIRS OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE ARTIFACT)
 .PHONY: print-vars
 print-vars:
     ifeq ($(VARS),)
@@ -321,9 +321,9 @@ $(eval $(call __builder_mk_as_template__,S))
 # ==============================================================================
 
 # dist =========================================================================
-ifdef EXTRA_DIST_DIRS
-    ifneq ($(origin EXTRA_DIST_DIRS),file)
-        $(error [EXTRA_DIST_DIRS] Not defined in a makefile (origin: $(origin EXTRA_DIST_DIRS)))
+ifdef DIST_DIRS
+    ifneq ($(origin DIST_DIRS),file)
+        $(error [DIST_DIRS] Not defined in a makefile (origin: $(origin DIST_DIRS)))
     endif
 endif
 ifeq ($(PROJ_TYPE),lib)
@@ -334,11 +334,11 @@ ifeq ($(PROJ_TYPE),lib)
     endif
 endif
 
-__builder_mk_dist_dirs__ := $(call FN_UNIQUE,$(__builder_mk_dist_dirs__) $(EXTRA_DIST_DIRS))
+__builder_mk_dist_dirs__ := $(call FN_UNIQUE,$(__builder_mk_dist_dirs__) $(DIST_DIRS))
 
-ifdef EXTRA_DIST_FILES
-    ifneq ($(origin EXTRA_DIST_FILES),file)
-        $(error [EXTRA_DIST_FILES] Not defined in a makefile (origin: $(origin EXTRA_DIST_FILES)))
+ifdef DIST_FILES
+    ifneq ($(origin DIST_FILES),file)
+        $(error [DIST_FILES] Not defined in a makefile (origin: $(origin DIST_FILES)))
     endif
 endif
 ifneq ($(SRC_FILES),)
@@ -348,15 +348,15 @@ ifneq ($(SRC_FILES),)
         __builder_mk_dist_files__ := $(O_BUILD_DIR)/$(ARTIFACT):lib/$(ARTIFACT)
     endif
 endif
-__builder_mk_dist_files__ := $(call FN_UNIQUE,$(__builder_mk_dist_files__) $(EXTRA_DIST_FILES))
+__builder_mk_dist_files__ := $(call FN_UNIQUE,$(__builder_mk_dist_files__) $(DIST_FILES))
 
 # Each entry (either O_DIST_DIR or DIST_FILE) has the syntax: src:destPathInDistDir
 
-# Autixiliary function to adjust a distribution directory entry in EXTRA_DIST_DIRS.
+# Autixiliary function to adjust a distribution directory entry in DIST_DIRS.
 # Syntax: $(call __builder_mk_fn_dist_adjust_dir_entry__,distDirEntry)
 __builder_mk_fn_dist_adjust_dir_entry__ = $(if $(call FN_TOKEN,$(1),:,2),$(1),$(1):)
 
-# Autixiliary function to adjust a distribution file entry in EXTRA_DIST_FILES.
+# Autixiliary function to adjust a distribution file entry in DIST_FILES.
 # Syntax: $(call __builder_mk_fn_dist_adjust_file_entry__,distFileEntry)
 __builder_mk_fn_dist_adjust_file_entry__ = $(if $(call FN_TOKEN,$(1),:,2),$(1),$(1):$(notdir $(1)))
 

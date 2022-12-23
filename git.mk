@@ -72,6 +72,21 @@ ifneq ($(__git_mk_repo_available__),)
         undefine GIT_COMMIT
     endif
 endif
+
+ifdef GIT_VERSION
+    $(error [GIT_VERSION] Reserved variable)
+endif
+ifeq ($(GIT_TAG),)
+    GIT_VERSION := 0.1.0
+    ifeq ($(GIT_COMMIT_SHORT),)
+        GIT_VERSION := $(GIT_VERSION)-unknown
+    else
+        GIT_VERSION := $(GIT_VERSION)-$(GIT_COMMIT_SHORT)
+    endif
+else
+    GIT_VERSION := $(GIT_TAG)
+endif
+
 undefine __git_mk_repo_available__
 
 endif # ifndef __git_mk__
