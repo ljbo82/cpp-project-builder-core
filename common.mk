@@ -45,14 +45,4 @@ endif
 O_VERBOSE = $(if $(filter 0,$(V)),@,)
 # ------------------------------------------------------------------------------
 
-# Output base directory --------------------------------------------------------
-O ?= output
-ifeq ($(O),)
-    $(error [O] Missing value)
-endif
-ifneq ($(words $(O)),1)
-    $(error [O] Value cannot have whitespaces: $(O))
-endif
-# ------------------------------------------------------------------------------
-
 endif # ifndef __common_mk__

@@ -96,12 +96,13 @@ else
 endif
 # ------------------------------------------------------------------------------
 
-# Output directories (read-only vars) ------------------------------------------
-__project_mk_o__ := $(O)/$(if $(HOST),$(HOST),native)
-ifeq ($(DEBUG),0)
-    __project_mk_o__ := $(__project_mk_o__)/release
-else
-    __project_mk_o__ := $(__project_mk_o__)/debug
+# Output directory -------------------------------------------------------------
+O ?= output
+ifeq ($(O),)
+    $(error [O] Missing value)
+endif
+ifneq ($(words $(O)),1)
+    $(error [O] Value cannot have whitespaces: $(O))
 endif
 
 # Build sub-directory
@@ -115,11 +116,12 @@ ifneq ($(filter ..,$(BUILD_SUBDIR)),)
 endif
 ifdef O_BUILD_DIR
     $(error [O_BUILD_DIR] Reserved variable)
-endif
-ifeq ($(BUILD_SUBDIR),)
-    O_BUILD_DIR := $(__project_mk_o__)/build
 else
-    O_BUILD_DIR := $(__project_mk_o__)/build/$(BUILD_SUBDIR)
+    ifeq ($(BUILD_SUBDIR),)
+        O_BUILD_DIR := $(O)/build
+    else
+        O_BUILD_DIR := $(O)/build/$(BUILD_SUBDIR)
+    endif
 endif
 
 # Distribution sub-directory
@@ -133,11 +135,12 @@ ifneq ($(filter ..,$(DIST_SUBDIR)),)
 endif
 ifdef O_DIST_DIR
     $(error [O_DIST_DIR] Reserved variable)
-endif
-ifeq ($(DIST_SUBDIR),)
-    O_DIST_DIR := $(__project_mk_o__)/dist
 else
-    O_DIST_DIR := $(__project_mk_o__)/dist/$(DIST_SUBDIR)
+    ifeq ($(DIST_SUBDIR),)
+        O_DIST_DIR := $(O)/dist
+    else
+        O_DIST_DIR := $(O)/dist/$(DIST_SUBDIR)
+    endif
 endif
 # ------------------------------------------------------------------------------
 
@@ -379,56 +382,6 @@ ifneq ($(OPTIMIZE_RELEASE),0)
 endif
 # ------------------------------------------------------------------------------
 
-# LIB_PROJECTS -----------------------------------------------------------------
-
-# Syntax: $(call __project_mk_lib_projects_template__,directory,libDirAlias)
-define __project_mk_lib_projects_template__
---__project_mk_$(2)_force__:
-
-# Uses dist marker to check if application must be re-linked
-ARTIFACT_DEPS += $(O_DIST_DIR)/../build/$(2)/dist.marker
-
-# dist marker
-$(O_DIST_DIR)/../build/$(2)/dist.marker: --__project_mk_$(2)_force__
-    # NOTE: Uses a custom BUILD_SUBDIR in order to isolate library object files from application ones.
-	$$(O_VERBOSE)$$(MAKE) -C $(1) BUILD_SUBDIR=$(2) O=$$(shell realpath -m --relative-to=$(1) $$(O))
-
-
-endef
-
-# Each entry in LIB_PROJECTS must have the syntax: lib_project_directory:lib_dir_alias.
-
-# Autixiliary function to adjust a lib project entry in LIB_PROJECTS.
-# Syntax: $(call __project_mk_fn_lib_project_adjust_entry__,libProjEntry)
-__project_mk_fn_lib_project_adjust_entry__ = $(if $(call FN_TOKEN,$(1),:,2),$(1),$(1):$(notdir $(abspath $(1))))
-
-ifdef LIB_PROJECTS
-    ifneq ($(origin LIB_PROJECTS),file)
-        $(error [LIB_PROJECTS] Not defined in a makefile (origin: $(origin LIB_PROJECTS)))
-    endif
-endif
-
-ifneq ($(LIB_PROJECTS),)
-    LIB_PROJECTS := $(call FN_UNIQUE,$(foreach libProjEntry,$(LIB_PROJECTS),$(call __project_mk_fn_lib_project_adjust_entry__,$(libProjEntry))))
-
-    INCLUDE_DIRS += $(O_DIST_DIR)/include
-    LDFLAGS      += -L$(O_DIST_DIR)/lib
-
-    $(eval $(foreach libProj,$(LIB_PROJECTS),$(call __project_mk_lib_projects_template__,$(call FN_TOKEN,$(libProj),:,1),$(call FN_TOKEN,$(libProj),:,2))))
-endif
-# ------------------------------------------------------------------------------
-
-# LIBS -------------------------------------------------------------------------
-ifdef LIBS
-    ifneq ($(origin LIBS),file)
-        $(error [LIBS] Not defined in a makefile (origin: $(origin LIBS)))
-    endif
-endif
-ifneq ($(LIBS),)
-    LDFLAGS += $(foreach lib,$(LIBS),-l$(lib))
-endif
-# ------------------------------------------------------------------------------
-
 # LAZY -------------------------------------------------------------------------
 ifdef LAZY
     ifneq ($(origin LAZY),file)
@@ -439,7 +392,6 @@ endif
 $(eval $(LAZY))
 # ------------------------------------------------------------------------------
 
-undefine __project_mk_o__
 undefine __project_mk_host_factorizer__
 undefine __project_mk_host_factorizer_current__
 undefine __project_mk_host_factorizer_previous__
@@ -454,7 +406,5 @@ undefine __project_mk_src_dirs__
 undefine __project_mk_include_dirs__
 undefine __project_mk_src_file_filter__
 undefine __project_mk_invalid_src_files__
-undefine __project_mk_lib_projects_template__
-undefine __project_mk_fn_lib_project_adjust_entry__
 
 endif # ifndef __project_mk__

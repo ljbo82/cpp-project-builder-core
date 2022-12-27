@@ -86,6 +86,13 @@ ifdef FN_FIND_FILES
     $(error [FN_FIND_FILES] Reserved variable)
 endif
 FN_FIND_FILES = $(shell cd $(1); find . -type f $(2) | sed 's:./::')
+
+# Returns the relative path between src and destination.
+# Syntax: $(call FN_REL_DIR,srcDir,destDir)
+ifdef FN_REL_DIR
+    $(error [FN_REL_DIR] Reserved variable)
+endif
+FN_REL_DIR = $(shell realpath -m --relative-to=$(1) $(2))
 # ------------------------------------------------------------------------------
 
 endif # ifndef __functions_mk__

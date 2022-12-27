@@ -168,11 +168,11 @@ LDFLAGS  := $(call FN_UNIQUE, $(__builder_mk_ldflags__) $(LDFLAGS) $(EXTRA_LDFLA
 
 # all ==========================================================================
 .PHONY: all
-all: dist
+all: dist ;
 # ==============================================================================
 
 # print-vars ===================================================================
-VARS ?= $(sort ARTIFACT_DEPS DEBUG HOST O V DIST_DIRS DIST_FILES INCLUDE_DIRS LIB_PROJECTS LIBS LIB_TYPE POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS O_BUILD_DIR O_DIST_DIR HOSTS_DIRS OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE ARTIFACT)
+VARS ?= $(sort DEBUG HOST DIST_MARKER O O_BUILD_DIR O_DIST_DIR V DIST_DIRS DIST_FILES INCLUDE_DIRS LIB_TYPE POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS HOSTS_DIRS OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE ARTIFACT)
 .PHONY: print-vars
 print-vars:
     ifeq ($(VARS),)
@@ -194,15 +194,15 @@ ifdef POST_CLEAN_DEPS
     endif
 endif
 
---__builder_mk_pre_clean__: $(PRE_CLEAN_DEPS)
+--__builder_mk_pre_clean__: $(PRE_CLEAN_DEPS) ;
 
 --__builder_mk_clean__: --__builder_mk_pre_clean__
 	$(O_VERBOSE)rm -rf $(O)
 
---__builder_mk_post_clean__: --__builder_mk_clean__ $(POST_CLEAN_DEPS)
+--__builder_mk_post_clean__: --__builder_mk_clean__ $(POST_CLEAN_DEPS) ;
 
 .PHONY: clean
-clean: --__builder_mk_post_clean__
+clean: --__builder_mk_post_clean__ ;
 # ==============================================================================
 
 # build ========================================================================
@@ -214,11 +214,6 @@ endif
 ifdef POST_BUILD_DEPS
     ifneq ($(origin POST_BUILD_DEPS),file)
         $(error [POST_BUILD_DEPS] Not defined in a makefile (origin: $(origin POST_BUILD_DEPS)))
-    endif
-endif
-ifdef ARTIFACT_DEPS
-    ifneq ($(origin ARTIFACT_DEPS),file)
-        $(error [ARTIFACT_DEPS] Not defined in a makefile (origin: $(origin ARTIFACT_DEPS)))
     endif
 endif
 
@@ -248,28 +243,21 @@ ifneq ($(SRC_FILES),)
     endif
 endif
 
---__builder_mk_pre_build__: $(PRE_BUILD_DEPS)
-    ifneq ($(SRC_FILES),)
+
+ifneq ($(SRC_FILES),)
+    --pre-build-check:
         ifneq ($(HOST),$(NATIVE_HOST))
             ifeq ($(origin CROSS_COMPILE),undefined)
 	            $(error [CROSS_COMPILE] Missing value for HOST $(HOST))
             endif
         endif
-    endif
 
---__builder_mk_build__: --__builder_mk_pre_build__ $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT),)
-
---__builder_mk_post_build__: --__builder_mk_build__ $(POST_BUILD_DEPS)
-
-define __builder_mk_build_target__
-.PHONY: build
-build: --__builder_mk_post_build__
-ifneq ($(SRC_FILES),)
-    $(O_BUILD_DIR)/$(ARTIFACT): $(ARTIFACT_DEPS) $(__builder_mk_obj_files__)
+    define __builder_mk_artifact_target__
+    $(O_BUILD_DIR)/$(ARTIFACT): $(PRE_BUILD_DEPS) $(__builder_mk_obj_files__)
         ifeq ($(PROJ_TYPE),lib)
             ifeq ($(LIB_TYPE),shared)
 	            @echo [LD] $$@
-	            $(O_VERBOSE)$(CROSS_COMPILE)$(LD) $$(strip -o $$@ $(__builder_mk_obj_files__) $(LDFLAGS))
+	            $(O_VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $$@ $(__builder_mk_obj_files__) $(LDFLAGS))
             endif
             ifeq ($(LIB_TYPE),static)
 	            @echo [AR] $$@
@@ -278,12 +266,18 @@ ifneq ($(SRC_FILES),)
         endif
         ifeq ($(PROJ_TYPE),app)
 	        @echo [LD] $$@
-	        $(O_VERBOSE)$(CROSS_COMPILE)$(LD) $$(strip -o $$@ $(__builder_mk_obj_files__) $(LDFLAGS))
+	        $(O_VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $$@ $(__builder_mk_obj_files__) $(LDFLAGS))
         endif
-    endif
-endef
+    endef
+    $(eval $(__builder_mk_artifact_target__))
+    undefine __builder_mk_artifact_target__
 
-$(eval $(__builder_mk_build_target__))
+    .PHONY: build
+    build: --pre-build-check $(O_BUILD_DIR)/$(ARTIFACT) $(POST_BUILD_DEPS) ;
+else
+    .PHONY: build
+    build: ;
+endif
 
 # C sources --------------------------------------------------------------------
 $(O_BUILD_DIR)/%.c$(__builder_mk_obj_suffix__): %.c
@@ -321,6 +315,16 @@ $(eval $(call __builder_mk_as_template__,S))
 # ==============================================================================
 
 # dist =========================================================================
+ifneq ($(DIST_MARKER),)
+    ifneq ($(DIST_MARKER),)
+        ifneq ($(words $(DIST_MARKER)),1)
+            $(error [DIST_MARKER] Value cannot have whitespaces: $(DIST_MARKER))
+        endif
+    endif
+    ifneq ($(filter ..,$(DIST_MARKER)),)
+        $(error [DIST_MARKER] Invalid value: $(DIST_MARKER))
+    endif
+endif
 ifdef DIST_DIRS
     ifneq ($(origin DIST_DIRS),file)
         $(error [DIST_DIRS] Not defined in a makefile (origin: $(origin DIST_DIRS)))
@@ -350,7 +354,7 @@ ifneq ($(SRC_FILES),)
 endif
 __builder_mk_dist_files__ := $(call FN_UNIQUE,$(__builder_mk_dist_files__) $(DIST_FILES))
 
-# Each entry (either O_DIST_DIR or DIST_FILE) has the syntax: src:destPathInDistDir
+# Each entry (either DIST_DIR or DIST_FILE) has the syntax: src:destPathInDistDir
 
 # Autixiliary function to adjust a distribution directory entry in DIST_DIRS.
 # Syntax: $(call __builder_mk_fn_dist_adjust_dir_entry__,distDirEntry)
@@ -395,22 +399,21 @@ ifdef POST_DIST_DEPS
     endif
 endif
 
---__builder_mk_pre_dist__: build $(PRE_DIST_DEPS)
+--__builder_mk_pre_dist__: build $(PRE_DIST_DEPS) ;
 
-define __builder_mk_dist_marker__
-$(O_BUILD_DIR)/dist.marker: $(__builder_mk_dist_deps__)
-	@mkdir -p $$(dir $$@)
-	@touch $$@
-endef
+ifneq ($(DIST_MARKER),)
+    $(O)/$(DIST_MARKER): $(__builder_mk_dist_deps__)
+	    @touch $@
 
-$(eval $(__builder_mk_dist_marker__))
+    --__builder_mk_dist__: --__builder_mk_pre_dist__ $(O)/$(DIST_MARKER) ;
+else
+    --__builder_mk_dist__: --__builder_mk_pre_dist__ $(__builder_mk_dist_deps__) ;
+endif
 
---__builder_mk_dist__: --__builder_mk_pre_dist__ $(O_BUILD_DIR)/dist.marker
-
---__builder_mk_post_dist__: --__builder_mk_dist__ $(POST_DIST_DEPS)
+--__builder_mk_post_dist__: --__builder_mk_dist__ $(POST_DIST_DEPS) ;
 
 .PHONY: dist
-dist: --__builder_mk_post_dist__
+dist: --__builder_mk_post_dist__ ;
 # ==============================================================================
 
 undefine __builder_mk_origin_as__
@@ -428,7 +431,6 @@ undefine __builder_mk_include_flags__
 undefine __builder_mk_obj_suffix__
 undefine __builder_mk_obj_files__
 undefine __builder_mk_dep_files__
-undefine __builder_mk_build_target__
 undefine __builder_mk_cxx_template__
 undefine __builder_mk_as_template__
 undefine __builder_mk_dist_dirs__
@@ -437,6 +439,5 @@ undefine __builder_mk_fn_dist_adjust_dir_entry__
 undefine __builder_mk_fn_dist_adjust_file_entry__
 undefine __builder_mk_dist_deps_template__
 undefine __builder_mk_dist_deps__
-undefine __builder_mk_dist_marker__
 
 endif # ifndef __builder_mk__
