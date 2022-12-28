@@ -26,6 +26,7 @@ __functions_mk__ := 1
 # Text functions ---------------------------------------------------------------
 
 # Returns a token on delimited string.
+#
 # Syntax: $(call FN_TOKEN,baseString,delimiter,index)
 ifdef FN_TOKEN
     $(error [FN_TOKEN] Reserved variable)
@@ -33,6 +34,7 @@ endif
 FN_TOKEN = $(word $(3),$(subst $(2), ,$(1)))
 
 # Removes duplicate words without sorting.
+#
 # Syntax: $(call FN_UNIQUE,list_of_words)
 ifdef FN_UNIQUE
     $(error [FN_UNIQUE] Reserved variable)
@@ -40,6 +42,7 @@ endif
 FN_UNIQUE = $(strip $(if $(1),$(firstword $(1)) $(call FN_UNIQUE,$(filter-out $(firstword $(1)),$(1)))))
 
 # If str1 equals str2, returns str1. Otherwise, returns an empty value.
+#
 # Syntax: $(call FN_EQ,srt1,str2)
 ifdef FN_EQ
     $(error [FN_EQ] Reserved variable)
@@ -57,6 +60,7 @@ endif
 FN_SEMVER_CHECK = $(if $(filter-out 1 2 3,$(words $(subst ., ,$(1)))),,$(1))
 
 # Returns the major component for given version.
+#
 # Syntax: $(call FN_SEMVER_MAJOR,semanticVersion)
 ifdef FN_SEMVER_MAJOR
     $(error [FN_SEMVER_MAJOR] Reserved variable)
@@ -64,6 +68,7 @@ endif
 FN_SEMVER_MAJOR = $(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,1)
 
 # Returns the minor component for given version.
+#
 # Syntax: $(call FN_SEMVER_MINOR,semanticVersion)
 ifdef FN_SEMVER_MINOR
     $(error [FN_SEMVER_MINOR] Reserved variable)
@@ -71,6 +76,7 @@ endif
 FN_SEMVER_MINOR = $(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,2)
 
 # Returns the patch component for given version.
+#
 # Syntax: $(call FN_SEMVER_PATCH,semanticVersion)
 ifdef FN_SEMVER_PATCH
     $(error [FN_SEMVER_PATCH] Reserved variable)
@@ -81,6 +87,7 @@ FN_SEMVER_PATCH = $(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,3)
 # File system functions --------------------------------------------------------
 
 # Lists files in a directory.
+#
 # Syntax: $(call FN_FIND_FILES,directory,findFlags)
 ifdef FN_FIND_FILES
     $(error [FN_FIND_FILES] Reserved variable)
@@ -93,6 +100,15 @@ ifdef FN_REL_DIR
     $(error [FN_REL_DIR] Reserved variable)
 endif
 FN_REL_DIR = $(shell realpath -m --relative-to=$(1) $(2))
+
+# Check if a path is inside a directory (on success, returns the path,
+# otherwise returns an empty value).
+#
+# Syntax $(call FN_IS_INSIDE_DIR,dir,path)
+ifdef FN_IS_INSIDE_DIR
+    $(error [FN_IS_INSIDE_DIR] Reserved variable)
+endif
+FN_IS_INSIDE_DIR = $(filter $(abspath $(1)) $(abspath $(1)/%),$(abspath $(2)))
 # ------------------------------------------------------------------------------
 
 endif # ifndef __functions_mk__

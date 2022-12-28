@@ -321,9 +321,7 @@ ifneq ($(DIST_MARKER),)
             $(error [DIST_MARKER] Value cannot have whitespaces: $(DIST_MARKER))
         endif
     endif
-    ifneq ($(filter ..,$(DIST_MARKER)),)
-        $(error [DIST_MARKER] Invalid value: $(DIST_MARKER))
-    endif
+    $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(DIST_MARKER)),,$(error [DIST_MARKER] Invalid path: $(DIST_MARKER)))
 endif
 ifdef DIST_DIRS
     ifneq ($(origin DIST_DIRS),file)

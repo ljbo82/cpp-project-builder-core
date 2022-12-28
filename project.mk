@@ -110,9 +110,7 @@ ifneq ($(BUILD_SUBDIR),)
     ifneq ($(words $(BUILD_SUBDIR)),1)
         $(error [BUILD_SUBDIR] Value cannot have whitespaces: $(BUILD_SUBDIR))
     endif
-endif
-ifneq ($(filter ..,$(BUILD_SUBDIR)),)
-    $(error [BUILD_SUBDIR] Invalid value: $(BUILD_SUBDIR))
+    $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(BUILD_SUBDIR)),,$(error [BUILD_SUBDIR] Invalid path: $(BUILD_SUBDIR)))
 endif
 ifdef O_BUILD_DIR
     $(error [O_BUILD_DIR] Reserved variable)
@@ -129,9 +127,7 @@ ifneq ($(DIST_SUBDIR),)
     ifneq ($(words $(DIST_SUBDIR)),1)
         $(error [DIST_SUBDIR] Value cannot have whitespaces: $(DIST_SUBDIR))
     endif
-endif
-ifneq ($(filter ..,$(DIST_SUBDIR)),)
-    $(error [DIST_SUBDIR] Invalid value: $(DIST_SUBDIR))
+    $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(DIST_SUBDIR)),,$(error [DIST_SUBDIR] Invalid path: $(DIST_SUBDIR)))
 endif
 ifdef O_DIST_DIR
     $(error [O_DIST_DIR] Reserved variable)
@@ -338,6 +334,9 @@ ifdef SRC_FILES
 endif
 
 SRC_DIRS := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS)))
+
+# Checks if any SRC_DIR is outside CURDIR
+$(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Invalid directory: $(srcDir))))
 
 __project_mk_src_file_filter__ := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
 
