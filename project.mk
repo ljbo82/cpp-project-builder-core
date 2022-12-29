@@ -201,7 +201,7 @@ ifeq ($(SKIP_DEFAULT_HOSTS_DIR),0)
         HOSTS_DIRS := hosts $(HOSTS_DIRS)
     endif
 endif
-HOSTS_DIRS := $(call FN_UNIQUE,$(HOSTS_DIRS) $(__SELF_DIR__)hosts)
+HOSTS_DIRS := $(call FN_UNIQUE,$(EXTRA_HOSTS_DIRS) $(HOSTS_DIRS) $(__SELF_DIR__)hosts)
 
 # Auxiliar checker for 'host.mk' and 'src' directory into a layer directory
 #
