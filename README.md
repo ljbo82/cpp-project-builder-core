@@ -13,7 +13,7 @@ For details, check [official repository](https://github.com/ljbo82/cpp-project-b
   * [doxygen.mk](#doxygenmk)
   * [functions.mk](#functionsmk)
   * [git.mk](#gitmk)
-  * [native-host.mk](#native-hostmk)
+  * [host.mk](#hostmk)
   * [project.mk](#projectmk)
 
 ## License
@@ -70,6 +70,10 @@ Include this file at the end of your `$(PROJ_ROOT)/Makefile`.
 
 See [documentation](https://github.com/ljbo82/cpp-project-builder-doc/blob/master/builder.mk.md) for details.
 
+### common.mk
+
+Common definitions for the build system. It is included by [project.mk](#projectmk).
+
 ### doxygen.mk
 
 This file provides standard targets to generate source documentation using [doxygen](https://www.doxygen.nl/index.html).
@@ -90,13 +94,13 @@ This file inspects `$(PROJ_ROOT)` directory and exposes git repository informati
 
 See [documentation](https://github.com/ljbo82/cpp-project-builder-doc/blob/master/git.mk.md) for details.
 
-### native-host.mk
+### host.mk
 
-This file inspects current execution environment and identifies the native host. Identified info is exposed through read-only variables.
+This file inspects current execution environment and identifies the target host if it was not defined.
 
 > NOTE: This file is automatically included by `$(CPP_PROJECT_BUILDER)/builder.mk`
 
-See [documentation](https://github.com/ljbo82/cpp-project-builder-doc/blob/master/native-host.mk.md) for details.
+See [documentation](https://github.com/ljbo82/cpp-project-builder-doc/blob/master/host.mk.md) for details.
 
 ### project.mk
 
