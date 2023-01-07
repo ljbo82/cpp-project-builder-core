@@ -31,7 +31,7 @@ endif
 
 ifeq ($(PROJ_TYPE),app)
     ifndef ARTIFACT
-        ARTIFACT := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).exe
+        ARTIFACT := $(PROJ_NAME).exe
     endif
 endif
 

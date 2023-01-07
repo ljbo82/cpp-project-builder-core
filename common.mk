@@ -45,4 +45,65 @@ endif
 O_VERBOSE = $(if $(filter 0,$(V)),@,)
 # ------------------------------------------------------------------------------
 
+# Host -------------------------------------------------------------------------
+__common_self_dir__ := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(__common_self_dir__)host.mk
+include $(__common_self_dir__)functions.mk
+undefine __common_self_dir__
+# ------------------------------------------------------------------------------
+
+# Debug / release --------------------------------------------------------------
+DEBUG ?= 0
+ifeq ($(DEBUG),)
+    $(error [DEBUG] Missing value)
+endif
+ifneq ($(DEBUG),0)
+    ifneq ($(DEBUG),1)
+        $(error [DEBUG] Invalid value: $(DEBUG))
+    endif
+endif
+# ------------------------------------------------------------------------------
+
+# Output directory -------------------------------------------------------------
+O ?= output
+ifeq ($(O),)
+    $(error [O] Missing value)
+endif
+ifneq ($(words $(O)),1)
+    $(error [O] Value cannot have whitespaces: $(O))
+endif
+
+# Build sub-directory
+ifneq ($(BUILD_SUBDIR),)
+    ifneq ($(words $(BUILD_SUBDIR)),1)
+        $(error [BUILD_SUBDIR] Value cannot have whitespaces: $(BUILD_SUBDIR))
+    endif
+    $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(BUILD_SUBDIR)),,$(error [BUILD_SUBDIR] Invalid path: $(BUILD_SUBDIR)))
+endif
+ifdef O_BUILD_DIR
+    $(error [O_BUILD_DIR] Reserved variable)
+else
+    O_BUILD_DIR := $(O)/build
+    ifneq ($(BUILD_SUBDIR),)
+        O_BUILD_DIR := $(O_BUILD_DIR)/$(BUILD_SUBDIR)
+    endif
+endif
+
+# Distribution sub-directory
+ifneq ($(DIST_SUBDIR),)
+    ifneq ($(words $(DIST_SUBDIR)),1)
+        $(error [DIST_SUBDIR] Value cannot have whitespaces: $(DIST_SUBDIR))
+    endif
+    $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(DIST_SUBDIR)),,$(error [DIST_SUBDIR] Invalid path: $(DIST_SUBDIR)))
+endif
+ifdef O_DIST_DIR
+    $(error [O_DIST_DIR] Reserved variable)
+else
+    O_DIST_DIR := $(O)/dist
+    ifneq ($(DIST_SUBDIR),)
+        O_DIST_DIR := $(DIST_SUBDIR)/$(DIST_SUBDIR)
+    endif
+endif
+# ------------------------------------------------------------------------------
+
 endif # ifndef __common_mk__

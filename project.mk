@@ -23,11 +23,9 @@
 ifndef __project_mk__
 __project_mk__ := 1
 
-__SELF_DIR__ := $(dir $(lastword $(MAKEFILE_LIST)))
+__project_mk_self_dir__ := $(dir $(lastword $(MAKEFILE_LIST)))
 
-include $(__SELF_DIR__)common.mk
-include $(__SELF_DIR__)functions.mk
-include $(__SELF_DIR__)native-host.mk
+include $(__project_mk_self_dir__)common.mk
 
 # Project name -----------------------------------------------------------------
 ifeq ($(PROJ_NAME),)
@@ -65,78 +63,6 @@ ifeq ($(PROJ_VERSION),)
 endif
 ifeq ($(call FN_SEMVER_CHECK,$(PROJ_VERSION)),)
     $(error [PROJ_VERSION] Invalid semantic version: $(PROJ_VERSION))
-endif
-# ------------------------------------------------------------------------------
-
-# Debug / release --------------------------------------------------------------
-DEBUG ?= 0
-ifeq ($(DEBUG),)
-    $(error [DEBUG] Missing value)
-endif
-ifneq ($(DEBUG),0)
-    ifneq ($(DEBUG),1)
-        $(error [DEBUG] Invalid value: $(DEBUG))
-    endif
-endif
-# ------------------------------------------------------------------------------
-
-# Host -------------------------------------------------------------------------
-ifndef HOST
-    ifdef NATIVE_HOST
-        HOST := $(NATIVE_HOST)
-    endif
-else
-    ifeq ($(HOST),)
-        $(error [HOST] Missing value)
-    else
-        ifneq ($(words $(HOST)),1)
-           $(error [HOST] Value cannot have whitespaces: $(HOST))
-        endif
-    endif
-endif
-# ------------------------------------------------------------------------------
-
-# Output directory -------------------------------------------------------------
-O ?= output
-ifeq ($(O),)
-    $(error [O] Missing value)
-endif
-ifneq ($(words $(O)),1)
-    $(error [O] Value cannot have whitespaces: $(O))
-endif
-
-# Build sub-directory
-ifneq ($(BUILD_SUBDIR),)
-    ifneq ($(words $(BUILD_SUBDIR)),1)
-        $(error [BUILD_SUBDIR] Value cannot have whitespaces: $(BUILD_SUBDIR))
-    endif
-    $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(BUILD_SUBDIR)),,$(error [BUILD_SUBDIR] Invalid path: $(BUILD_SUBDIR)))
-endif
-ifdef O_BUILD_DIR
-    $(error [O_BUILD_DIR] Reserved variable)
-else
-    ifeq ($(BUILD_SUBDIR),)
-        O_BUILD_DIR := $(O)/build
-    else
-        O_BUILD_DIR := $(O)/build/$(BUILD_SUBDIR)
-    endif
-endif
-
-# Distribution sub-directory
-ifneq ($(DIST_SUBDIR),)
-    ifneq ($(words $(DIST_SUBDIR)),1)
-        $(error [DIST_SUBDIR] Value cannot have whitespaces: $(DIST_SUBDIR))
-    endif
-    $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(DIST_SUBDIR)),,$(error [DIST_SUBDIR] Invalid path: $(DIST_SUBDIR)))
-endif
-ifdef O_DIST_DIR
-    $(error [O_DIST_DIR] Reserved variable)
-else
-    ifeq ($(DIST_SUBDIR),)
-        O_DIST_DIR := $(O)/dist
-    else
-        O_DIST_DIR := $(O)/dist/$(DIST_SUBDIR)
-    endif
 endif
 # ------------------------------------------------------------------------------
 
@@ -201,7 +127,7 @@ ifeq ($(SKIP_DEFAULT_HOSTS_DIR),0)
         HOSTS_DIRS := hosts $(HOSTS_DIRS)
     endif
 endif
-HOSTS_DIRS := $(call FN_UNIQUE,$(EXTRA_HOSTS_DIRS) $(HOSTS_DIRS) $(__SELF_DIR__)hosts)
+HOSTS_DIRS := $(call FN_UNIQUE,$(EXTRA_HOSTS_DIRS) $(HOSTS_DIRS) $(__project_mk_self_dir__)hosts)
 
 # Auxiliar checker for 'host.mk' and 'src' directory into a layer directory
 #
@@ -391,6 +317,7 @@ endif
 $(eval $(LAZY))
 # ------------------------------------------------------------------------------
 
+undefine __project_mk_self_dir__
 undefine __project_mk_host_factorizer__
 undefine __project_mk_host_factorizer_current__
 undefine __project_mk_host_factorizer_previous__

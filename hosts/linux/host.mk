@@ -23,7 +23,11 @@
 ifndef __hosts_linux_mk__
 __hosts_linux_mk__ := 1
 
-__hosts_linux_mk_target_base_name__ := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
+ifeq ($(PROJ_TYPE),app)
+    __hosts_linux_mk_target_base_name__ := $(PROJ_NAME)
+else
+    __hosts_linux_mk_target_base_name__ := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
+endif
 
 ifeq ($(PROJ_TYPE),app)
     ifndef ARTIFACT
