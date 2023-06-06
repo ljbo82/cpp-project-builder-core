@@ -69,44 +69,44 @@ endif
 # Loads host definitions -------------------------------------------------------
 
 # Precedence:
-# 1. project-specific host definitions (from most specific to most generic,
-#    for example: linux-arm-v9 > linux-arm > linux)
+# 1. Build-system-specific host definitions (from most generic to most specific,
+#    for example: linux > linux/arm)
 #
-# 2. Build-system-specific host definitions (from most specific to most generic,
-#    for example: linux-arm > linux)
+# 2. project-specific host definitions (from most generic to most specifc,
+#    for example: linux > linux-arm > linux-arm-v9)
 
 # Host layer factorizer auxiliary function template.
 #
 # This template will be called multiple times in order to prepare the list of acceptable layers.
 #
-# Syntax: $(call __project_mk_host_factorizer__,hostLayer,delimiter)
+# Syntax: $(call __project_mk_host_factorizer__,hostLayer)
 define __project_mk_host_factorizer__
-__project_mk_host_factorizer_current__  := $$(if $$(__project_mk_host_factorizer_previous__),$$(__project_mk_host_factorizer_previous__)$(2)$(1),$(1))
+__project_mk_host_factorizer_current__  := $$(if $$(__project_mk_host_factorizer_previous__),$$(__project_mk_host_factorizer_previous__)/$(1),$(1))
 __project_mk_host_factorizer_previous__ := $$(__project_mk_host_factorizer_current__)
-__project_mk_host_factorizer_factors__  := $$(__project_mk_host_factorizer_current__) $$(__project_mk_host_factorizer_factors__)
+__project_mk_host_factorizer_factors__  := $$(__project_mk_host_factorizer_factors__) $$(__project_mk_host_factorizer_current__)
 endef
 
 # Host layer factorizer auxiliary function.
 #
 # This function will set the accepted layers in the variable __project_mk_host_factorizer_factors__
 #
-# Syntax: $(call __project_mk_host_factorize__,hostString,delimiter)
+# Syntax: $(call __project_mk_host_factorize__,hostString)
 define __project_mk_host_factorize__
     undefine __project_mk_host_factorizer_current__
     undefine __project_mk_host_factorizer_previous__
     undefine __project_mk_host_factorizer_factors__
-    $$(foreach token,$$(subst $(2), ,$(1)),$$(eval $$(call __project_mk_host_factorizer__,$$(token),$(2))))
+    $$(foreach token,$$(subst -, ,$(1)),$$(eval $$(call __project_mk_host_factorizer__,$$(token))))
 endef
 
 # Factorizer function for a host.
 #
 # Function will return a list of accepted layers for a given host.
 #
-# Syntax: $(call __project_mk_host_factorize__,hostString,delimiter)
-__project_mk_fn_host_factorize__ = $(eval $(call __project_mk_host_factorize__,$(1),$(2)))$(__project_mk_host_factorizer_factors__)
+# Syntax: $(call __project_mk_host_factorize__,hostString)
+__project_mk_fn_host_factorize__ = $(eval $(call __project_mk_host_factorize__,$(1)))$(__project_mk_host_factorizer_factors__)
 
 # Contains all valid layers for current HOST
-__project_mk_host_layers__ := $(call __project_mk_fn_host_factorize__,$(HOST),-)
+__project_mk_host_layers__ := $(call __project_mk_fn_host_factorize__,$(HOST))
 
 SKIP_DEFAULT_HOSTS_DIR ?= 0
 ifneq ($(origin SKIP_DEFAULT_HOSTS_DIR),file)
@@ -124,10 +124,11 @@ ifdef $(HOSTS_DIRS)
 endif
 ifeq ($(SKIP_DEFAULT_HOSTS_DIR),0)
     ifneq ($(wildcard hosts),)
-        HOSTS_DIRS := hosts $(HOSTS_DIRS)
+        HOSTS_DIRS := $(HOSTS_DIRS) hosts
     endif
 endif
-HOSTS_DIRS := $(call FN_UNIQUE,$(EXTRA_HOSTS_DIRS) $(HOSTS_DIRS) $(__project_mk_self_dir__)hosts)
+
+HOSTS_DIRS := $(call FN_UNIQUE,$(__project_mk_self_dir__)hosts $(HOSTS_DIRS))
 
 # Auxiliar checker for 'host.mk' and 'src' directory into a layer directory
 #
