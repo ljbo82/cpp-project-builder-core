@@ -106,7 +106,7 @@ endef
 __project_mk_fn_host_factorize__ = $(eval $(call __project_mk_host_factorize__,$(1)))$(__project_mk_host_factorizer_factors__)
 
 # Contains all valid layers for current HOST
-__project_mk_host_layers__ := $(call __project_mk_fn_host_factorize__,$(HOST))
+__project_mk_host_layers__ := $(call FN_UNIQUE,$(call __project_mk_fn_host_factorize__,$(HOST)) $(HOST))
 
 SKIP_DEFAULT_HOSTS_DIR ?= 0
 ifneq ($(origin SKIP_DEFAULT_HOSTS_DIR),file)
