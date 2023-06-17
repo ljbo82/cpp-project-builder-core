@@ -9,12 +9,6 @@ For details, check [official repository](https://github.com/ljbo82/cpp-project-b
 * [License](#license)
 * [Usage](#usage)
 * [Makefiles](#makefiles)
-  * [builder.mk](#buildermk)
-  * [doxygen.mk](#doxygenmk)
-  * [functions.mk](#functionsmk)
-  * [git.mk](#gitmk)
-  * [host.mk](#hostmk)
-  * [project.mk](#projectmk)
 
 ## License
 
@@ -62,6 +56,18 @@ For more examples, check the [demo](https://github.com/ljbo82/cpp-project-builde
 
 The build system is composed by utility makefiles. Here is a summary of the provided ones:
 
+### Dependency graph
+
+```mermaid
+graph TD;
+    builder.mk[<a href='#buildermk'>builder.mk</a>]-->project.mk[<a href='#projectmk'>project.mk</a>];
+    common.mk[<a href='#commonmk'>common.mk</a>]-->host.mk[<a href='#hostmk'>host.mk</a>];
+    common.mk-->functions.mk[<a href='#functionsmk'>functions.mk</a>];
+    doxygen.mk[<a href='#doxygenmk'>doxygen.mk</a>]-->common.mk;
+    git.mk[<a href='#gitmk'>git.mk</a>];
+    project.mk-->common.mk;
+```
+
 ### builder.mk
 
 This is the main makefile. It contains standard recipes to build C/C++/Assembly multiplatform projects using a GCC-based compiler.
@@ -72,7 +78,9 @@ See [documentation](https://github.com/ljbo82/cpp-project-builder-doc/blob/maste
 
 ### common.mk
 
-Common definitions for the build system. It is included by [project.mk](#projectmk).
+Common definitions for the build system.
+
+> NOTE: There is no need to include this file manually since it is automatically included by other makefiles. See the [dependency graph](#dependency-graph).
 
 ### doxygen.mk
 
@@ -84,7 +92,7 @@ See [documentation](https://github.com/ljbo82/cpp-project-builder-doc/blob/maste
 
 This file provides convenience functions to be used through [`$(call)`](https://www.gnu.org/software/make/manual/make.html#Call-Function).
 
-> NOTE: This file is automatically included by `$(CPP_PROJECT_BUILDER)/builder.mk`
+> NOTE: There is no need to include this file manually since it is automatically included by other makefiles. See the [dependency graph](#dependency-graph).
 
 See [documentation](https://github.com/ljbo82/cpp-project-builder-doc/blob/master/functions.mk.md) for details.
 
@@ -98,12 +106,12 @@ See [documentation](https://github.com/ljbo82/cpp-project-builder-doc/blob/maste
 
 This file inspects current execution environment and identifies the target host if it was not defined.
 
-> NOTE: This file is automatically included by `$(CPP_PROJECT_BUILDER)/builder.mk`
+> NOTE: There is no need to include this file manually since it is automatically included by other makefiles. See the [dependency graph](#dependency-graph).
 
 See [documentation](https://github.com/ljbo82/cpp-project-builder-doc/blob/master/host.mk.md) for details.
 
 ### project.mk
 
-This file contains the project parser. It is automatically included by [builder.mk](https://github.com/ljbo82/cpp-project-builder-doc/blob/master/builder.mk.md).
+This file contains the project parser. It is automatically included by [builder.mk](#buildermk).
 
-Including this file separately is useful when some logic must be processed after project is fully parsed (e.g. after host layers are processed), but before compiler management takes place.
+Including this file separately is useful only when some logic must be processed after project is fully parsed (e.g. after host layers are processed), but before compiler management takes place.
