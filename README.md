@@ -60,11 +60,11 @@ The build system is composed by utility makefiles. Here is a summary of the prov
 
 ```mermaid
 graph TD;
-    builder.mk[<a href='README.md#buildermk'>builder.mk</a>]-->project.mk[<a href='#projectmk'>project.mk</a>];
-    common.mk[<a href='#commonmk'>common.mk</a>]-->host.mk[<a href='#hostmk'>host.mk</a>];
-    common.mk-->functions.mk[<a href='#functionsmk'>functions.mk</a>];
-    doxygen.mk[<a href='#doxygenmk'>doxygen.mk</a>]-->common.mk;
-    git.mk[<a href='#gitmk'>git.mk</a>];
+    builder.mk[<a href='https://github.com/ljbo82/cpp-project-builder-core/blob/master/README.md#buildermk'>builder.mk</a>]-->project.mk[<a href='https://github.com/ljbo82/cpp-project-builder-core/blob/master/README.md#projectmk'>project.mk</a>];
+    common.mk[<a href='https://github.com/ljbo82/cpp-project-builder-core/blob/master/README.md#commonmk'>common.mk</a>]-->host.mk[<a href='https://github.com/ljbo82/cpp-project-builder-core/blob/master/README.md#hostmk'>host.mk</a>];
+    common.mk-->functions.mk[<a href='https://github.com/ljbo82/cpp-project-builder-core/blob/master/README.md#functionsmk'>functions.mk</a>];
+    doxygen.mk[<a href='https://github.com/ljbo82/cpp-project-builder-core/blob/master/README.md#doxygenmk'>doxygen.mk</a>]-->common.mk;
+    git.mk[<a href='https://github.com/ljbo82/cpp-project-builder-core/blob/master/README.md#gitmk'>git.mk</a>];
     project.mk-->common.mk;
 ```
 
