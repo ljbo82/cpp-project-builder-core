@@ -113,6 +113,7 @@ ifneq ($(LIBS_SUBDIR),)
     ifneq ($(words $(LIBS_SUBDIR)),1)
         $(error [LIBS_SUBDIR] Value cannot have whitespaces)
     endif
+    $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(LIBS_SUBDIR)),,$(error [LIBS_SUBDIR] Invalid path: $(LIBS_SUBDIR)))
 else
     override LIBS_SUBDIR := .
 endif
