@@ -60,7 +60,7 @@ The build system is composed by utility makefiles. Here is a summary of the prov
 
 ```mermaid
 graph TD;
-    builder.mk[<a href='#buildermk'>builder.mk</a>]-->project.mk[<a href='#projectmk'>project.mk</a>];
+    builder.mk[<a href='README.md#buildermk'>builder.mk</a>]-->project.mk[<a href='#projectmk'>project.mk</a>];
     common.mk[<a href='#commonmk'>common.mk</a>]-->host.mk[<a href='#hostmk'>host.mk</a>];
     common.mk-->functions.mk[<a href='#functionsmk'>functions.mk</a>];
     doxygen.mk[<a href='#doxygenmk'>doxygen.mk</a>]-->common.mk;
