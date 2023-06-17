@@ -319,10 +319,10 @@ endif
 define __project_mk_libs_template1__
 __project_mk_libs_has_lib_dir__ := $$(if $$(or $$(__project_mk_libs_has_lib_dir__),$(2)),1,)
 __project_mk_libs_ldflags__ += -l$(1)
-$(if $(2),PRE_BUILD_DEPS += $$(O)/libs/$(1).marker,)
+$(if $(2),PRE_BUILD_DEPS += $$(O)/$(LIBS_SUBDIR)/$(1).marker,)
 $(if $(2),--$(1):,)
-$(if $(2),	$$(O_VERBOSE)$$(MAKE) -C $(2) O=$$(call FN_REL_DIR,$(2),$$(O)/libs) BUILD_SUBDIR=$(1) DIST_MARKER=$(1).marker,)
-$(if $(2),$$(O)/libs/$(1).marker: --$(1) ;,)
+$(if $(2),	$$(O_VERBOSE)$$(MAKE) -C $(2) O=$$(call FN_REL_DIR,$(2),$$(O)/$(LIBS_SUBDIR)) BUILD_SUBDIR=$(1) DIST_MARKER=$(1).marker,)
+$(if $(2),$$(O)/$(LIBS_SUBDIR)/$(1).marker: --$(1) ;,)
 
 endef
 
@@ -340,8 +340,8 @@ __project_mk_libs_fn_template__ = $(eval $(call __project_mk_libs_template__,$(1
 
 $(foreach lib,$(LIBS),$(call __project_mk_libs_fn_template__,$(lib)))
 ifeq ($(__project_mk_libs_has_lib_dir__),1)
-    INCLUDE_DIRS += $(O)/libs/dist/include
-    LDFLAGS := $(LDFLAGS) -L$(O)/libs/dist/lib $(__project_mk_libs_ldflags__)
+    INCLUDE_DIRS += $(O)/$(LIBS_SUBDIR)/dist/include
+    LDFLAGS := $(LDFLAGS) -L$(O)/$(LIBS_SUBDIR)/dist/lib $(__project_mk_libs_ldflags__)
 else
     LDFLAGS := $(LDFLAGS) $(__project_mk_libs_ldflags__)
 endif

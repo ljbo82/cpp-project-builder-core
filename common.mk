@@ -104,6 +104,18 @@ else
         O_DIST_DIR := $(DIST_SUBDIR)/$(DIST_SUBDIR)
     endif
 endif
+
+# Libs sub-directory
+LIBS_SUBDIR ?= libs
+override LIBS_SUBDIR := $(strip $(LIBS_SUBDIR))
+
+ifneq ($(LIBS_SUBDIR),)
+    ifneq ($(words $(LIBS_SUBDIR)),1)
+        $(error [LIBS_SUBDIR] Value cannot have whitespaces)
+    endif
+else
+    override LIBS_SUBDIR := .
+endif
 # ------------------------------------------------------------------------------
 
 endif # ifndef __common_mk__
