@@ -309,6 +309,12 @@ endif
 # ------------------------------------------------------------------------------
 
 # LIBS -------------------------------------------------------------------------
+ifdef LIBS
+    ifneq ($(origin LIBS),file)
+        $(error [LIBS] Not defined in a makefile (origin: $(origin LIBS)))
+    endif
+endif
+
 #$(call __project_mk_libs_template1__,<lib_name>,[lib_dir])
 define __project_mk_libs_template1__
 __project_mk_libs_has_lib_dir__ := $$(if $$(or $$(__project_mk_libs_has_lib_dir__),$(2)),1,)
