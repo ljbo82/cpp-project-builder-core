@@ -27,45 +27,6 @@ __project_mk_self_dir__ := $(dir $(lastword $(MAKEFILE_LIST)))
 
 include $(__project_mk_self_dir__)common.mk
 
-# Project name -----------------------------------------------------------------
-ifeq ($(PROJ_NAME),)
-    $(error [PROJ_NAME] Missing value)
-endif
-ifneq ($(origin PROJ_NAME),file)
-    $(error [PROJ_NAME] Not defined in a makefile (origin: $(origin PROJ_NAME)))
-endif
-ifneq ($(words $(PROJ_NAME)),1)
-    $(error [PROJ_NAME] Value cannot have whitespaces: $(PROJ_NAME))
-endif
-# ------------------------------------------------------------------------------
-
-# Project type -----------------------------------------------------------------
-ifeq ($(PROJ_TYPE),)
-    $(error [PROJ_TYPE] Missing value)
-endif
-ifneq ($(origin PROJ_TYPE),file)
-    $(error [PROJ_TYPE] Not defined in a makefile (origin: $(origin PROJ_TYPE)))
-endif
-ifneq ($(PROJ_TYPE),app)
-    ifneq ($(PROJ_TYPE),lib)
-        $(error [PROJ_TYPE] Invalid value: $(PROJ_TYPE))
-    endif
-endif
-# ------------------------------------------------------------------------------
-
-# Project version --------------------------------------------------------------
-PROJ_VERSION ?= 0.1.0
-ifneq ($(origin PROJ_VERSION),file)
-    $(error [PROJ_VERSION] Not defined in a makefile (origin: $(origin PROJ_VERSION)))
-endif
-ifeq ($(PROJ_VERSION),)
-    $(error [PROJ_VERSION] Missing value)
-endif
-ifeq ($(call FN_SEMVER_CHECK,$(PROJ_VERSION)),)
-    $(error [PROJ_VERSION] Invalid semantic version: $(PROJ_VERSION))
-endif
-# ------------------------------------------------------------------------------
-
 # Loads host definitions -------------------------------------------------------
 
 # Precedence:
@@ -124,11 +85,11 @@ ifdef $(HOSTS_DIRS)
 endif
 ifeq ($(SKIP_DEFAULT_HOSTS_DIR),0)
     ifneq ($(wildcard hosts),)
-        HOSTS_DIRS := $(HOSTS_DIRS) hosts
+        HOSTS_DIRS := hosts $(HOSTS_DIRS)
     endif
 endif
 
-HOSTS_DIRS := $(call FN_UNIQUE,$(__project_mk_self_dir__)hosts $(HOSTS_DIRS))
+HOSTS_DIRS := $(call FN_UNIQUE,$(HOSTS_DIRS) $(__project_mk_self_dir__)hosts)
 
 # Auxiliar checker for 'host.mk' and 'src' directory into a layer directory
 #
