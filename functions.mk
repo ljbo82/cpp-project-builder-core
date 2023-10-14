@@ -48,6 +48,14 @@ ifdef FN_EQ
     $(error [FN_EQ] Reserved variable)
 endif
 FN_EQ = $(and $(findstring $(1),$(2)),$(findstring $(2),$(1)))
+
+# Get an unexpected or invalid option
+#
+# Syntax: $(call FN_INVALID_OPTION,options,accepted_options)
+ifdef FN_INVALID_OPTION
+    $(error [FN_INVALID_OPTION] Reserved variable)
+endif
+FN_INVALID_OPTION=$(or $(word 2,$(1)),$(filter-out $(2),$(1)))
 # ------------------------------------------------------------------------------
 
 # Semantic version functions ---------------------------------------------------

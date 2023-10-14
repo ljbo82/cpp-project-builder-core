@@ -23,36 +23,41 @@
 ifndef __hosts_windows_mk__
 __hosts_windows_mk__ := 1
 
-ifeq ($(HOST),windows-x86)
-    export CROSS_COMPILE ?= i686-w64-mingw32-
-else ifeq ($(HOST),windows-x64)
-    export CROSS_COMPILE ?= x86_64-w64-mingw32-
+ifndef __project_mk__
+    $(error This file cannot be manually included)
 endif
 
-ifeq ($(PROJ_TYPE),app)
-    ifndef ARTIFACT
-        ARTIFACT := $(PROJ_NAME).exe
+ifneq ($(filter app lib,$(PROJ_TYPE)),)
+    ifeq ($(HOST),windows-x86)
+        export CROSS_COMPILE ?= i686-w64-mingw32-
+    else ifeq ($(HOST),windows-x64)
+        export CROSS_COMPILE ?= x86_64-w64-mingw32-
     endif
-endif
 
-LIB_TYPE ?= shared
-
-ifeq ($(PROJ_TYPE),lib)
-    ifeq ($(LIB_TYPE),static)
+    ifeq ($(PROJ_TYPE),app)
         ifndef ARTIFACT
-            ARTIFACT := lib$(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).a
+            ARTIFACT := $(PROJ_NAME).exe
         endif
-    endif
+    else
+        # $(PROJ_TYPE) is equal lib
+        LIB_TYPE ?= shared
 
-    ifeq ($(LIB_TYPE),shared)
-        ifndef ARTIFACT
-            ARTIFACT := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).dll
+        ifeq ($(LIB_TYPE),static)
+            ifndef ARTIFACT
+                ARTIFACT := lib$(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).a
+            endif
+        else ifeq ($(LIB_TYPE),shared)
+            ifndef ARTIFACT
+                ARTIFACT := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).dll
+            endif
+
+            LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
+            LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
+
+            DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).lib:lib/$(ARTIFACT).lib
+            DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).def:lib/$(ARTIFACT).def
         endif
-        LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
-        LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
-        DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT).lib:lib/$(ARTIFACT).lib,)
-        DIST_FILES += $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT).def:lib/$(ARTIFACT).def)
-    endif
+	endif
 endif
 
 endif #__hosts_windows_mk__

@@ -220,12 +220,12 @@ endif
 ifneq ($(SRC_FILES),)
     ifeq ($(PROJ_TYPE),lib)
         # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
-        ifneq ($(filter -fPIC,$(CFLAGS)),)
+        ifneq ($(filter -fPIC,$(CFLAGS) $(CXXFLAGS)),)
             __builder_mk_obj_suffix__ := .lo
         else
             __builder_mk_obj_suffix__ := .o
         endif
-    else
+    else ifeq ($(PROJ_TYPE),app)
         __builder_mk_obj_suffix__ := .o
     endif
 
@@ -238,7 +238,7 @@ ifneq ($(SRC_FILES),)
         else
             __builder_mk_dep_files__ := $(__builder_mk_obj_files__:.o=.d)
         endif
-    else
+    else ifeq ($(PROJ_TYPE),app)
         __builder_mk_dep_files__ := $(__builder_mk_obj_files__:.o=.d)
     endif
 endif

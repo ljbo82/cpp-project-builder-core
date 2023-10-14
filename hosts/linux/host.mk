@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Leandro José Britto de Oliveira
+# Copyright (c) 2023 Leandro José Britto de Oliveira
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,39 +23,33 @@
 ifndef __hosts_linux_mk__
 __hosts_linux_mk__ := 1
 
-ifeq ($(PROJ_TYPE),app)
-    __hosts_linux_mk_target_base_name__ := $(PROJ_NAME)
-else
-    __hosts_linux_mk_target_base_name__ := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
+ifndef __project_mk__
+    $(error This file cannot be manually included)
 endif
 
 ifeq ($(PROJ_TYPE),app)
     ifndef ARTIFACT
-        ARTIFACT := $(__hosts_linux_mk_target_base_name__)
+        ARTIFACT := $(PROJ_NAME)
     endif
-endif
-
-LIB_TYPE ?= shared
-
-ifeq ($(PROJ_TYPE),lib)
-    __hosts_linux_mk_target_base_name__ := lib$(__hosts_linux_mk_target_base_name__)
-
-    ifeq ($(LIB_TYPE),static)
-        ifndef ARTIFACT
+else ifeq ($(PROJ_TYPE),lib)
+    LIB_TYPE ?= shared
+    ifndef ARTIFACT
+        __hosts_linux_mk_target_base_name__ := lib$(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
+        ifeq ($(LIB_TYPE),static)
             ARTIFACT := $(__hosts_linux_mk_target_base_name__).a
         endif
-    endif
-
-    ifeq ($(LIB_TYPE),shared)
-        ifndef ARTIFACT
-            __hosts_linux_mk_shared_lib_suffix__ ?= .so
+        ifeq ($(LIB_TYPE),shared)
+            # NOTE: __hosts_linux_mk_shared_lib_suffix__ is modified in OSX hosts
+            ifndef __hosts_linux_mk_shared_lib_suffix__
+                __hosts_linux_mk_shared_lib_suffix__ := .so
+            endif
             ARTIFACT := $(__hosts_linux_mk_target_base_name__)$(__hosts_linux_mk_shared_lib_suffix__)
+            ifdef __hosts_linux_mk_shared_lib_suffix__
+                undefine __hosts_linux_mk_shared_lib_suffix__
+            endif
         endif
+        undefine __hosts_linux_mk_target_base_name__
     endif
 endif
-
-
-undefine __hosts_linux_mk_target_base_name__
-undefine __hosts_linux_mk_shared_lib_suffix__
 
 endif # ifndef __hosts_linux_mk__

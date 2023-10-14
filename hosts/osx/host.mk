@@ -26,7 +26,8 @@ __hosts_osx_mk__ := 1
 # NOTE: The only difference between osx and linux build system customizations
 #       is the suffix used for shared libraries
 
+# NOTE: __hosts_linux_mk_shared_lib_suffix__ will be undefined in linux's host.mk
 __hosts_linux_mk_shared_lib_suffix__ := .dylib
-include $(dir $(lastword $(MAKEFILE_LIST)))linux.mk
+include $(dir $(lastword $(MAKEFILE_LIST)))../linux/host.mk
 
 endif # ifndef __hosts_osx_mk__

@@ -18,327 +18,341 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Project parser
+# Common definitions
 
 ifndef __project_mk__
 __project_mk__ := 1
 
 __project_mk_self_dir__ := $(dir $(lastword $(MAKEFILE_LIST)))
 
-include $(__project_mk_self_dir__)common.mk
+include $(__project_mk_self_dir__)functions.mk
 
-# Loads host definitions -------------------------------------------------------
-
-# Precedence:
-# 1. Build-system-specific host definitions (from most generic to most specific,
-#    for example: linux > linux/arm)
-#
-# 2. project-specific host definitions (from most generic to most specifc,
-#    for example: linux > linux-arm > linux-arm-v9)
-
-# Host layer factorizer auxiliary function template.
-#
-# This template will be called multiple times in order to prepare the list of acceptable layers.
-#
-# Syntax: $(call __project_mk_host_factorizer__,hostLayer)
-define __project_mk_host_factorizer__
-__project_mk_host_factorizer_current__  := $$(if $$(__project_mk_host_factorizer_previous__),$$(__project_mk_host_factorizer_previous__)/$(1),$(1))
-__project_mk_host_factorizer_previous__ := $$(__project_mk_host_factorizer_current__)
-__project_mk_host_factorizer_factors__  := $$(__project_mk_host_factorizer_factors__) $$(__project_mk_host_factorizer_current__)
-endef
-
-# Host layer factorizer auxiliary function.
-#
-# This function will set the accepted layers in the variable __project_mk_host_factorizer_factors__
-#
-# Syntax: $(call __project_mk_host_factorize__,hostString)
-define __project_mk_host_factorize__
-    undefine __project_mk_host_factorizer_current__
-    undefine __project_mk_host_factorizer_previous__
-    undefine __project_mk_host_factorizer_factors__
-    $$(foreach token,$$(subst -, ,$(1)),$$(eval $$(call __project_mk_host_factorizer__,$$(token))))
-endef
-
-# Factorizer function for a host.
-#
-# Function will return a list of accepted layers for a given host.
-#
-# Syntax: $(call __project_mk_host_factorize__,hostString)
-__project_mk_fn_host_factorize__ = $(eval $(call __project_mk_host_factorize__,$(1)))$(__project_mk_host_factorizer_factors__)
-
-# Contains all valid layers for current HOST
-__project_mk_host_layers__ := $(call FN_UNIQUE,$(call __project_mk_fn_host_factorize__,$(HOST)) $(HOST))
-
-SKIP_DEFAULT_HOSTS_DIR ?= 0
-ifneq ($(origin SKIP_DEFAULT_HOSTS_DIR),file)
-    $(error [SKIP_DEFAULT_HOSTS_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_HOSTS_DIR)))
+# Checks for whitespace in CWD -------------------------------------------------
+ifneq ($(words $(shell pwd)),1)
+    $(error Current directory ($(shell pwd)) contains one or more whitespaces)
 endif
-ifneq ($(SKIP_DEFAULT_HOSTS_DIR),0)
-    ifneq ($(SKIP_DEFAULT_HOSTS_DIR),1)
-        $(error [SKIP_DEFAULT_HOSTS_DIR] Invalid value: $(SKIP_DEFAULT_HOSTS_DIR))
-    endif
-endif
-ifdef $(HOSTS_DIRS)
-    ifneq ($(origin HOSTS_DIRS),file)
-        $(error [HOSTS_DIRS] Not defined in a makefile (origin: $(origin HOSTS_DIRS)))
-    endif
-endif
-ifeq ($(SKIP_DEFAULT_HOSTS_DIR),0)
-    ifneq ($(wildcard hosts),)
-        HOSTS_DIRS := hosts $(HOSTS_DIRS)
-    endif
-endif
-
-HOSTS_DIRS := $(call FN_UNIQUE,$(HOSTS_DIRS) $(__project_mk_self_dir__)hosts)
-
-# Auxiliar checker for 'host.mk' and 'src' directory into a layer directory
-#
-# This function will add values to '__project_mk_hosts_mk_includes__' and
-# '__project_mk_hosts_src_dirs__' on each call
-#
-# Syntax $(call __project_mk_layer_aux_parser__,hostsDir,layer)
-define __project_mk_layer_aux_parser__
-__project_mk_hosts_mk_includes__ += $(if $(wildcard $(1)/$(2)/host.mk),$(realpath $(1)/$(2)/host.mk),)
-__project_mk_hosts_src_dirs__    += $(if $(wildcard $(1)/$(2)/src),$(1)/$(2)/src,)
-endef
-
-$(foreach hostDir,$(HOSTS_DIRS),$(eval $$(foreach layer,$$(__project_mk_host_layers__),$$(eval $$(call __project_mk_layer_aux_parser__,$(hostDir),$$(layer))))))
-
-__project_mk_hosts_mk_includes__ := $(call FN_UNIQUE,$(strip $(__project_mk_hosts_mk_includes__)))
-__project_mk_hosts_src_dirs__    := $(strip $(__project_mk_hosts_src_dirs__))
-
-ifneq ($(__project_mk_hosts_mk_includes__),)
-    include $(__project_mk_hosts_mk_includes__)
-endif
-
-# NOTE: '__project_mk_src_dirs__' will be used later
-__project_mk_src_dirs__ := $(__project_mk_hosts_src_dirs__)
 # ------------------------------------------------------------------------------
 
-# LIB_TYPE ----------------------------------------------------------------------
-
-# NOTE: host may have set a default LIB_TYPE
-
-LIB_TYPE ?= shared
-ifeq ($(LIB_TYPE),)
-    $(error [LIB_TYPE] Missing value)
+# Enable/Disable verbose mode --------------------------------------------------
+V ?= 0
+ifeq ($(V),)
+    $(error [V] Missing value)
 endif
-ifneq ($(words $(LIB_TYPE)),1)
-    $(error [LIB_TYPE] Value cannot have whitespaces: $(LIB_TYPE))
+ifneq ($(call FN_INVALID_OPTION,$(V),0 1),)
+    $(error [V] Invalid value: $(V))
 endif
-ifneq ($(LIB_TYPE),shared)
-    ifneq ($(LIB_TYPE),static)
-        $(error [LIB_TYPE] Invalid value: $(LIB_TYPE))
+ifdef O_VERBOSE
+    $(error [O_VERBOSE] Reserved variable)
+endif
+O_VERBOSE = $(if $(filter 0,$(V)),@,)
+# ------------------------------------------------------------------------------
+
+# Project name -----------------------------------------------------------------
+ifeq ($(PROJ_NAME),)
+    $(error [PROJ_NAME] Missing value)
+endif
+ifneq ($(origin PROJ_NAME),file)
+    $(error [PROJ_NAME] Not defined in a makefile (origin: $(origin PROJ_NAME)))
+endif
+ifneq ($(words $(PROJ_NAME)),1)
+    $(error [PROJ_NAME] Value cannot have whitespaces: $(PROJ_NAME))
+endif
+# ------------------------------------------------------------------------------
+
+# Project type -----------------------------------------------------------------
+ifeq ($(PROJ_TYPE),)
+    $(error [PROJ_TYPE] Missing value)
+endif
+ifneq ($(origin PROJ_TYPE),file)
+    $(error [PROJ_TYPE] Not defined in a makefile (origin: $(origin PROJ_TYPE)))
+endif
+ifneq ($(call FN_INVALID_OPTION,$(PROJ_TYPE),app lib custom-lib),)
+    $(error [PROJ_TYPE] Invalid value: $(PROJ_TYPE))
+endif
+# ------------------------------------------------------------------------------
+
+# Project version --------------------------------------------------------------
+PROJ_VERSION ?= 0.1.0
+ifneq ($(origin PROJ_VERSION),file)
+    $(error [PROJ_VERSION] Not defined in a makefile (origin: $(origin PROJ_VERSION)))
+endif
+ifeq ($(PROJ_VERSION),)
+    $(error [PROJ_VERSION] Missing value)
+endif
+ifeq ($(call FN_SEMVER_CHECK,$(PROJ_VERSION)),)
+    $(error [PROJ_VERSION] Invalid semantic version: $(PROJ_VERSION))
+endif
+# ------------------------------------------------------------------------------
+
+# Debug / release --------------------------------------------------------------
+DEBUG ?= 0
+ifeq ($(DEBUG),)
+    $(error [DEBUG] Missing value)
+endif
+ifneq ($(call FN_INVALID_OPTION,$(DEBUG),0 1),)
+    $(error [DEBUG] Invalid value: $(DEBUG))
+endif
+# ------------------------------------------------------------------------------
+
+# Check for transient dependency calculation (TDC) -----------------------------
+__TDC__ ?= 0
+ifneq ($(origin __TDC__),command line)
+    $(error [__TDC__] Not defined via command-line (origin: $(origin __TDC__)))
+endif
+ifneq ($(call FN_INVALID_OPTION,$(__TDC__),0 1),)
+    $(error [__TDC__] Invalid value: $(__TDC__))
+endif
+# ------------------------------------------------------------------------------
+
+# Output directory -------------------------------------------------------------
+ifeq ($(__TDC__),0)
+    O ?= output
+    ifeq ($(O),)
+        $(error [O] Missing value)
+    endif
+    ifneq ($(words $(O)),1)
+        $(error [O] Value cannot have whitespaces: $(O))
     endif
 endif
 # ------------------------------------------------------------------------------
 
-# ARTIFACT -----------------------------------------------------------------------
-
-# NOTE: host may have set a default ARTIFACT
-
-ARTIFACT ?= a.out
-ifeq ($(ARTIFACT),)
-    $(error [ARTIFACT] Missing value)
+# Build sub-directory ----------------------------------------------------------
+ifeq ($(__TDC__),0)
+    ifneq ($(BUILD_SUBDIR),)
+        ifneq ($(words $(BUILD_SUBDIR)),1)
+            $(error [BUILD_SUBDIR] Value cannot have whitespaces: $(BUILD_SUBDIR))
+        endif
+        $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(BUILD_SUBDIR)),,$(error [BUILD_SUBDIR] Invalid path: $(BUILD_SUBDIR)))
+    endif
+    ifdef O_BUILD_DIR
+        $(error [O_BUILD_DIR] Reserved variable)
+    else
+        O_BUILD_DIR := $(O)/build
+        ifneq ($(BUILD_SUBDIR),)
+            O_BUILD_DIR := $(O_BUILD_DIR)/$(BUILD_SUBDIR)
+        endif
+    endif
 endif
-ifneq ($(words $(ARTIFACT)),1)
-    $(error [ARTIFACT] Value cannot have whitespaces: $(ARTIFACT))
+# ------------------------------------------------------------------------------
+
+# Distribution sub-directory ---------------------------------------------------
+ifeq ($(__TDC__),0)
+    ifneq ($(DIST_SUBDIR),)
+        ifneq ($(words $(DIST_SUBDIR)),1)
+            $(error [DIST_SUBDIR] Value cannot have whitespaces: $(DIST_SUBDIR))
+        endif
+        $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(DIST_SUBDIR)),,$(error [DIST_SUBDIR] Invalid path: $(DIST_SUBDIR)))
+    endif
+    ifdef O_DIST_DIR
+        $(error [O_DIST_DIR] Reserved variable)
+    else
+        O_DIST_DIR := $(O)/dist
+        ifneq ($(DIST_SUBDIR),)
+            O_DIST_DIR := $(DIST_SUBDIR)/$(DIST_SUBDIR)
+        endif
+    endif
 endif
 # ------------------------------------------------------------------------------
 
 # Source directories -----------------------------------------------------------
-SKIP_DEFAULT_SRC_DIR ?= 0
-ifneq ($(origin SKIP_DEFAULT_SRC_DIR),file)
-    $(error [SKIP_DEFAULT_SRC_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_SRC_DIR)))
-endif
-ifneq ($(SKIP_DEFAULT_SRC_DIR),0)
-    ifneq ($(SKIP_DEFAULT_SRC_DIR),1)
-        $(error [SKIP_DEFAULT_SRC_DIR] Invalid value: $(SKIP_DEFAULT_SRC_DIR))
-    endif
-endif
+ifeq ($(__TDC__),0)
+    ifneq ($(filter app lib,$(PROJ_TYPE)),)
+        SKIP_DEFAULT_SRC_DIR ?= 0
+        ifneq ($(origin SKIP_DEFAULT_SRC_DIR),file)
+            $(error [SKIP_DEFAULT_SRC_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_SRC_DIR)))
+        endif
+        ifneq ($(SKIP_DEFAULT_SRC_DIR),0)
+            ifneq ($(SKIP_DEFAULT_SRC_DIR),1)
+                $(error [SKIP_DEFAULT_SRC_DIR] Invalid value: $(SKIP_DEFAULT_SRC_DIR))
+            endif
+        endif
 
-ifdef SRC_DIRS
-    ifneq ($(origin SRC_DIRS),file)
-        $(error [SRC_DIRS] Not defined in a makefile (origin: $(origin SRC_DIRS)))
+        ifdef SRC_DIRS
+            ifneq ($(origin SRC_DIRS),file)
+                $(error [SRC_DIRS] Not defined in a makefile (origin: $(origin SRC_DIRS)))
+            endif
+        endif
+        ifeq ($(SKIP_DEFAULT_SRC_DIR),0)
+            ifneq ($(wildcard src),)
+                SRC_DIRS += src
+            endif
+        endif
     endif
 endif
-ifeq ($(SKIP_DEFAULT_SRC_DIR),0)
-    ifneq ($(wildcard src),)
-        __project_mk_src_dirs__ := $(__project_mk_src_dirs__) src
-    endif
-endif
-
-__project_mk_src_dirs__ := $(call FN_UNIQUE,$(__project_mk_src_dirs__) $(SRC_DIRS))
-SRC_DIRS := $(__project_mk_src_dirs__)
 # ------------------------------------------------------------------------------
 
-# Include directories ----------------------------------------------------------
-SKIP_DEFAULT_INCLUDE_DIR ?= 0
-ifneq ($(origin SKIP_DEFAULT_INCLUDE_DIR),file)
-    $(error [SKIP_DEFAULT_INCLUDE_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_INCLUDE_DIR)))
-endif
-ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
-    ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),1)
-        $(error [SKIP_DEFAULT_INCLUDE_DIR] Invalid value: $(SKIP_DEFAULT_INCLUDE_DIR))
-    endif
-endif
-
-ifdef INCLUDE_DIRS
-    ifneq ($(origin INCLUDE_DIRS),file)
-        $(error [INCLUDE_DIRS] Not defined in a makefile (origin: $(origin INCLUDE_DIRS)))
-    endif
-endif
-
-__project_mk_include_dirs__ := $(__project_mk_src_dirs__)
-ifeq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
-    ifneq ($(wildcard include),)
-        __project_mk_include_dirs__ := $(__project_mk_include_dirs__) include
-    endif
-endif
-
-__project_mk_include_dirs__ := $(__project_mk_include_dirs__) $(INCLUDE_DIRS)
-INCLUDE_DIRS := $(call FN_UNIQUE,$(__project_mk_include_dirs__))
-# ------------------------------------------------------------------------------
-
-# Identify source files --------------------------------------------------------
-ifdef SKIPPED_SRC_DIRS
-    ifneq ($(origin SKIPPED_SRC_DIRS),file)
-        $(error [SKIPPED_SRC_DIRS] Not defined in a makefile (origin: $(origin SKIPPED_SRC_DIRS)))
-    endif
-    SKIPPED_SRC_DIRS := $(call FN_UNIQUE,$(SKIPPED_SRC_DIRS))
-endif
-
-ifdef SKIPPED_SRC_FILES
-    ifneq ($(origin SKIPPED_SRC_FILES),file)
-        $(error [SKIPPED_SRC_FILES] Not defined in a makefile (origin: $(origin SKIPPED_SRC_FILES)))
-    endif
-    SKIPPED_SRC_FILES := $(call FN_UNIQUE,$(SKIPPED_SRC_FILES))
-endif
-
-ifdef SRC_FILES
-    ifneq ($(origin SRC_FILES),file)
-        $(error [SRC_FILES] Not defined in a makefile (origin: $(origin SRC_FILES)))
-    endif
-endif
-
-SRC_DIRS := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS)))
-
-# Checks if any SRC_DIR is outside CURDIR
-$(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Invalid directory: $(srcDir))))
-
-__project_mk_src_file_filter__ := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
-
-SRC_FILES := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f $(__project_mk_src_file_filter__) 2> /dev/null)) $(SRC_FILES)))
-
-__project_mk_invalid_src_files__ := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
-ifneq ($(__project_mk_invalid_src_files__),)
-    $(error [SRC_FILES] Unsupported source file(s): $(__project_mk_invalid_src_files__))
-endif
+# Manages target host ----------------------------------------------------------
+include $(__project_mk_self_dir__)hosts.mk
 # ------------------------------------------------------------------------------
 
 # Strips release build ---------------------------------------------------------
-STRIP_RELEASE ?= 1
-ifneq ($(origin STRIP_RELEASE),file)
-    $(error [STRIP_RELEASE] Not defined in a makefile (origin: $(origin STRIP_RELEASE)))
-endif
-ifeq ($(STRIP_RELEASE),)
-    $(error [STRIP_RELEASE] Missing value)
-endif
-ifneq ($(STRIP_RELEASE),0)
-    ifneq ($(STRIP_RELEASE),1)
-        $(error [STRIP_RELEASE] Invalid value: $(STRIP_RELEASE))
+ifeq ($(__TDC__),0)
+    ifneq ($(filter app lib,$(PROJ_TYPE)),)
+        STRIP_RELEASE ?= 1
+        ifneq ($(origin STRIP_RELEASE),file)
+            $(error [STRIP_RELEASE] Not defined in a makefile (origin: $(origin STRIP_RELEASE)))
+        endif
+        ifeq ($(STRIP_RELEASE),)
+            $(error [STRIP_RELEASE] Missing value)
+        endif
+        ifneq ($(STRIP_RELEASE),0)
+            ifneq ($(STRIP_RELEASE),1)
+                $(error [STRIP_RELEASE] Invalid value: $(STRIP_RELEASE))
+            endif
+        endif
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # Optimizes release build ------------------------------------------------------
-OPTIMIZE_RELEASE ?= 1
-ifneq ($(origin OPTIMIZE_RELEASE),file)
-    $(error [OPTIMIZE_RELEASE] Not defined in a makefile (origin: $(origin OPTIMIZE_RELEASE)))
-endif
-ifeq ($(OPTIMIZE_RELEASE),)
-    $(error [OPTIMIZE_RELEASE] Missing value)
-endif
-ifneq ($(OPTIMIZE_RELEASE),0)
-    ifneq ($(OPTIMIZE_RELEASE),1)
-        $(error [OPTIMIZE_RELEASE] Invalid value: $(OPTIMIZE_RELEASE))
+ifeq ($(__TDC__),0)
+    ifneq ($(filter app lib,$(PROJ_TYPE)),)
+        OPTIMIZE_RELEASE ?= 1
+        ifneq ($(origin OPTIMIZE_RELEASE),file)
+            $(error [OPTIMIZE_RELEASE] Not defined in a makefile (origin: $(origin OPTIMIZE_RELEASE)))
+        endif
+        ifeq ($(OPTIMIZE_RELEASE),)
+            $(error [OPTIMIZE_RELEASE] Missing value)
+        endif
+        ifneq ($(OPTIMIZE_RELEASE),0)
+            ifneq ($(OPTIMIZE_RELEASE),1)
+                $(error [OPTIMIZE_RELEASE] Invalid value: $(OPTIMIZE_RELEASE))
+            endif
+        endif
+        ifneq ($(OPTIMIZE_RELEASE),0)
+            RELEASE_OPTIMIZATION_LEVEL ?= 2
+        endif
     endif
-endif
-ifneq ($(OPTIMIZE_RELEASE),0)
-    RELEASE_OPTIMIZATION_LEVEL ?= 2
 endif
 # ------------------------------------------------------------------------------
 
-# LIBS -------------------------------------------------------------------------
-ifdef LIBS
-    ifneq ($(origin LIBS),file)
-        $(error [LIBS] Not defined in a makefile (origin: $(origin LIBS)))
+# LIB_TYPE ----------------------------------------------------------------------
+
+# NOTE: A host layer may have set a default LIB_TYPE
+
+ifeq ($(__TDC__),0)
+    ifeq ($(PROJ_TYPE),lib)
+        LIB_TYPE ?= shared
+        ifeq ($(LIB_TYPE),)
+            $(error [LIB_TYPE] Missing value)
+        endif
+        ifneq ($(call FN_INVALID_OPTION,$(LIB_TYPE),shared static),)
+            $(error [LIB_TYPE] Invalid value: $(LIB_TYPE))
+        endif
     endif
 endif
+# ------------------------------------------------------------------------------
 
-#$(call __project_mk_libs_template1__,<lib_name>,[lib_dir])
-define __project_mk_libs_template1__
-__project_mk_libs_has_lib_dir__ := $$(if $$(or $$(__project_mk_libs_has_lib_dir__),$(2)),1,)
-__project_mk_libs_ldflags__ += -l$(1)
-$(if $(2),PRE_BUILD_DEPS += $$(O)/$(LIBS_SUBDIR)/$(1).marker,)
-$(if $(2),--$(1):,)
-$(if $(2),	$$(O_VERBOSE)$$(MAKE) -C $(2) O=$$(call FN_REL_DIR,$(2),$$(O)/$(LIBS_SUBDIR)) BUILD_SUBDIR=$(1) DIST_MARKER=$(1).marker,)
-$(if $(2),$$(O)/$(LIBS_SUBDIR)/$(1).marker: --$(1) ;,)
+# ARTIFACT ---------------------------------------------------------------------
 
-endef
+# NOTE: A host layer may have set a default ARTIFACT
 
-# $(call __project_mk_libs_fn_lib_name__,<lib_entry>)
-__project_mk_libs_fn_lib_name__     = $(word 1, $(subst :, ,$(1)))
+ifeq ($(__TDC__),0)
+    ifneq ($(filter app lib,$(PROJ_TYPE)),)
+        ARTIFACT ?= a.out
+        ifeq ($(ARTIFACT),)
+            $(error [ARTIFACT] Missing value)
+        endif
+        ifneq ($(words $(ARTIFACT)),1)
+            $(error [ARTIFACT] Value cannot have whitespaces: $(ARTIFACT))
+        endif
+    endif
+endif
+# ------------------------------------------------------------------------------
 
-# $(call __project_mk_libs_fn_lib_dir__,<lib_entry>)
-__project_mk_libs_fn_lib_dir__      = $(word 2, $(subst :, ,$(1)))
+# Identify source files --------------------------------------------------------
+ifeq ($(__TDC__),0)
+    ifneq ($(filter app lib,$(PROJ_TYPE)),)
+        ifdef SKIPPED_SRC_DIRS
+            ifneq ($(origin SKIPPED_SRC_DIRS),file)
+                $(error [SKIPPED_SRC_DIRS] Not defined in a makefile (origin: $(origin SKIPPED_SRC_DIRS)))
+            endif
+            SKIPPED_SRC_DIRS := $(call FN_UNIQUE,$(SKIPPED_SRC_DIRS))
+        endif
 
-# $(call __project_mk_libs_template__,<lib_entry>)
-__project_mk_libs_template__    = $(call __project_mk_libs_template1__,$(call __project_mk_libs_fn_lib_name__,$(1)),$(call __project_mk_libs_fn_lib_dir__,$(1)))
+        ifdef SKIPPED_SRC_FILES
+            ifneq ($(origin SKIPPED_SRC_FILES),file)
+                $(error [SKIPPED_SRC_FILES] Not defined in a makefile (origin: $(origin SKIPPED_SRC_FILES)))
+            endif
+            SKIPPED_SRC_FILES := $(call FN_UNIQUE,$(SKIPPED_SRC_FILES))
+        endif
 
-# $(call __project_mk_libs_fn_template__,<lib_entry>)
-__project_mk_libs_fn_template__ = $(eval $(call __project_mk_libs_template__,$(1)))
+        ifdef SRC_FILES
+            ifneq ($(origin SRC_FILES),file)
+                $(error [SRC_FILES] Not defined in a makefile (origin: $(origin SRC_FILES)))
+            endif
+        endif
 
-$(foreach lib,$(LIBS),$(call __project_mk_libs_fn_template__,$(lib)))
-ifeq ($(__project_mk_libs_has_lib_dir__),1)
-    INCLUDE_DIRS += $(O)/$(LIBS_SUBDIR)/dist/include
-    LDFLAGS := $(LDFLAGS) -L$(O)/$(LIBS_SUBDIR)/dist/lib $(__project_mk_libs_ldflags__)
+        SRC_DIRS := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS)))
+
+        # Checks if any SRC_DIR is outside CURDIR
+        $(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Invalid directory: $(srcDir))))
+
+        __project_mk_src_file_filter__ := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
+
+        SRC_FILES := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f $(__project_mk_src_file_filter__) 2> /dev/null)) $(SRC_FILES)))
+
+        __project_mk_invalid_src_files__ := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
+
+        ifneq ($(__project_mk_invalid_src_files__),)
+            $(error [SRC_FILES] Unsupported source file(s): $(__project_mk_invalid_src_files__))
+        endif
+    endif
+endif
+# ------------------------------------------------------------------------------
+
+# Include directories ----------------------------------------------------------
+ifeq ($(__TDC__),0)
+    ifneq ($(filter app lib,$(PROJ_TYPE)),)
+        SKIP_DEFAULT_INCLUDE_DIR ?= 0
+        ifneq ($(origin SKIP_DEFAULT_INCLUDE_DIR),file)
+            $(error [SKIP_DEFAULT_INCLUDE_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_INCLUDE_DIR)))
+        endif
+
+        ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
+            ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),1)
+                $(error [SKIP_DEFAULT_INCLUDE_DIR] Invalid value: $(SKIP_DEFAULT_INCLUDE_DIR))
+            endif
+        endif
+
+        ifdef INCLUDE_DIRS
+            ifneq ($(origin INCLUDE_DIRS),file)
+                $(error [INCLUDE_DIRS] Not defined in a makefile (origin: $(origin INCLUDE_DIRS)))
+            endif
+        endif
+
+        ifeq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
+            ifneq ($(wildcard include),)
+                INCLUDE_DIRS += include
+            endif
+        endif
+
+        INCLUDE_DIRS := $(call FN_UNIQUE,$(SRC_DIRS) $(INCLUDE_DIRS))
+    endif
+endif
+# ------------------------------------------------------------------------------
+
+# Libs sub-directory -----------------------------------------------------------
+ifeq ($(PROJ_TYPE),lib)
+    LIBS_SUBDIR ?=
 else
-    LDFLAGS := $(LDFLAGS) $(__project_mk_libs_ldflags__)
+    LIBS_SUBDIR ?= libs
 endif
-# ------------------------------------------------------------------------------
 
-# LAZY -------------------------------------------------------------------------
-ifdef LAZY
-    ifneq ($(origin LAZY),file)
-        $(error [LAZY] Not defined in a makefile (origin: $(origin LAZY)))
+override LIBS_SUBDIR := $(strip $(LIBS_SUBDIR))
+
+ifneq ($(LIBS_SUBDIR),)
+    ifneq ($(words $(LIBS_SUBDIR)),1)
+        $(error [LIBS_SUBDIR] Value cannot have whitespaces)
     endif
+    $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(LIBS_SUBDIR)),,$(error [LIBS_SUBDIR] Invalid path: $(LIBS_SUBDIR)))
+else
+    override LIBS_SUBDIR := .
 endif
-
-$(eval $(LAZY))
 # ------------------------------------------------------------------------------
 
-undefine __project_mk_self_dir__
-undefine __project_mk_host_factorizer__
-undefine __project_mk_host_factorizer_current__
-undefine __project_mk_host_factorizer_previous__
-undefine __project_mk_host_factorizer_factors__
-undefine __project_mk_host_factorize__
-undefine __project_mk_fn_host_factorize__
-undefine __project_mk_host_layers__
-undefine __project_mk_layer_aux_parser__
-undefine __project_mk_hosts_mk_includes__
-undefine __project_mk_hosts_src_dirs__
-undefine __project_mk_src_dirs__
-undefine __project_mk_include_dirs__
 undefine __project_mk_src_file_filter__
 undefine __project_mk_invalid_src_files__
-undefine __project_mk_libs_template1__
-undefine __project_mk_libs_has_lib_dir__
-undefine __project_mk_libs_ldflags__
-undefine __project_mk_libs_fn_lib_name__
-undefine __project_mk_libs_fn_lib_dir__
-undefine __project_mk_libs_template__
-undefine __project_mk_libs_fn_template__
+undefine __project_mk_self_dir__
 
 endif # ifndef __project_mk__
