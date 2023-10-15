@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Leandro José Britto de Oliveira
+# Copyright (c) 2023 Leandro José Britto de Oliveira
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,13 +18,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# cpp-project-builder main makefile
+# Compiler management
 
 ifndef __builder_mk__
 __builder_mk__ := 1
 
-__SELF_DIR__ := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(__SELF_DIR__)project.mk
+ifndef __project_mk__
+    $(error This file cannot be manually included)
+endif
 
 # Compiler management ----------------------------------------------------------
 # AS
@@ -160,26 +161,13 @@ ASFLAGS  := $(call FN_UNIQUE, -MMD -MP $(__builder_mk_include_flags__) $(__build
 LDFLAGS  := $(call FN_UNIQUE, $(__builder_mk_ldflags__) $(LDFLAGS) $(EXTRA_LDFLAGS))
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------
+.NOTPARALLEL:
+
+# all (default) ================================================================
 .DEFAULT_GOAL := all
 
-.NOTPARALLEL:
-# ------------------------------------------------------------------------------
-
-# all ==========================================================================
 .PHONY: all
 all: dist ;
-# ==============================================================================
-
-# print-vars ===================================================================
-VARS ?= $(sort DEBUG HOST DIST_MARKER O O_BUILD_DIR O_DIST_DIR V DIST_DIRS DIST_FILES INCLUDE_DIRS LIB_TYPE POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS HOSTS_DIRS OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE ARTIFACT)
-.PHONY: print-vars
-print-vars:
-    ifeq ($(VARS),)
-	    $(error [VARS] Missing value)
-    endif
-	$(foreach varName,$(VARS),$(info $(varName) = $($(varName))))
-	@printf ''
 # ==============================================================================
 
 # clean ========================================================================
@@ -196,13 +184,23 @@ endif
 
 --__builder_mk_pre_clean__: $(PRE_CLEAN_DEPS) ;
 
---__builder_mk_clean__: --__builder_mk_pre_clean__
-	$(O_VERBOSE)rm -rf $(O)
-
---__builder_mk_post_clean__: --__builder_mk_clean__ $(POST_CLEAN_DEPS) ;
+ifneq ($(filter app lib,$(PROJ_TYPE)),)
+    --__builder_mk_clean__: --__builder_mk_pre_clean__
+	    $(O_VERBOSE)rm -rf $(O)
+else ifeq ($(PROJ_TYPE),custom)
+    ifneq ($(CUSTOM_CLEAN_CMD),)
+        ifneq ($(origin CUSTOM_CLEAN_CMD),file)
+            $(error [CUSTOM_CLEAN_CMD] Not defined in a makefile (origin: $(origin CUSTOM_CLEAN_CMD)))
+        endif
+        --__builder_mk_clean__: --__builder_mk_pre_clean__
+	        $(O_VERBOSE)$(CUSTOM_CLEAN_CMD)
+    else
+        --__builder_mk_clean__: --__builder_mk_pre_clean__ ;
+    endif
+endif
 
 .PHONY: clean
-clean: --__builder_mk_post_clean__ ;
+clean: --__builder_mk_clean__ $(POST_CLEAN_DEPS) ;
 # ==============================================================================
 
 # build ========================================================================
@@ -217,7 +215,11 @@ ifdef POST_BUILD_DEPS
     endif
 endif
 
-ifneq ($(SRC_FILES),)
+ifneq ($(filter app lib,$(PROJ_TYPE)),)
+    ifeq ($(SRC_FILES),)
+        $(error No source files)
+    endif
+
     ifeq ($(PROJ_TYPE),lib)
         # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
         ifneq ($(filter -fPIC,$(CFLAGS) $(CXXFLAGS)),)
@@ -233,7 +235,7 @@ ifneq ($(SRC_FILES),)
 
     ifeq ($(PROJ_TYPE),lib)
         # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
-        ifneq ($(filter -fPIC,$(CFLAGS)),)
+        ifneq ($(filter -fPIC,$(CFLAGS) $(CXXFLAGS)),)
             __builder_mk_dep_files__ := $(__builder_mk_obj_files__:.lo=.d)
         else
             __builder_mk_dep_files__ := $(__builder_mk_obj_files__:.o=.d)
@@ -241,10 +243,7 @@ ifneq ($(SRC_FILES),)
     else ifeq ($(PROJ_TYPE),app)
         __builder_mk_dep_files__ := $(__builder_mk_obj_files__:.o=.d)
     endif
-endif
 
-
-ifneq ($(SRC_FILES),)
     --pre-build-check:
         ifneq ($(HOST),$(NATIVE_HOST))
             ifeq ($(origin CROSS_COMPILE),undefined)
@@ -258,13 +257,11 @@ ifneq ($(SRC_FILES),)
             ifeq ($(LIB_TYPE),shared)
 	            @echo [LD] $$@
 	            $(O_VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $$@ $(__builder_mk_obj_files__) $(LDFLAGS))
-            endif
-            ifeq ($(LIB_TYPE),static)
+            else ifeq ($(LIB_TYPE),static)
 	            @echo [AR] $$@
 	            $(O_VERBOSE)$(CROSS_COMPILE)$(AR) rcs $$@ $(__builder_mk_obj_files__)
             endif
-        endif
-        ifeq ($(PROJ_TYPE),app)
+        else ifeq ($(PROJ_TYPE),app)
 	        @echo [LD] $$@
 	        $(O_VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $$@ $(__builder_mk_obj_files__) $(LDFLAGS))
         endif
@@ -274,9 +271,15 @@ ifneq ($(SRC_FILES),)
 
     .PHONY: build
     build: --pre-build-check $(O_BUILD_DIR)/$(ARTIFACT) $(POST_BUILD_DEPS) ;
-else
+else ifeq ($(PROJ_TYPE), custom)
+    ifeq ($(CUSTOM_BUILD_CMD),)
+        --__builder_mk_build__: $(PRE_BUILD_DEPS) ;
+    else
+        --__builder_mk_build__: $(PRE_BUILD_DEPS)
+	        $(O_VERBOSE)$(CUSTOM_BUILD_CMD)
+    endif
     .PHONY: build
-    build: ;
+    build: --__builder_mk_build__ $(POST_BUILD_DEPS) ;
 endif
 
 # C sources --------------------------------------------------------------------
@@ -316,10 +319,8 @@ $(eval $(call __builder_mk_as_template__,S))
 
 # dist =========================================================================
 ifneq ($(DIST_MARKER),)
-    ifneq ($(DIST_MARKER),)
-        ifneq ($(words $(DIST_MARKER)),1)
-            $(error [DIST_MARKER] Value cannot have whitespaces: $(DIST_MARKER))
-        endif
+    ifneq ($(words $(DIST_MARKER)),1)
+        $(error [DIST_MARKER] Value cannot have whitespaces: $(DIST_MARKER))
     endif
     $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(DIST_MARKER)),,$(error [DIST_MARKER] Invalid path: $(DIST_MARKER)))
 endif
@@ -343,12 +344,10 @@ ifdef DIST_FILES
         $(error [DIST_FILES] Not defined in a makefile (origin: $(origin DIST_FILES)))
     endif
 endif
-ifneq ($(SRC_FILES),)
-    ifeq ($(PROJ_TYPE),app)
-        __builder_mk_dist_files__ := $(O_BUILD_DIR)/$(ARTIFACT):bin/$(ARTIFACT)
-    else ifeq ($(PROJ_TYPE),lib)
-        __builder_mk_dist_files__ := $(O_BUILD_DIR)/$(ARTIFACT):lib/$(ARTIFACT)
-    endif
+ifeq ($(PROJ_TYPE),app)
+    __builder_mk_dist_files__ := $(O_BUILD_DIR)/$(ARTIFACT):bin/$(ARTIFACT)
+else ifeq ($(PROJ_TYPE),lib)
+    __builder_mk_dist_files__ := $(O_BUILD_DIR)/$(ARTIFACT):lib/$(ARTIFACT)
 endif
 __builder_mk_dist_files__ := $(call FN_UNIQUE,$(__builder_mk_dist_files__) $(DIST_FILES))
 

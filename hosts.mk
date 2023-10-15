@@ -18,11 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# host management
-
-# Hosts with supported auto-detection:
-#    linux-x86, linux-x64, linux-arm, linux-arm64,
-#    windows-x86, windows-x64, windows-arm, windows-arm64
+# Host management
 
 ifndef __hosts_mk__
 __hosts_mk__ := 1
@@ -32,78 +28,81 @@ ifndef __project_mk__
 endif
 
 # Native host detection ========================================================
-ifeq ($(__TDC__),0)
-    ifdef NATIVE_OS
-        $(error [NATIVE_OS] Reserved variable)
-    endif
-    ifdef NATIVE_ARCH
-        $(error [NATIVE_ARCH] Reserved variable)
-    endif
-    ifdef NATIVE_HOST
-        $(error [NATIVE_HOST] Reserved variable)
-    endif
 
-    ifeq ($(OS),Windows_NT)
-        NATIVE_OS := windows
+# Hosts with supported auto-detection:
+#    linux-x86, linux-x64, linux-arm, linux-arm64,
+#    windows-x86, windows-x64, windows-arm, windows-arm64
+
+ifdef NATIVE_OS
+    $(error [NATIVE_OS] Reserved variable)
+endif
+ifdef NATIVE_ARCH
+    $(error [NATIVE_ARCH] Reserved variable)
+endif
+ifdef NATIVE_HOST
+    $(error [NATIVE_HOST] Reserved variable)
+endif
+
+ifeq ($(OS),Windows_NT)
+    NATIVE_OS := windows
+else
+    __hosts_mk_os__ := $(shell uname -s)
+    ifneq ($(filter Linux linux,$(__hosts_mk_os__)),)
+        NATIVE_OS := linux
     else
-        __hosts_mk_os__ := $(shell uname -s)
-        ifneq ($(filter Linux linux,$(__hosts_mk_os__)),)
-            NATIVE_OS := linux
-        else
-            ifneq ($(filter Darwin darwin, $(__hosts_mk_os__)),)
-                NATIVE_OS := osx
-            endif
+        ifneq ($(filter Darwin darwin, $(__hosts_mk_os__)),)
+            NATIVE_OS := osx
         endif
     endif
+endif
 
-    ifdef NATIVE_OS
-        ifeq ($(NATIVE_OS),windows)
-            __hosts_mk_arch__ := $(shell cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
-            ifeq ($(__hosts_mk_arch__),AMD64)
-                NATIVE_ARCH := x64
-            else
-                ifeq ($(__hosts_mk_arch__),x86)
-                    NATIVE_ARCH := x86
-                else
-                    ifneq ($(__hosts_mk_arch__),ARM32)
-                        NATIVE_ARCH := arm
-                    else
-                        ifeq ($(__hosts_mk_arch__),ARM64)
-                            NATIVE_ARCH := arm64
-                        endif
-                    endif
-                endif
-            endif
+ifdef NATIVE_OS
+    ifeq ($(NATIVE_OS),windows)
+        __hosts_mk_arch__ := $(shell cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
+        ifeq ($(__hosts_mk_arch__),AMD64)
+            NATIVE_ARCH := x64
         else
-            __hosts_mk_arch__ := $(shell uname -m)
-            ifeq ($(__hosts_mk_arch__),x86_64)
-                NATIVE_ARCH := x64
+            ifeq ($(__hosts_mk_arch__),x86)
+                NATIVE_ARCH := x86
             else
-                ifneq ($(filter %86, $(__hosts_mk_arch__)),)
-                    NATIVE_ARCH := x86
+                ifneq ($(__hosts_mk_arch__),ARM32)
+                    NATIVE_ARCH := arm
                 else
-                    ifneq ($(filter arm, $(__hosts_mk_arch__)),)
-                        NATIVE_ARCH := arm
-                    else
-                        ifneq ($(filter arm64, $(__hosts_mk_arch__)),)
-                            NATIVE_ARCH := arm64
-                        endif
+                    ifeq ($(__hosts_mk_arch__),ARM64)
+                        NATIVE_ARCH := arm64
                     endif
                 endif
             endif
         endif
-
-        ifdef NATIVE_ARCH
-            NATIVE_HOST := $(NATIVE_OS)-$(NATIVE_ARCH)
+    else
+        __hosts_mk_arch__ := $(shell uname -m)
+        ifeq ($(__hosts_mk_arch__),x86_64)
+            NATIVE_ARCH := x64
         else
-            NATIVE_HOST := $(NATIVE_OS)
+            ifneq ($(filter %86, $(__hosts_mk_arch__)),)
+                NATIVE_ARCH := x86
+            else
+                ifneq ($(filter arm, $(__hosts_mk_arch__)),)
+                    NATIVE_ARCH := arm
+                else
+                    ifneq ($(filter arm64, $(__hosts_mk_arch__)),)
+                        NATIVE_ARCH := arm64
+                    endif
+                endif
+            endif
         endif
     endif
 
-    ifndef HOST
-        ifdef NATIVE_HOST
-            HOST := $(NATIVE_HOST)
-        endif
+    ifdef NATIVE_ARCH
+        NATIVE_HOST := $(NATIVE_OS)-$(NATIVE_ARCH)
+    else
+        NATIVE_HOST := $(NATIVE_OS)
+    endif
+endif
+
+ifndef HOST
+    ifdef NATIVE_HOST
+        HOST := $(NATIVE_HOST)
     endif
 endif
 

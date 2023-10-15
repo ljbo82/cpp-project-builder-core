@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Leandro José Britto de Oliveira
+# Copyright (c) 2023 Leandro José Britto de Oliveira
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,19 +18,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Doxygen targets
+# Doxygen support
 
 ifndef __doxygen_mk__
 __doxygen_mk__ := 1
 
-# Include build system makefiles -----------------------------------------------
-include $(dir $(lastword $(MAKEFILE_LIST)))common.mk
-# ------------------------------------------------------------------------------
-
 # Doc output directory ---------------------------------------------------------
 DOC_DIR ?= doc
 ifneq ($(words $(DOC_DIR)),1)
-    $(error [DOC_DIR] Value cannot have whitespaces: $(DOC_DIR)
+    $(error [DOC_DIR] Value cannot have whitespaces: $(DOC_DIR))
 endif
 ifeq ($(DOC_DIR),)
     $(error [DOC_DIR] Missing value)
@@ -47,7 +43,7 @@ ifeq ($(DOXYFILE),)
     $(error [DOXYFILE] Missing value)
 endif
 ifneq ($(words $(DOXYFILE)),1)
-    $(error [DOXYFILE] Value cannot have whitespaces: $(DOXYFILE)
+    $(error [DOXYFILE] Value cannot have whitespaces: $(DOXYFILE))
 endif
 # ------------------------------------------------------------------------------
 
