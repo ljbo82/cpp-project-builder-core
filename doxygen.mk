@@ -23,7 +23,9 @@
 ifndef __doxygen_mk__
 __doxygen_mk__ := 1
 
-# Doc output directory ---------------------------------------------------------
+include $(dir $(lastword $(MAKEFILE_LIST)))common.mk
+
+# Doc src/output directories----------------------------------------------------
 DOC_DIR ?= doc
 ifneq ($(words $(DOC_DIR)),1)
     $(error [DOC_DIR] Value cannot have whitespaces: $(DOC_DIR))
@@ -34,7 +36,7 @@ endif
 ifdef O_DOC_DIR
     $(error [O_DOC_DIR] Reserved variable)
 endif
-O_DOC_DIR := $(O)/$(DOC_DIR)
+O_DOC_DIR := $(O)/doc
 # ------------------------------------------------------------------------------
 
 # Doxyfile definition ----------------------------------------------------------
@@ -47,7 +49,7 @@ ifneq ($(words $(DOXYFILE)),1)
 endif
 # ------------------------------------------------------------------------------
 
-# DOC ==========================================================================
+# doc ==========================================================================
 ifdef PRE_DOC_DEPS
     ifneq ($(origin PRE_DOC_DEPS),file)
         $(error [PRE_DOC_DEPS] Not defined in a makefile (origin: $(origin PRE_DOC_DEPS)))
@@ -59,21 +61,23 @@ ifdef POST_DOC_DEPS
     endif
 endif
 
-.PHONY: pre-doc
-pre-doc: $(PRE_DOC_DEPS)
+.PHONY: --__doxygen_mk_pre_doc__
+--__doxygen_mk_pre_doc__: $(PRE_DOC_DEPS) ;
 
---__doxygen_mk_doc__: pre-doc
+.PHONY: --__doxygen_mk_doc__
+--__doxygen_mk_doc__: --__doxygen_mk_pre_doc__
     ifeq ($(wildcard $(DOXYFILE)),)
 	    $(error [DOXYFILE] File not found: $(DOXYFILE))
     else
 	    @mkdir -p $(O_DOC_DIR)
-	    $(O_VERBOSE)( cat $(DOXYFILE); $(foreach arg,$(strip OUTPUT_DIRECTORY=$(O_DOC_DIR) $(DOXYARGS)),echo cat $(arg); ) ) | doxygen -
+	    $(VERBOSE)(cat $(DOXYFILE)$(foreach arg,$(strip OUTPUT_DIRECTORY=$(O_DOC_DIR) $(DOXYARGS)),; echo cat $(arg))) | doxygen -
     endif
 
---__doxygen_mk_post_doc__: --__doxygen_mk_doc__ $(POST_DOC_DEPS)
+.PHONY: --__doxygen_mk_post_doc__
+--__doxygen_mk_post_doc__: --__doxygen_mk_doc__ $(POST_DOC_DEPS) ;
 
 .PHONY: doc
-doc: --__doxygen_mk_post_doc__
+doc: --__doxygen_mk_post_doc__ ;
 # ==============================================================================
 
 endif # ifndef __doxygen_mk__
