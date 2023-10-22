@@ -20,8 +20,8 @@
 
 # General purpose functions
 
-ifndef __functions_mk__
-__functions_mk__ := 1
+ifndef functions_mk
+functions_mk := 1
 
 # Text functions ---------------------------------------------------------------
 
@@ -119,4 +119,4 @@ endif
 FN_IS_INSIDE_DIR = $(filter $(abspath $(1)) $(abspath $(1)/%),$(abspath $(2)))
 # ------------------------------------------------------------------------------
 
-endif # ifndef __functions_mk__
+endif # ifndef functions_mk

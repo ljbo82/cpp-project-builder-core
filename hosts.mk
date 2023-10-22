@@ -20,14 +20,14 @@
 
 # Host management
 
-ifndef __hosts_mk__
-__hosts_mk__ := 1
+ifndef hosts_mk
+hosts_mk := 1
 
-ifndef __project_mk__
+ifndef project_mk
     $(error This file cannot be manually included)
 endif
 
-# Native host detection ========================================================
+# Native host detection ********************************************************
 
 # Hosts with supported auto-detection:
 #    linux-x86, linux-x64, linux-arm, linux-arm64,
@@ -46,11 +46,11 @@ endif
 ifeq ($(OS),Windows_NT)
     NATIVE_OS := windows
 else
-    __hosts_mk_os__ := $(shell uname -s)
-    ifneq ($(filter Linux linux,$(__hosts_mk_os__)),)
+    hosts_mk_os := $(shell uname -s)
+    ifneq ($(filter Linux linux,$(hosts_mk_os)),)
         NATIVE_OS := linux
     else
-        ifneq ($(filter Darwin darwin, $(__hosts_mk_os__)),)
+        ifneq ($(filter Darwin darwin, $(hosts_mk_os)),)
             NATIVE_OS := osx
         endif
     endif
@@ -58,34 +58,34 @@ endif
 
 ifdef NATIVE_OS
     ifeq ($(NATIVE_OS),windows)
-        __hosts_mk_arch__ := $(shell cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
-        ifeq ($(__hosts_mk_arch__),AMD64)
+        hosts_mk_arch := $(shell cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
+        ifeq ($(hosts_mk_arch),AMD64)
             NATIVE_ARCH := x64
         else
-            ifeq ($(__hosts_mk_arch__),x86)
+            ifeq ($(hosts_mk_arch),x86)
                 NATIVE_ARCH := x86
             else
-                ifneq ($(__hosts_mk_arch__),ARM32)
+                ifneq ($(hosts_mk_arch),ARM32)
                     NATIVE_ARCH := arm
                 else
-                    ifeq ($(__hosts_mk_arch__),ARM64)
+                    ifeq ($(hosts_mk_arch),ARM64)
                         NATIVE_ARCH := arm64
                     endif
                 endif
             endif
         endif
     else
-        __hosts_mk_arch__ := $(shell uname -m)
-        ifeq ($(__hosts_mk_arch__),x86_64)
+        hosts_mk_arch := $(shell uname -m)
+        ifeq ($(hosts_mk_arch),x86_64)
             NATIVE_ARCH := x64
         else
-            ifneq ($(filter %86, $(__hosts_mk_arch__)),)
+            ifneq ($(filter %86, $(hosts_mk_arch)),)
                 NATIVE_ARCH := x86
             else
-                ifneq ($(filter arm, $(__hosts_mk_arch__)),)
+                ifneq ($(filter arm, $(hosts_mk_arch)),)
                     NATIVE_ARCH := arm
                 else
-                    ifneq ($(filter arm64, $(__hosts_mk_arch__)),)
+                    ifneq ($(filter arm64, $(hosts_mk_arch)),)
                         NATIVE_ARCH := arm64
                     endif
                 endif
@@ -113,9 +113,9 @@ else
        $(error [HOST] Value cannot have whitespaces: $(HOST))
     endif
 endif
-# ==============================================================================
+# ******************************************************************************
 
-# Host layers management =======================================================
+# Host layers management *******************************************************
 
 # Precedence:
 # 1. Build-system-specific host definitions (from most generic to most specific,
@@ -129,24 +129,24 @@ endif
 #
 # This template will be called multiple times in order to prepare the list of acceptable layers.
 #
-# Syntax: $(call __hosts_mk_host_factorizer__,hostLayer)
-define __hosts_mk_host_factorizer__
-__hosts_mk_host_factorizer_current__  := $$(if $$(__hosts_mk_host_factorizer_previous__),$$(__hosts_mk_host_factorizer_previous__)/$(1),$(1))
-__hosts_mk_host_factorizer_previous__ := $$(__hosts_mk_host_factorizer_current__)
-__hosts_mk_host_factorizer_factors__  := $$(__hosts_mk_host_factorizer_factors__) $$(__hosts_mk_host_factorizer_current__)
+# Syntax: $(call hosts_mk_host_factorizer,hostLayer)
+define hosts_mk_host_factorizer
+hosts_mk_host_factorizer_current  := $$(if $$(hosts_mk_host_factorizer_previous),$$(hosts_mk_host_factorizer_previous)/$(1),$(1))
+hosts_mk_host_factorizer_previous := $$(hosts_mk_host_factorizer_current)
+hosts_mk_host_factorizer_factors  := $$(hosts_mk_host_factorizer_factors) $$(hosts_mk_host_factorizer_current)
 endef
 # ------------------------------------------------------------------------------
 
 # Host layer factorizer auxiliary function -------------------------------------
 #
-# This function will set the accepted layers in the variable __hosts_mk_host_factorizer_factors__
+# This function will set the accepted layers in the variable hosts_mk_host_factorizer_factors
 #
-# Syntax: $(call __hosts_mk_host_factorize__,hostString)
-define __hosts_mk_host_factorize__
-    undefine __hosts_mk_host_factorizer_current__
-    undefine __hosts_mk_host_factorizer_previous__
-    undefine __hosts_mk_host_factorizer_factors__
-    $$(foreach token,$$(subst -, ,$(1)),$$(eval $$(call __hosts_mk_host_factorizer__,$$(token))))
+# Syntax: $(call hosts_mk_host_factorize,hostString)
+define hosts_mk_host_factorize
+    undefine hosts_mk_host_factorizer_current
+    undefine hosts_mk_host_factorizer_previous
+    undefine hosts_mk_host_factorizer_factors
+    $$(foreach token,$$(subst -, ,$(1)),$$(eval $$(call hosts_mk_host_factorizer,$$(token))))
 endef
 # ------------------------------------------------------------------------------
 
@@ -154,11 +154,11 @@ endef
 #
 # Function will return a list of accepted layers for a given host.
 #
-# Syntax: $(call __hosts_mk_host_factorize__,hostString)
-__hosts_mk_fn_host_factorize__ = $(eval $(call __hosts_mk_host_factorize__,$(1)))$(__hosts_mk_host_factorizer_factors__)
+# Syntax: $(call hosts_mk_fn_host_factorize,hostString)
+hosts_mk_fn_host_factorize = $(eval $(call hosts_mk_host_factorize,$(1)))$(hosts_mk_host_factorizer_factors)
 
 # Contains all valid layers for current HOST
-__hosts_mk_host_layers__ := $(call FN_UNIQUE,$(call __hosts_mk_fn_host_factorize__,$(HOST)) $(HOST))
+hosts_mk_host_layers := $(call FN_UNIQUE,$(call hosts_mk_fn_host_factorize,$(HOST)) $(HOST))
 
 SKIP_DEFAULT_HOSTS_DIR ?= 0
 ifneq ($(origin SKIP_DEFAULT_HOSTS_DIR),file)
@@ -180,45 +180,45 @@ ifeq ($(SKIP_DEFAULT_HOSTS_DIR),0)
     endif
 endif
 
-HOSTS_DIRS := $(call FN_UNIQUE,$(HOSTS_DIRS) $(__hosts_mk_self_dir__)hosts)
+HOSTS_DIRS := $(call FN_UNIQUE,$(HOSTS_DIRS) $(hosts_mk_self_dir)hosts)
 
 # Auxiliar checker for 'host.mk' and 'src' directory into a layer directory ----
 #
-# This function will add values to '__hosts_mk_hosts_mk_includes__' and
-# '__hosts_mk_hosts_src_dirs__' on each call
+# This function will add values to 'hosts_mk_hosts_mk_includes' and
+# 'hosts_mk_hosts_src_dirs' on each call
 #
-# Syntax $(call __hosts_mk_layer_aux_parser__,hostsDir,layer)
-define __hosts_mk_layer_aux_parser__
-__hosts_mk_hosts_mk_includes__ += $(if $(wildcard $(1)/$(2)/host.mk),$(realpath $(1)/$(2)/host.mk),)
-__hosts_mk_hosts_src_dirs__    += $(if $(wildcard $(1)/$(2)/src),$(1)/$(2)/src,)
+# Syntax $(call hosts_mk_layer_aux_parser,hostsDir,layer)
+define hosts_mk_layer_aux_parser
+hosts_mk_hosts_mk_includes += $(if $(wildcard $(1)/$(2)/host.mk),$(realpath $(1)/$(2)/host.mk),)
+hosts_mk_hosts_src_dirs    += $(if $(wildcard $(1)/$(2)/src),$(1)/$(2)/src,)
 endef
 # ------------------------------------------------------------------------------
 
-$(foreach hostDir,$(HOSTS_DIRS),$(eval $$(foreach layer,$$(__hosts_mk_host_layers__),$$(eval $$(call __hosts_mk_layer_aux_parser__,$(hostDir),$$(layer))))))
+$(foreach hostDir,$(HOSTS_DIRS),$(eval $$(foreach layer,$$(hosts_mk_host_layers),$$(eval $$(call hosts_mk_layer_aux_parser,$(hostDir),$$(layer))))))
 
-__hosts_mk_hosts_mk_includes__ := $(call FN_UNIQUE,$(strip $(__hosts_mk_hosts_mk_includes__)))
-__hosts_mk_hosts_src_dirs__    := $(strip $(__hosts_mk_hosts_src_dirs__))
+hosts_mk_hosts_mk_includes := $(call FN_UNIQUE,$(strip $(hosts_mk_hosts_mk_includes)))
+hosts_mk_hosts_src_dirs    := $(strip $(hosts_mk_hosts_src_dirs))
 
-ifneq ($(__hosts_mk_hosts_mk_includes__),)
-    include $(__hosts_mk_hosts_mk_includes__)
+ifneq ($(hosts_mk_hosts_mk_includes),)
+    include $(hosts_mk_hosts_mk_includes)
 endif
 
 ifneq ($(filter app lib,$(PROJ_TYPE)),)
-    SRC_DIRS := $(call FN_UNIQUE,$(SRC_DIRS) $(__hosts_mk_hosts_src_dirs__))
+    SRC_DIRS := $(call FN_UNIQUE,$(SRC_DIRS) $(hosts_mk_hosts_src_dirs))
 endif
-#===============================================================================
+# ******************************************************************************
 
-undefine __hosts_mk_os__
-undefine __hosts_mk_arch__
-undefine __hosts_mk_host_factorizer__
-undefine __hosts_mk_host_factorizer_current__
-undefine __hosts_mk_host_factorizer_previous__
-undefine __hosts_mk_host_factorizer_factors__
-undefine __hosts_mk_host_factorize__
-undefine __hosts_mk_fn_host_factorize__
-undefine __hosts_mk_host_layers__
-undefine __hosts_mk_layer_aux_parser__
-undefine __hosts_mk_hosts_mk_includes__
-undefine __hosts_mk_hosts_src_dirs__
+undefine hosts_mk_os
+undefine hosts_mk_arch
+undefine hosts_mk_host_factorizer
+undefine hosts_mk_host_factorizer_current
+undefine hosts_mk_host_factorizer_previous
+undefine hosts_mk_host_factorizer_factors
+undefine hosts_mk_host_factorize
+undefine hosts_mk_fn_host_factorize
+undefine hosts_mk_host_layers
+undefine hosts_mk_layer_aux_parser
+undefine hosts_mk_hosts_mk_includes
+undefine hosts_mk_hosts_src_dirs
 
-endif # ifndef __hosts_mk__
+endif # ifndef hosts_mk

@@ -20,10 +20,10 @@
 
 # Linux host standard definitions
 
-ifndef __hosts_linux_mk__
-__hosts_linux_mk__ := 1
+ifndef hosts_linux_mk
+hosts_linux_mk := 1
 
-ifndef __project_mk__
+ifndef project_mk
     $(error This file cannot be manually included)
 endif
 
@@ -34,22 +34,22 @@ ifeq ($(PROJ_TYPE),app)
 else ifeq ($(PROJ_TYPE),lib)
     LIB_TYPE ?= shared
     ifndef ARTIFACT
-        __hosts_linux_mk_target_base_name__ := lib$(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
+        hosts_linux_mk_target_base_name := lib$(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
         ifeq ($(LIB_TYPE),static)
-            ARTIFACT := $(__hosts_linux_mk_target_base_name__).a
+            ARTIFACT := $(hosts_linux_mk_target_base_name).a
         endif
         ifeq ($(LIB_TYPE),shared)
-            # NOTE: __hosts_linux_mk_shared_lib_suffix__ is modified in OSX hosts
-            ifndef __hosts_linux_mk_shared_lib_suffix__
-                __hosts_linux_mk_shared_lib_suffix__ := .so
+            # NOTE: hosts_linux_mk_shared_lib_suffix is modified in OSX hosts
+            ifndef hosts_linux_mk_shared_lib_suffix
+                hosts_linux_mk_shared_lib_suffix := .so
             endif
-            ARTIFACT := $(__hosts_linux_mk_target_base_name__)$(__hosts_linux_mk_shared_lib_suffix__)
-            ifdef __hosts_linux_mk_shared_lib_suffix__
-                undefine __hosts_linux_mk_shared_lib_suffix__
+            ARTIFACT := $(hosts_linux_mk_target_base_name)$(hosts_linux_mk_shared_lib_suffix)
+            ifdef hosts_linux_mk_shared_lib_suffix
+                undefine hosts_linux_mk_shared_lib_suffix
             endif
         endif
-        undefine __hosts_linux_mk_target_base_name__
+        undefine hosts_linux_mk_target_base_name
     endif
 endif
 
-endif # ifndef __hosts_linux_mk__
+endif # ifndef hosts_linux_mk

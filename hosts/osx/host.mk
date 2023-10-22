@@ -20,14 +20,14 @@
 
 # Linux host standard definitions
 
-ifndef __hosts_osx_mk__
-__hosts_osx_mk__ := 1
+ifndef hosts_osx_mk
+hosts_osx_mk := 1
 
 # NOTE: The only difference between osx and linux build system customizations
 #       is the suffix used for shared libraries
 
-# NOTE: __hosts_linux_mk_shared_lib_suffix__ will be undefined in linux's host.mk
-__hosts_linux_mk_shared_lib_suffix__ := .dylib
+# NOTE: hosts_linux_mk_shared_lib_suffix will be undefined in linux's host.mk
+hosts_linux_mk_shared_lib_suffix := .dylib
 include $(dir $(lastword $(MAKEFILE_LIST)))../linux/host.mk
 
-endif # ifndef __hosts_osx_mk__
+endif # ifndef hosts_osx_mk

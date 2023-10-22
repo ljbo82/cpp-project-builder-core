@@ -20,8 +20,8 @@
 
 # Git repository support
 
-ifndef __git_mk__
-__git_mk__ := 1
+ifndef git_mk
+git_mk := 1
 
 GIT_REPO_DIR ?= .
 ifeq ($(GIT_REPO_DIR),)
@@ -32,8 +32,8 @@ ifneq ($(words $(GIT_REPO_DIR)),1)
     $(error [GIT_REPO_DIR] Value cannot have whitespaces: $(GIT_REPO_DIR))
 endif
 
-__git_mk_repo_available__ := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1 && echo y)
-ifneq ($(__git_mk_repo_available__),)
+git_mk_repo_available := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1 && echo y)
+ifneq ($(git_mk_repo_available),)
     ifdef GIT_COMMIT
         $(error [GIT_COMMIT] Reserved variable)
     endif
@@ -85,6 +85,6 @@ ifneq ($(GIT_VERSION),)
     endif
 endif
 
-undefine __git_mk_repo_available__
+undefine git_mk_repo_available
 
-endif # ifndef __git_mk__
+endif # ifndef git_mk

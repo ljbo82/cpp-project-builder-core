@@ -20,8 +20,8 @@
 
 # Doxygen support
 
-ifndef __doxygen_mk__
-__doxygen_mk__ := 1
+ifndef doxygen_mk
+doxygen_mk := 1
 
 include $(dir $(lastword $(MAKEFILE_LIST)))common.mk
 
@@ -61,11 +61,11 @@ ifdef POST_DOC_DEPS
     endif
 endif
 
-.PHONY: --__doxygen_mk_pre_doc__
---__doxygen_mk_pre_doc__: $(PRE_DOC_DEPS) ;
+.PHONY: --doxygen_mk_pre_doc
+--doxygen_mk_pre_doc: $(PRE_DOC_DEPS) ;
 
-.PHONY: --__doxygen_mk_doc__
---__doxygen_mk_doc__: --__doxygen_mk_pre_doc__
+.PHONY: --doxygen_mk_doc
+--doxygen_mk_doc: --doxygen_mk_pre_doc
     ifeq ($(wildcard $(DOXYFILE)),)
 	    $(error [DOXYFILE] File not found: $(DOXYFILE))
     else
@@ -73,11 +73,11 @@ endif
 	    $(VERBOSE)(cat $(DOXYFILE)$(foreach arg,$(strip OUTPUT_DIRECTORY=$(O_DOC_DIR) $(DOXYARGS)),; echo cat $(arg))) | doxygen -
     endif
 
-.PHONY: --__doxygen_mk_post_doc__
---__doxygen_mk_post_doc__: --__doxygen_mk_doc__ $(POST_DOC_DEPS) ;
+.PHONY: --doxygen_mk_post_doc
+--doxygen_mk_post_doc: --doxygen_mk_doc $(POST_DOC_DEPS) ;
 
 .PHONY: doc
-doc: --__doxygen_mk_post_doc__ ;
+doc: --doxygen_mk_post_doc ;
 # ==============================================================================
 
-endif # ifndef __doxygen_mk__
+endif # ifndef doxygen_mk

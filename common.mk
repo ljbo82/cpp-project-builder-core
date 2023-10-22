@@ -20,8 +20,8 @@
 
 # Common definitions
 
-ifndef __common_mk__
-__common_mk__ := 1
+ifndef common_mk
+common_mk := 1
 
 # Output directory -------------------------------------------------------------
 O ?= output
@@ -47,4 +47,4 @@ endif
 VERBOSE := $(if $(filter 0,$(V)),@,)
 # ------------------------------------------------------------------------------
 
-endif # ifndef __common_mk__
+endif # ifndef common_mk

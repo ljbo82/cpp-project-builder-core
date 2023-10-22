@@ -20,13 +20,13 @@
 
 # Project definitions
 
-ifndef __project_mk__
-__project_mk__ := 1
+ifndef project_mk
+project_mk := 1
 
-__project_mk_self_dir__ := $(dir $(lastword $(MAKEFILE_LIST)))
+project_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
-include $(__project_mk_self_dir__)functions.mk
-include $(__project_mk_self_dir__)common.mk
+include $(project_mk_self_dir)functions.mk
+include $(project_mk_self_dir)common.mk
 
 # Checks for whitespace in CWD -------------------------------------------------
 ifneq ($(words $(shell pwd)),1)
@@ -57,6 +57,36 @@ ifneq ($(words $(PROJ_NAME)),1)
     $(error [PROJ_NAME] Value cannot have whitespaces: $(PROJ_NAME))
 endif
 # ------------------------------------------------------------------------------
+
+# deps =========================================================================
+ifneq ($(filter deps,$(MAKECMDGOALS)),)
+    ifneq ($(MAKECMDGOALS),deps)
+        $(error 'deps' target cannot be invoked along with other targets)
+    endif
+endif
+
+.PHONY: deps
+deps:
+	@printf $(strip $(DEPS))
+# ==============================================================================
+
+# print-vars ===================================================================
+VARS ?= $(sort DEBUG HOST DIST_MARKER O O_BUILD_DIR O_DIST_DIR V DIST_DIRS DIST_FILES INCLUDE_DIRS LIB_TYPE POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS HOSTS_DIRS OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE ARTIFACT LIBS)
+
+ifneq ($(filter print-vars,$(MAKECMDGOALS)),)
+    ifneq ($(words $(MAKECMDGOALS)),1)
+        $(error print-vars target cannot be invoked along with other targes)
+    endif
+endif
+
+.PHONY: print-vars
+print-vars:
+    ifeq ($(VARS),)
+	    $(error [VARS] Missing value)
+    endif
+	$(foreach varName,$(VARS),$(info $(varName) = $($(varName))))
+	@printf ''
+# ==============================================================================
 
 # Project version --------------------------------------------------------------
 PROJ_VERSION ?= 0.1.0
@@ -116,31 +146,33 @@ endif
 # ------------------------------------------------------------------------------
 
 # Source directories (only for `app` and `lib` project types) ------------------
-ifneq ($(filter app lib,$(PROJ_TYPE)),)
-    SKIP_DEFAULT_SRC_DIR ?= 0
-    ifneq ($(origin SKIP_DEFAULT_SRC_DIR),file)
-        $(error [SKIP_DEFAULT_SRC_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_SRC_DIR)))
-    endif
-    ifneq ($(SKIP_DEFAULT_SRC_DIR),0)
-        ifneq ($(SKIP_DEFAULT_SRC_DIR),1)
-            $(error [SKIP_DEFAULT_SRC_DIR] Invalid value: $(SKIP_DEFAULT_SRC_DIR))
+ifneq ($(MAKECMDGOALS),deps)
+    ifneq ($(filter app lib,$(PROJ_TYPE)),)
+        SKIP_DEFAULT_SRC_DIR ?= 0
+        ifneq ($(origin SKIP_DEFAULT_SRC_DIR),file)
+            $(error [SKIP_DEFAULT_SRC_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_SRC_DIR)))
         endif
-    endif
-    ifdef SRC_DIRS
-        ifneq ($(origin SRC_DIRS),file)
-            $(error [SRC_DIRS] Not defined in a makefile (origin: $(origin SRC_DIRS)))
+        ifneq ($(SKIP_DEFAULT_SRC_DIR),0)
+            ifneq ($(SKIP_DEFAULT_SRC_DIR),1)
+                $(error [SKIP_DEFAULT_SRC_DIR] Invalid value: $(SKIP_DEFAULT_SRC_DIR))
+            endif
         endif
-    endif
-    ifeq ($(SKIP_DEFAULT_SRC_DIR),0)
-        ifneq ($(wildcard src),)
-            SRC_DIRS += src
+        ifdef SRC_DIRS
+            ifneq ($(origin SRC_DIRS),file)
+                $(error [SRC_DIRS] Not defined in a makefile (origin: $(origin SRC_DIRS)))
+            endif
+        endif
+        ifeq ($(SKIP_DEFAULT_SRC_DIR),0)
+            ifneq ($(wildcard src),)
+                SRC_DIRS += src
+            endif
         endif
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # Manages target host ----------------------------------------------------------
-include $(__project_mk_self_dir__)hosts.mk
+include $(project_mk_self_dir)hosts.mk
 # ------------------------------------------------------------------------------
 
 # Strips release build ---------------------------------------------------------
@@ -204,70 +236,74 @@ endif
 
 # Identify source files (only for `app` and `lib` project types) ---------------
 # NOTE: Source files must be searched after host layers
-ifneq ($(filter app lib,$(PROJ_TYPE)),)
-    ifdef SKIPPED_SRC_DIRS
-        ifneq ($(origin SKIPPED_SRC_DIRS),file)
-            $(error [SKIPPED_SRC_DIRS] Not defined in a makefile (origin: $(origin SKIPPED_SRC_DIRS)))
+ifneq ($(MAKECMDGOALS),deps)
+    ifneq ($(filter app lib,$(PROJ_TYPE)),)
+        ifdef SKIPPED_SRC_DIRS
+            ifneq ($(origin SKIPPED_SRC_DIRS),file)
+                $(error [SKIPPED_SRC_DIRS] Not defined in a makefile (origin: $(origin SKIPPED_SRC_DIRS)))
+            endif
+            SKIPPED_SRC_DIRS := $(call FN_UNIQUE,$(SKIPPED_SRC_DIRS))
         endif
-        SKIPPED_SRC_DIRS := $(call FN_UNIQUE,$(SKIPPED_SRC_DIRS))
-    endif
 
-    ifdef SKIPPED_SRC_FILES
-        ifneq ($(origin SKIPPED_SRC_FILES),file)
-            $(error [SKIPPED_SRC_FILES] Not defined in a makefile (origin: $(origin SKIPPED_SRC_FILES)))
+        ifdef SKIPPED_SRC_FILES
+            ifneq ($(origin SKIPPED_SRC_FILES),file)
+                $(error [SKIPPED_SRC_FILES] Not defined in a makefile (origin: $(origin SKIPPED_SRC_FILES)))
+            endif
+            SKIPPED_SRC_FILES := $(call FN_UNIQUE,$(SKIPPED_SRC_FILES))
         endif
-        SKIPPED_SRC_FILES := $(call FN_UNIQUE,$(SKIPPED_SRC_FILES))
-    endif
 
-    ifdef SRC_FILES
-        ifneq ($(origin SRC_FILES),file)
-            $(error [SRC_FILES] Not defined in a makefile (origin: $(origin SRC_FILES)))
+        ifdef SRC_FILES
+            ifneq ($(origin SRC_FILES),file)
+                $(error [SRC_FILES] Not defined in a makefile (origin: $(origin SRC_FILES)))
+            endif
         endif
-    endif
 
-    SRC_DIRS := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS)))
+        SRC_DIRS := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS)))
 
-    # Checks if any SRC_DIR is outside CURDIR
-    $(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Invalid directory: $(srcDir))))
+        # Checks if any SRC_DIR is outside CURDIR
+        $(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Invalid directory: $(srcDir))))
 
-    __project_mk_src_file_filter__ := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
+        project_mk_src_file_filter := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
 
-    SRC_FILES := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f $(__project_mk_src_file_filter__) 2> /dev/null)) $(SRC_FILES)))
+        SRC_FILES := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f $(project_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES)))
 
-    __project_mk_invalid_src_files__ := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
-    ifneq ($(__project_mk_invalid_src_files__),)
-        $(error [SRC_FILES] Unsupported source file(s): $(__project_mk_invalid_src_files__))
+        project_mk_invalid_src_files := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
+        ifneq ($(project_mk_invalid_src_files),)
+            $(error [SRC_FILES] Unsupported source file(s): $(project_mk_invalid_src_files))
+        endif
     endif
 endif
 # ------------------------------------------------------------------------------
 
 # Include directories (only for `app` and `lib` project types) -----------------
 # NOTE: Include directories must be managed after host layers
-ifneq ($(filter app lib,$(PROJ_TYPE)),)
-    SKIP_DEFAULT_INCLUDE_DIR ?= 0
-    ifneq ($(origin SKIP_DEFAULT_INCLUDE_DIR),file)
-        $(error [SKIP_DEFAULT_INCLUDE_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_INCLUDE_DIR)))
-    endif
-
-    ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
-        ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),1)
-            $(error [SKIP_DEFAULT_INCLUDE_DIR] Invalid value: $(SKIP_DEFAULT_INCLUDE_DIR))
+ifneq ($(MAKECMDGOALS),deps)
+    ifneq ($(filter app lib,$(PROJ_TYPE)),)
+        SKIP_DEFAULT_INCLUDE_DIR ?= 0
+        ifneq ($(origin SKIP_DEFAULT_INCLUDE_DIR),file)
+            $(error [SKIP_DEFAULT_INCLUDE_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_INCLUDE_DIR)))
         endif
-    endif
 
-    ifdef INCLUDE_DIRS
-        ifneq ($(origin INCLUDE_DIRS),file)
-            $(error [INCLUDE_DIRS] Not defined in a makefile (origin: $(origin INCLUDE_DIRS)))
+        ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
+            ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),1)
+                $(error [SKIP_DEFAULT_INCLUDE_DIR] Invalid value: $(SKIP_DEFAULT_INCLUDE_DIR))
+            endif
         endif
-    endif
 
-    ifeq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
-        ifneq ($(wildcard include),)
-            INCLUDE_DIRS += include
+        ifdef INCLUDE_DIRS
+            ifneq ($(origin INCLUDE_DIRS),file)
+                $(error [INCLUDE_DIRS] Not defined in a makefile (origin: $(origin INCLUDE_DIRS)))
+            endif
         endif
-    endif
 
-    INCLUDE_DIRS := $(call FN_UNIQUE,$(SRC_DIRS) $(INCLUDE_DIRS))
+        ifeq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
+            ifneq ($(wildcard include),)
+                INCLUDE_DIRS += include
+            endif
+        endif
+
+        INCLUDE_DIRS := $(call FN_UNIQUE,$(SRC_DIRS) $(INCLUDE_DIRS))
+    endif
 endif
 # ------------------------------------------------------------------------------
 
@@ -280,23 +316,12 @@ ifneq ($(MAKE_INCLUDES),)
 endif
 # ------------------------------------------------------------------------------
 
-# print-vars ===================================================================
-VARS ?= $(sort DEBUG HOST DIST_MARKER O O_BUILD_DIR O_DIST_DIR V DIST_DIRS DIST_FILES INCLUDE_DIRS LIB_TYPE POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS HOSTS_DIRS OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE ARTIFACT LIBS)
-.PHONY: print-vars
-print-vars:
-    ifeq ($(VARS),)
-	    $(error [VARS] Missing value)
-    endif
-	$(foreach varName,$(VARS),$(info $(varName) = $($(varName))))
-	@printf ''
-# ==============================================================================
-
 # GCC management ---------------------------------------------------------------
-include $(__project_mk_self_dir__)gcc.mk
+include $(project_mk_self_dir)gcc.mk
 # ------------------------------------------------------------------------------
 
-undefine __project_mk_src_file_filter__
-undefine __project_mk_invalid_src_files__
-undefine __project_mk_self_dir__
+undefine project_mk_src_file_filter
+undefine project_mk_invalid_src_files
+undefine project_mk_self_dir
 
-endif # ifndef __project_mk__
+endif # ifndef project_mk
