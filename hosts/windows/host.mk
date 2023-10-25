@@ -41,14 +41,14 @@ ifneq ($(filter app lib,$(PROJ_TYPE)),)
     else
         # $(PROJ_TYPE) is equal lib
         LIB_TYPE ?= shared
-
+        LIB_NAME ?= $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
         ifeq ($(LIB_TYPE),static)
             ifndef ARTIFACT
-                ARTIFACT := lib$(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).a
+                ARTIFACT := lib$(LIB_NAME).a
             endif
         else ifeq ($(LIB_TYPE),shared)
             ifndef ARTIFACT
-                ARTIFACT := $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION)).dll
+                ARTIFACT := $(LIB_NAME).dll
             endif
 
             LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib

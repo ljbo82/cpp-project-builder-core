@@ -33,8 +33,9 @@ ifeq ($(PROJ_TYPE),app)
     endif
 else ifeq ($(PROJ_TYPE),lib)
     LIB_TYPE ?= shared
+    LIB_NAME ?= $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
     ifndef ARTIFACT
-        hosts_linux_mk_target_base_name := lib$(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
+        hosts_linux_mk_target_base_name := lib$(LIB_NAME)
         ifeq ($(LIB_TYPE),static)
             ARTIFACT := $(hosts_linux_mk_target_base_name).a
         endif
