@@ -202,6 +202,7 @@ ifneq ($(MAKECMDGOALS),deps)
             ifeq ($(origin ARFLAGS),command line)
                 $(error [ARFLAGS] Defined in command line. Consider using EXTRA_ARFLAGS)
             endif
+            ARFLAGS := $(subst r,,$(subst c,,$(subst s,,$(subst v,,$(ARFLAGS)))))
         endif
 
         ifdef LDFLAGS
