@@ -29,7 +29,7 @@ cpp-project-builder provides a build system intended to be used by C/C++/Assembl
 Typical usage is comprised by the following steps:
 
 1. Clone or copy cpp-project-builder-core inside directory of your preference (usually inside a subdirectory of `$(PROJ_ROOT)` - this location will be referred from this point onwards as `$(CPP_PROJECT_BUILDER)`).
-2. Place project C/C++/Assembly source files into specific directories (usually `$(PROJ_ROOT)/src/` and `$(PROJ_ROOT)/include/`).
+2. Place project C/C++/Assembly source and header files into specific directories (usually `$(PROJ_ROOT)/src/` and `$(PROJ_ROOT)/include/`).
 3. Create a `$(PROJ_ROOT)/Makefile` containing [variables](https://www.gnu.org/software/make/manual/make.html#Using-Variables) defining how your project shall be built.
 4. At the end of your `$(PROJ_ROOT)/Makefile` include the `$(CPP_PROJECT_BUILDER)/project.mk` provided by the build system:
 
@@ -70,7 +70,7 @@ See [documentation](https://github.com/ljbo82/cpp-project-builder-doc/blob/maste
 
 ### project.mk
 
-This is the main makefile. It contains standard recipes to build C/C++/Assembly multiplatform projects using a GCC-based compiler.
+This is the main makefile provided by the build system. It contains standard recipes to build C/C++/Assembly multiplatform projects using a GCC-based compiler.
 
 Include this file at the end of your `$(PROJ_ROOT)/Makefile`.
 
