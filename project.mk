@@ -25,8 +25,8 @@ project_mk := 1
 
 project_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
-include $(project_mk_self_dir)functions.mk
-include $(project_mk_self_dir)common.mk
+include $(project_mk_self_dir)include/functions.mk
+include $(project_mk_self_dir)include/common.mk
 
 # Checks for whitespace in CWD -------------------------------------------------
 ifneq ($(words $(shell pwd)),1)
@@ -172,7 +172,7 @@ endif
 # ------------------------------------------------------------------------------
 
 # Manages target host ----------------------------------------------------------
-include $(project_mk_self_dir)hosts.mk
+include $(project_mk_self_dir)include/hosts.mk
 # ------------------------------------------------------------------------------
 
 # Strips release build ---------------------------------------------------------
@@ -242,14 +242,12 @@ ifneq ($(MAKECMDGOALS),deps)
             ifneq ($(origin SKIPPED_SRC_DIRS),file)
                 $(error [SKIPPED_SRC_DIRS] Not defined in a makefile (origin: $(origin SKIPPED_SRC_DIRS)))
             endif
-            SKIPPED_SRC_DIRS := $(call FN_UNIQUE,$(SKIPPED_SRC_DIRS))
         endif
 
         ifdef SKIPPED_SRC_FILES
             ifneq ($(origin SKIPPED_SRC_FILES),file)
                 $(error [SKIPPED_SRC_FILES] Not defined in a makefile (origin: $(origin SKIPPED_SRC_FILES)))
             endif
-            SKIPPED_SRC_FILES := $(call FN_UNIQUE,$(SKIPPED_SRC_FILES))
         endif
 
         ifdef SRC_FILES
@@ -258,14 +256,14 @@ ifneq ($(MAKECMDGOALS),deps)
             endif
         endif
 
-        SRC_DIRS := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS)))
+        SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
 
         # Checks if any SRC_DIR is outside CURDIR
         $(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Invalid directory: $(srcDir))))
 
         project_mk_src_file_filter := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
 
-        SRC_FILES := $(call FN_UNIQUE,$(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f $(project_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES)))
+        SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f $(project_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES))
 
         project_mk_invalid_src_files := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
         ifneq ($(project_mk_invalid_src_files),)
@@ -302,7 +300,7 @@ ifneq ($(MAKECMDGOALS),deps)
             endif
         endif
 
-        INCLUDE_DIRS := $(call FN_UNIQUE,$(SRC_DIRS) $(INCLUDE_DIRS))
+        INCLUDE_DIRS := $(SRC_DIRS) $(INCLUDE_DIRS)
     endif
 endif
 # ------------------------------------------------------------------------------
@@ -316,8 +314,18 @@ ifneq ($(MAKE_INCLUDES),)
 endif
 # ------------------------------------------------------------------------------
 
+# LAZY_DEFS --------------------------------------------------------------------
+ifdef LAZY_DEFS
+    ifneq ($(origin LAZY_DEFS),file)
+        $(error [LAZY_DEFS] Not defined in a makefile (origin: $(origin LAZY_DEFS)))
+    endif
+endif
+
+$(eval $(LAZY_DEFS))
+# ------------------------------------------------------------------------------
+
 # GCC management ---------------------------------------------------------------
-include $(project_mk_self_dir)gcc.mk
+include $(project_mk_self_dir)include/gcc.mk
 # ------------------------------------------------------------------------------
 
 undefine project_mk_src_file_filter

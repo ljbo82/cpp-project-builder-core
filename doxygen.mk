@@ -23,7 +23,7 @@
 ifndef doxygen_mk
 doxygen_mk := 1
 
-include $(dir $(lastword $(MAKEFILE_LIST)))common.mk
+include $(dir $(lastword $(MAKEFILE_LIST)))include/common.mk
 
 # Doc src/output directories----------------------------------------------------
 DOC_DIR ?= doc

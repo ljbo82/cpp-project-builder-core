@@ -20,8 +20,8 @@
 
 # Host management
 
-ifndef hosts_mk
-hosts_mk := 1
+ifndef include_hosts_mk
+include_hosts_mk := 1
 
 ifndef project_mk
     $(error This file cannot be manually included)
@@ -46,11 +46,11 @@ endif
 ifeq ($(OS),Windows_NT)
     NATIVE_OS := windows
 else
-    hosts_mk_os := $(shell uname -s)
-    ifneq ($(filter Linux linux,$(hosts_mk_os)),)
+    include_hosts_mk_os := $(shell uname -s)
+    ifneq ($(filter Linux linux,$(include_hosts_mk_os)),)
         NATIVE_OS := linux
     else
-        ifneq ($(filter Darwin darwin, $(hosts_mk_os)),)
+        ifneq ($(filter Darwin darwin, $(include_hosts_mk_os)),)
             NATIVE_OS := osx
         endif
     endif
@@ -58,34 +58,34 @@ endif
 
 ifdef NATIVE_OS
     ifeq ($(NATIVE_OS),windows)
-        hosts_mk_arch := $(shell cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
-        ifeq ($(hosts_mk_arch),AMD64)
+        include_hosts_mk_arch := $(shell cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
+        ifeq ($(include_hosts_mk_arch),AMD64)
             NATIVE_ARCH := x64
         else
-            ifeq ($(hosts_mk_arch),x86)
+            ifeq ($(include_hosts_mk_arch),x86)
                 NATIVE_ARCH := x86
             else
-                ifneq ($(hosts_mk_arch),ARM32)
+                ifneq ($(include_hosts_mk_arch),ARM32)
                     NATIVE_ARCH := arm
                 else
-                    ifeq ($(hosts_mk_arch),ARM64)
+                    ifeq ($(include_hosts_mk_arch),ARM64)
                         NATIVE_ARCH := arm64
                     endif
                 endif
             endif
         endif
     else
-        hosts_mk_arch := $(shell uname -m)
-        ifeq ($(hosts_mk_arch),x86_64)
+        include_hosts_mk_arch := $(shell uname -m)
+        ifeq ($(include_hosts_mk_arch),x86_64)
             NATIVE_ARCH := x64
         else
-            ifneq ($(filter %86, $(hosts_mk_arch)),)
+            ifneq ($(filter %86, $(include_hosts_mk_arch)),)
                 NATIVE_ARCH := x86
             else
-                ifneq ($(filter arm, $(hosts_mk_arch)),)
+                ifneq ($(filter arm, $(include_hosts_mk_arch)),)
                     NATIVE_ARCH := arm
                 else
-                    ifneq ($(filter arm64, $(hosts_mk_arch)),)
+                    ifneq ($(filter arm64, $(include_hosts_mk_arch)),)
                         NATIVE_ARCH := arm64
                     endif
                 endif
@@ -129,24 +129,24 @@ endif
 #
 # This template will be called multiple times in order to prepare the list of acceptable layers.
 #
-# Syntax: $(call hosts_mk_host_factorizer,hostLayer)
-define hosts_mk_host_factorizer
-hosts_mk_host_factorizer_current  := $$(if $$(hosts_mk_host_factorizer_previous),$$(hosts_mk_host_factorizer_previous)/$(1),$(1))
-hosts_mk_host_factorizer_previous := $$(hosts_mk_host_factorizer_current)
-hosts_mk_host_factorizer_factors  := $$(hosts_mk_host_factorizer_factors) $$(hosts_mk_host_factorizer_current)
+# Syntax: $(call include_hosts_mk_host_factorizer,hostLayer)
+define include_hosts_mk_host_factorizer
+include_hosts_mk_host_factorizer_current  := $$(if $$(include_hosts_mk_host_factorizer_previous),$$(include_hosts_mk_host_factorizer_previous)/$(1),$(1))
+include_hosts_mk_host_factorizer_previous := $$(include_hosts_mk_host_factorizer_current)
+include_hosts_mk_host_factorizer_factors  := $$(include_hosts_mk_host_factorizer_factors) $$(include_hosts_mk_host_factorizer_current)
 endef
 # ------------------------------------------------------------------------------
 
 # Host layer factorizer auxiliary function -------------------------------------
 #
-# This function will set the accepted layers in the variable hosts_mk_host_factorizer_factors
+# This function will set the accepted layers in the variable include_hosts_mk_host_factorizer_factors
 #
-# Syntax: $(call hosts_mk_host_factorize,hostString)
-define hosts_mk_host_factorize
-    undefine hosts_mk_host_factorizer_current
-    undefine hosts_mk_host_factorizer_previous
-    undefine hosts_mk_host_factorizer_factors
-    $$(foreach token,$$(subst -, ,$(1)),$$(eval $$(call hosts_mk_host_factorizer,$$(token))))
+# Syntax: $(call include_hosts_mk_host_factorize,hostString)
+define include_hosts_mk_host_factorize
+    undefine include_hosts_mk_host_factorizer_current
+    undefine include_hosts_mk_host_factorizer_previous
+    undefine include_hosts_mk_host_factorizer_factors
+    $$(foreach token,$$(subst -, ,$(1)),$$(eval $$(call include_hosts_mk_host_factorizer,$$(token))))
 endef
 # ------------------------------------------------------------------------------
 
@@ -154,11 +154,11 @@ endef
 #
 # Function will return a list of accepted layers for a given host.
 #
-# Syntax: $(call hosts_mk_fn_host_factorize,hostString)
-hosts_mk_fn_host_factorize = $(eval $(call hosts_mk_host_factorize,$(1)))$(hosts_mk_host_factorizer_factors)
+# Syntax: $(call include_hosts_mk_fn_host_factorize,hostString)
+include_hosts_mk_fn_host_factorize = $(eval $(call include_hosts_mk_host_factorize,$(1)))$(include_hosts_mk_host_factorizer_factors)
 
 # Contains all valid layers for current HOST
-hosts_mk_host_layers := $(call FN_UNIQUE,$(call hosts_mk_fn_host_factorize,$(HOST)) $(HOST))
+include_hosts_mk_host_layers := $(strip $(call include_hosts_mk_fn_host_factorize,$(HOST)) $(HOST))
 
 SKIP_DEFAULT_HOSTS_DIR ?= 0
 ifneq ($(origin SKIP_DEFAULT_HOSTS_DIR),file)
@@ -180,45 +180,45 @@ ifeq ($(SKIP_DEFAULT_HOSTS_DIR),0)
     endif
 endif
 
-HOSTS_DIRS := $(call FN_UNIQUE,$(HOSTS_DIRS) $(hosts_mk_self_dir)hosts)
+HOSTS_DIRS := $(strip $(project_mk_self_dir)hosts $(HOSTS_DIRS))
 
 # Auxiliar checker for 'host.mk' and 'src' directory into a layer directory ----
 #
-# This function will add values to 'hosts_mk_hosts_mk_includes' and
-# 'hosts_mk_hosts_src_dirs' on each call
+# This function will add values to 'include_hosts_mk_include_hosts_mk_includes' and
+# 'include_hosts_mk_hosts_src_dirs' on each call
 #
-# Syntax $(call hosts_mk_layer_aux_parser,hostsDir,layer)
-define hosts_mk_layer_aux_parser
-hosts_mk_hosts_mk_includes += $(if $(wildcard $(1)/$(2)/host.mk),$(realpath $(1)/$(2)/host.mk),)
-hosts_mk_hosts_src_dirs    += $(if $(wildcard $(1)/$(2)/src),$(1)/$(2)/src,)
+# Syntax $(call include_hosts_mk_layer_aux_parser,hostsDir,layer)
+define include_hosts_mk_layer_aux_parser
+include_hosts_mk_include_hosts_mk_includes += $(if $(wildcard $(1)/$(2)/host.mk),$(realpath $(1)/$(2)/host.mk),)
+include_hosts_mk_hosts_src_dirs    += $(if $(wildcard $(1)/$(2)/src),$(1)/$(2)/src,)
 endef
 # ------------------------------------------------------------------------------
 
-$(foreach hostDir,$(HOSTS_DIRS),$(eval $$(foreach layer,$$(hosts_mk_host_layers),$$(eval $$(call hosts_mk_layer_aux_parser,$(hostDir),$$(layer))))))
+$(foreach hostDir,$(HOSTS_DIRS),$(eval $$(foreach layer,$$(include_hosts_mk_host_layers),$$(eval $$(call include_hosts_mk_layer_aux_parser,$(hostDir),$$(layer))))))
 
-hosts_mk_hosts_mk_includes := $(call FN_UNIQUE,$(strip $(hosts_mk_hosts_mk_includes)))
-hosts_mk_hosts_src_dirs    := $(strip $(hosts_mk_hosts_src_dirs))
+include_hosts_mk_include_hosts_mk_includes := $(strip $(include_hosts_mk_include_hosts_mk_includes))
+include_hosts_mk_hosts_src_dirs    := $(strip $(include_hosts_mk_hosts_src_dirs))
 
-ifneq ($(hosts_mk_hosts_mk_includes),)
-    include $(hosts_mk_hosts_mk_includes)
+ifneq ($(include_hosts_mk_include_hosts_mk_includes),)
+    include $(include_hosts_mk_include_hosts_mk_includes)
 endif
 
 ifneq ($(filter app lib,$(PROJ_TYPE)),)
-    SRC_DIRS := $(call FN_UNIQUE,$(SRC_DIRS) $(hosts_mk_hosts_src_dirs))
+    SRC_DIRS := $(SRC_DIRS) $(include_hosts_mk_hosts_src_dirs)
 endif
 # ******************************************************************************
 
-undefine hosts_mk_os
-undefine hosts_mk_arch
-undefine hosts_mk_host_factorizer
-undefine hosts_mk_host_factorizer_current
-undefine hosts_mk_host_factorizer_previous
-undefine hosts_mk_host_factorizer_factors
-undefine hosts_mk_host_factorize
-undefine hosts_mk_fn_host_factorize
-undefine hosts_mk_host_layers
-undefine hosts_mk_layer_aux_parser
-undefine hosts_mk_hosts_mk_includes
-undefine hosts_mk_hosts_src_dirs
+undefine include_hosts_mk_os
+undefine include_hosts_mk_arch
+undefine include_hosts_mk_host_factorizer
+undefine include_hosts_mk_host_factorizer_current
+undefine include_hosts_mk_host_factorizer_previous
+undefine include_hosts_mk_host_factorizer_factors
+undefine include_hosts_mk_host_factorize
+undefine include_hosts_mk_fn_host_factorize
+undefine include_hosts_mk_host_layers
+undefine include_hosts_mk_layer_aux_parser
+undefine include_hosts_mk_include_hosts_mk_includes
+undefine include_hosts_mk_hosts_src_dirs
 
-endif # ifndef hosts_mk
+endif # ifndef include_hosts_mk

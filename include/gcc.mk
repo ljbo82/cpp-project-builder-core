@@ -20,8 +20,8 @@
 
 # GCC management
 
-ifndef gcc_mk
-gcc_mk := 1
+ifndef include_gcc_mk
+include_gcc_mk := 1
 
 ifndef project_mk
     $(error This file cannot be manually included)
@@ -38,11 +38,11 @@ ifdef DEPS
     $(error [DEPS] Reserved variable)
 endif
 
-#$(call gcc_mk_libs_template1,<lib_name>,[lib_dir])
-define gcc_mk_libs_template1
-gcc_mk_libs_has_lib_dir := $$(if $$(or $$(gcc_mk_libs_has_lib_dir),$(2)),1,)
-gcc_mk_libs_ldflags += -l$(1)
-gcc_mk_libs_proj_dirs := $$(strip $$(gcc_mk_libs_proj_dirs) $(2))
+#$(call include_gcc_mk_libs_template1,<lib_name>,[lib_dir])
+define include_gcc_mk_libs_template1
+include_gcc_mk_libs_has_lib_dir := $$(if $$(or $$(include_gcc_mk_libs_has_lib_dir),$(2)),1,)
+include_gcc_mk_libs_ldflags += -l$(1)
+include_gcc_mk_libs_proj_dirs := $$(strip $$(include_gcc_mk_libs_proj_dirs) $(2))
 
 $(if $(2),PRE_BUILD_DEPS += $$(O)/libs/$(1).marker,)
 $(if $(2),--$(1):,)
@@ -51,21 +51,21 @@ $(if $(2),$$(O)/libs/$(1).marker: --$(1) ;,)
 
 endef
 
-# $(call gcc_mk_libs_fn_lib_name,<lib_entry>)
-gcc_mk_libs_fn_lib_name = $(word 1, $(subst :, ,$(1)))
+# $(call include_gcc_mk_libs_fn_lib_name,<lib_entry>)
+include_gcc_mk_libs_fn_lib_name = $(word 1, $(subst :, ,$(1)))
 
-# $(call gcc_mk_libs_fn_lib_dir,<lib_entry>)
-gcc_mk_libs_fn_lib_dir = $(word 2, $(subst :, ,$(1)))
+# $(call include_gcc_mk_libs_fn_lib_dir,<lib_entry>)
+include_gcc_mk_libs_fn_lib_dir = $(word 2, $(subst :, ,$(1)))
 
-# $(call gcc_mk_libs_template,<lib_entry>)
-gcc_mk_libs_template = $(call gcc_mk_libs_template1,$(call gcc_mk_libs_fn_lib_name,$(1)),$(call gcc_mk_libs_fn_lib_dir,$(1)))
+# $(call include_gcc_mk_libs_template,<lib_entry>)
+include_gcc_mk_libs_template = $(call include_gcc_mk_libs_template1,$(call include_gcc_mk_libs_fn_lib_name,$(1)),$(call include_gcc_mk_libs_fn_lib_dir,$(1)))
 
-# $(call gcc_mk_libs_fn_template,<lib_entry>)
-gcc_mk_libs_fn_template = $(eval $(call gcc_mk_libs_template,$(1)))
+# $(call include_gcc_mk_libs_fn_template,<lib_entry>)
+include_gcc_mk_libs_fn_template = $(eval $(call include_gcc_mk_libs_template,$(1)))
 
-$(foreach lib,$(LIBS),$(call gcc_mk_libs_fn_template,$(lib)))
-ifeq ($(gcc_mk_libs_has_lib_dir),1)
-    DEPS := $(strip $(gcc_mk_libs_ldflags) `$(foreach lib_proj,$(strip $(gcc_mk_libs_proj_dirs)),$$(MAKE) -C $(lib_proj) deps;))`
+$(foreach lib,$(LIBS),$(call include_gcc_mk_libs_fn_template,$(lib)))
+ifeq ($(include_gcc_mk_libs_has_lib_dir),1)
+    DEPS := $(strip $(include_gcc_mk_libs_ldflags) `$(foreach lib_proj,$(strip $(include_gcc_mk_libs_proj_dirs)),$$(MAKE) -C $(lib_proj) deps;))`
     ifneq ($(MAKECMDGOALS),deps)
         ifneq ($(filter app lib,$(PROJ_TYPE)),)
             INCLUDE_DIRS += $(O)/libs/dist/include
@@ -75,7 +75,7 @@ ifeq ($(gcc_mk_libs_has_lib_dir),1)
 else
     ifneq ($(MAKECMDGOALS),deps)
         ifneq ($(filter app lib,$(PROJ_TYPE)),)
-            LDFLAGS := $(LDFLAGS) $(gcc_mk_libs_ldflags)
+            LDFLAGS := $(LDFLAGS) $(include_gcc_mk_libs_ldflags)
         endif
     endif
 endif
@@ -129,54 +129,54 @@ ifneq ($(MAKECMDGOALS),deps)
         endif
 
         # LD
-        gcc_mk_is_cpp_project := $(strip $(filter %.cpp %.cxx %.cc,$(SRC_FILES)))
-        ifeq ($(gcc_mk_is_cpp_project),)
-            gcc_mk_is_cpp_project := $(strip $(foreach includeDir,$(INCLUDE_DIRS),$(shell find $(includeDir) -type f -name '*.hpp' -or -name '*.hxx' 2> /dev/null)))
+        include_gcc_mk_is_cpp_project := $(strip $(filter %.cpp %.cxx %.cc,$(SRC_FILES)))
+        ifeq ($(include_gcc_mk_is_cpp_project),)
+            include_gcc_mk_is_cpp_project := $(strip $(foreach includeDir,$(INCLUDE_DIRS),$(shell find $(includeDir) -type f -name '*.hpp' -or -name '*.hxx' 2> /dev/null)))
         endif
 
-        ifeq ($(gcc_mk_is_cpp_project),)
+        ifeq ($(include_gcc_mk_is_cpp_project),)
             # Pure C project
-            gcc_mk_ld := gcc
+            include_gcc_mk_ld := gcc
         else
             # C/C++ project
-            gcc_mk_ld := g++
+            include_gcc_mk_ld := g++
         endif
 
         ifndef LD
-            LD := $(gcc_mk_ld)
+            LD := $(include_gcc_mk_ld)
         else
             ifeq ($(origin LD),default)
-                LD := $(gcc_mk_ld)
+                LD := $(include_gcc_mk_ld)
             else ifeq ($(LD),)
                 $(error [LD] Missing value)
             endif
         endif
 
-        gcc_mk_cflags += -Wall
-        gcc_mk_cxxflags += -Wall
+        include_gcc_mk_cflags += -Wall
+        include_gcc_mk_cxxflags += -Wall
 
         ifneq ($(DEBUG),0)
-            gcc_mk_cflags += -g3
-            gcc_mk_cxxflags += -g3
-            gcc_mk_asflags += -g3
+            include_gcc_mk_cflags += -g3
+            include_gcc_mk_cxxflags += -g3
+            include_gcc_mk_asflags += -g3
         else
             ifneq ($(OPTIMIZE_RELEASE),0)
-                gcc_mk_cflags += -O$(RELEASE_OPTIMIZATION_LEVEL)
-                gcc_mk_cxxflags += -O$(RELEASE_OPTIMIZATION_LEVEL)
+                include_gcc_mk_cflags += -O$(RELEASE_OPTIMIZATION_LEVEL)
+                include_gcc_mk_cxxflags += -O$(RELEASE_OPTIMIZATION_LEVEL)
             endif
 
             ifneq ($(STRIP_RELEASE),0)
-                gcc_mk_cflags += -s
-                gcc_mk_cxxflags += -s
-                gcc_mk_ldflags += -s
+                include_gcc_mk_cflags += -s
+                include_gcc_mk_cxxflags += -s
+                include_gcc_mk_ldflags += -s
             endif
         endif
 
         ifeq ($(PROJ_TYPE),lib)
             ifeq ($(LIB_TYPE),shared)
-                gcc_mk_cflags += -fPIC
-                gcc_mk_cxxflags += -fPIC
-                gcc_mk_ldflags += -shared
+                include_gcc_mk_cflags += -fPIC
+                include_gcc_mk_cxxflags += -fPIC
+                include_gcc_mk_ldflags += -shared
             endif
         endif
 
@@ -210,13 +210,13 @@ ifneq ($(MAKECMDGOALS),deps)
             endif
         endif
 
-        gcc_mk_include_flags := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
+        include_gcc_mk_include_flags := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
 
-        CFLAGS   := -MMD -MP $(gcc_mk_include_flags) $(gcc_mk_cflags) $(CFLAGS) $(EXTRA_CFLAGS)
-        CXXFLAGS := -MMD -MP $(gcc_mk_include_flags) $(gcc_mk_cxxflags) $(CXXFLAGS) $(EXTRA_CXXFLAGS)
-        ASFLAGS  := -MMD -MP $(gcc_mk_include_flags) $(gcc_mk_asflags) $(ASFLAGS) $(EXTRA_ASFLAGS)
+        CFLAGS   := -MMD -MP $(include_gcc_mk_include_flags) $(include_gcc_mk_cflags) $(CFLAGS) $(EXTRA_CFLAGS)
+        CXXFLAGS := -MMD -MP $(include_gcc_mk_include_flags) $(include_gcc_mk_cxxflags) $(CXXFLAGS) $(EXTRA_CXXFLAGS)
+        ASFLAGS  := -MMD -MP $(include_gcc_mk_include_flags) $(include_gcc_mk_asflags) $(ASFLAGS) $(EXTRA_ASFLAGS)
         ARFLAGS  := rcs $(ARFLAGS) $(EXTRA_ARFLAGS)
-        LDFLAGS  := $(gcc_mk_ldflags) $(LDFLAGS) $(DEPS) $(EXTRA_LDFLAGS)
+        LDFLAGS  := $(include_gcc_mk_ldflags) $(LDFLAGS) $(DEPS) $(EXTRA_LDFLAGS)
         # ----------------------------------------------------------------------
     endif
 endif
@@ -242,30 +242,30 @@ ifdef POST_CLEAN_DEPS
     endif
 endif
 
-.PHONY: --gcc_mk_pre_clean
---gcc_mk_pre_clean: $(PRE_CLEAN_DEPS) ;
+.PHONY: --include_gcc_mk_pre_clean
+--include_gcc_mk_pre_clean: $(PRE_CLEAN_DEPS) ;
 
-.PHONY: --gcc_mk_clean
+.PHONY: --include_gcc_mk_clean
 ifneq ($(filter app lib,$(PROJ_TYPE)),)
-    --gcc_mk_clean: --gcc_mk_pre_clean
+    --include_gcc_mk_clean: --include_gcc_mk_pre_clean
 	    $(VERBOSE)rm -rf $(O)
 else ifeq ($(PROJ_TYPE),custom)
     ifneq ($(CUSTOM_CLEAN_CMD),)
         ifneq ($(origin CUSTOM_CLEAN_CMD),file)
             $(error [CUSTOM_CLEAN_CMD] Not defined in a makefile (origin: $(origin CUSTOM_CLEAN_CMD)))
         endif
-        --gcc_mk_clean: --gcc_mk_pre_clean
+        --include_gcc_mk_clean: --include_gcc_mk_pre_clean
 	        $(VERBOSE)$(CUSTOM_CLEAN_CMD)
     else
-        --gcc_mk_clean: --gcc_mk_pre_clean ;
+        --include_gcc_mk_clean: --include_gcc_mk_pre_clean ;
     endif
 endif
 
-.PHONY: --gcc_mk_post_clean
---gcc_mk_post_clean: --gcc_mk_clean $(POST_CLEAN_DEPS) ;
+.PHONY: --include_gcc_mk_post_clean
+--include_gcc_mk_post_clean: --include_gcc_mk_clean $(POST_CLEAN_DEPS) ;
 
 .PHONY: clean
-clean: --gcc_mk_post_clean ;
+clean: --include_gcc_mk_post_clean ;
 # ==============================================================================
 
 # build ========================================================================
@@ -288,106 +288,106 @@ ifneq ($(filter app lib,$(PROJ_TYPE)),)
     ifeq ($(PROJ_TYPE),lib)
         # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
         ifneq ($(filter -fPIC,$(CFLAGS) $(CXXFLAGS)),)
-            gcc_mk_obj_suffix := .lo
+            include_gcc_mk_obj_suffix := .lo
         else
-            gcc_mk_obj_suffix := .o
+            include_gcc_mk_obj_suffix := .o
         endif
     else ifeq ($(PROJ_TYPE),app)
-        gcc_mk_obj_suffix := .o
+        include_gcc_mk_obj_suffix := .o
     endif
 
-    gcc_mk_obj_files := $(SRC_FILES:%=$(O_BUILD_DIR)/%$(gcc_mk_obj_suffix))
+    include_gcc_mk_obj_files := $(SRC_FILES:%=$(O_BUILD_DIR)/%$(include_gcc_mk_obj_suffix))
 
     ifeq ($(PROJ_TYPE),lib)
         # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
         ifneq ($(filter -fPIC,$(CFLAGS) $(CXXFLAGS)),)
-            gcc_mk_dep_files := $(gcc_mk_obj_files:.lo=.d)
+            include_gcc_mk_dep_files := $(include_gcc_mk_obj_files:.lo=.d)
         else
-            gcc_mk_dep_files := $(gcc_mk_obj_files:.o=.d)
+            include_gcc_mk_dep_files := $(include_gcc_mk_obj_files:.o=.d)
         endif
     else ifeq ($(PROJ_TYPE),app)
-        gcc_mk_dep_files := $(gcc_mk_obj_files:.o=.d)
+        include_gcc_mk_dep_files := $(include_gcc_mk_obj_files:.o=.d)
     endif
 
-    .PHONY: --gcc_mk_pre_build_check
-    --gcc_mk_pre_build_check:
+    .PHONY: --include_gcc_mk_pre_build_check
+    --include_gcc_mk_pre_build_check:
         ifneq ($(HOST),$(NATIVE_HOST))
             ifeq ($(origin CROSS_COMPILE),undefined)
 	            $(error [CROSS_COMPILE] Missing value for HOST $(HOST))
             endif
         endif
 
-    define gcc_mk_artifact_target
-    $(O_BUILD_DIR)/$(ARTIFACT): $(PRE_BUILD_DEPS) $(gcc_mk_obj_files)
+    define include_gcc_mk_artifact_target
+    $(O_BUILD_DIR)/$(ARTIFACT): $(PRE_BUILD_DEPS) $(include_gcc_mk_obj_files)
         ifeq ($(PROJ_TYPE),lib)
             ifeq ($(LIB_TYPE),shared)
 	            @echo [LD] $$@
-	            $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $$@ $(gcc_mk_obj_files) $(LDFLAGS))
+	            $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $$@ $(include_gcc_mk_obj_files) $(LDFLAGS))
             else ifeq ($(LIB_TYPE),static)
 	            @echo [AR] $$@
-	            $(VERBOSE)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $$@ $(gcc_mk_obj_files))
+	            $(VERBOSE)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $$@ $(include_gcc_mk_obj_files))
             endif
         else ifeq ($(PROJ_TYPE),app)
 	        @echo [LD] $$@
-	        $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $$@ $(gcc_mk_obj_files) $(LDFLAGS))
+	        $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $$@ $(include_gcc_mk_obj_files) $(LDFLAGS))
         endif
     endef
-    $(eval $(gcc_mk_artifact_target))
-    undefine gcc_mk_artifact_target
+    $(eval $(include_gcc_mk_artifact_target))
+    undefine include_gcc_mk_artifact_target
 
     .PHONY: build
-    build: --gcc_mk_pre_build_check $(O_BUILD_DIR)/$(ARTIFACT) $(POST_BUILD_DEPS) ;
+    build: --include_gcc_mk_pre_build_check $(O_BUILD_DIR)/$(ARTIFACT) $(POST_BUILD_DEPS) ;
 
     # C sources ----------------------------------------------------------------
-    $(O_BUILD_DIR)/%.c$(gcc_mk_obj_suffix): %.c
+    $(O_BUILD_DIR)/%.c$(include_gcc_mk_obj_suffix): %.c
 	    @echo [CC] $@
 	    @mkdir -p $(dir $@)
 	    $(VERBOSE)$(CROSS_COMPILE)$(CC) $(strip $(CFLAGS) -c $< -o $@)
     # --------------------------------------------------------------------------
 
     # C++ sources --------------------------------------------------------------
-    define gcc_mk_cxx_template =
-    $(O_BUILD_DIR)/%.$(1)$(gcc_mk_obj_suffix): %.$(1)
+    define include_gcc_mk_cxx_template =
+    $(O_BUILD_DIR)/%.$(1)$(include_gcc_mk_obj_suffix): %.$(1)
 	    @echo [CXX] $$@
 	    @mkdir -p $$(dir $$@)
 	    $(VERBOSE)$(CROSS_COMPILE)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
     endef
 
-    $(eval $(call gcc_mk_cxx_template,cpp))
-    $(eval $(call gcc_mk_cxx_template,cxx))
-    $(eval $(call gcc_mk_cxx_template,cc))
+    $(eval $(call include_gcc_mk_cxx_template,cpp))
+    $(eval $(call include_gcc_mk_cxx_template,cxx))
+    $(eval $(call include_gcc_mk_cxx_template,cc))
     # --------------------------------------------------------------------------
 
     # Assembly sources ---------------------------------------------------------
-    define gcc_mk_as_template =
-    $(O_BUILD_DIR)/%.$(1)$(gcc_mk_obj_suffix): %.$(1)
+    define include_gcc_mk_as_template =
+    $(O_BUILD_DIR)/%.$(1)$(include_gcc_mk_obj_suffix): %.$(1)
 	    @echo [AS] $$@
 	    @mkdir -p $$(dir $$@)
 	    $(VERBOSE)$(CROSS_COMPILE)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
     endef
 
-    $(eval $(call gcc_mk_as_template,s))
-    $(eval $(call gcc_mk_as_template,S))
+    $(eval $(call include_gcc_mk_as_template,s))
+    $(eval $(call include_gcc_mk_as_template,S))
     # --------------------------------------------------------------------------
 
-    -include $(gcc_mk_dep_files)
+    -include $(include_gcc_mk_dep_files)
 else ifeq ($(PROJ_TYPE), custom)
-    .PHONY: --gcc_mk_pre_build
-    --gcc_mk_pre_build: $(PRE_BUILD_DEPS) ;
+    .PHONY: --include_gcc_mk_pre_build
+    --include_gcc_mk_pre_build: $(PRE_BUILD_DEPS) ;
 
-    .PHONY: --gcc_mk_build
+    .PHONY: --include_gcc_mk_build
     ifeq ($(CUSTOM_BUILD_CMD),)
-        --gcc_mk_build: --gcc_mk_pre_build ;
+        --include_gcc_mk_build: --include_gcc_mk_pre_build ;
     else
-        --gcc_mk_build: --gcc_mk_pre_build
+        --include_gcc_mk_build: --include_gcc_mk_pre_build
 	        $(VERBOSE)$(CUSTOM_BUILD_CMD)
     endif
 
-    .PHONY: --gcc_mk_post_build
-    --gcc_mk_post_build: --gcc_mk_build $(POST_BUILD_DEPS) ;
+    .PHONY: --include_gcc_mk_post_build
+    --include_gcc_mk_post_build: --include_gcc_mk_build $(POST_BUILD_DEPS) ;
 
     .PHONY: build
-    build: --gcc_mk_post_build ;
+    build: --include_gcc_mk_post_build ;
 endif
 # ==============================================================================
 
@@ -406,12 +406,12 @@ endif
 ifeq ($(PROJ_TYPE),lib)
     ifeq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
         ifneq ($(wildcard include),)
-            gcc_mk_dist_dirs := include:include
+            include_gcc_mk_dist_dirs := include:include
         endif
     endif
 endif
 
-gcc_mk_dist_dirs := $(call FN_UNIQUE,$(gcc_mk_dist_dirs) $(DIST_DIRS))
+include_gcc_mk_dist_dirs := $(include_gcc_mk_dist_dirs) $(DIST_DIRS)
 
 ifdef DIST_FILES
     ifneq ($(origin DIST_FILES),file)
@@ -419,36 +419,36 @@ ifdef DIST_FILES
     endif
 endif
 ifeq ($(PROJ_TYPE),app)
-    gcc_mk_dist_files := $(O_BUILD_DIR)/$(ARTIFACT):bin/$(ARTIFACT)
+    include_gcc_mk_dist_files := $(O_BUILD_DIR)/$(ARTIFACT):bin/$(ARTIFACT)
 else ifeq ($(PROJ_TYPE),lib)
-    gcc_mk_dist_files := $(O_BUILD_DIR)/$(ARTIFACT):lib/$(ARTIFACT)
+    include_gcc_mk_dist_files := $(O_BUILD_DIR)/$(ARTIFACT):lib/$(ARTIFACT)
 endif
-gcc_mk_dist_files := $(call FN_UNIQUE,$(gcc_mk_dist_files) $(DIST_FILES))
+include_gcc_mk_dist_files := $(include_gcc_mk_dist_files) $(DIST_FILES)
 
 # Each entry (either DIST_DIR or DIST_FILE) has the syntax: src:destPathInDistDir
 
 # Autixiliary function to adjust a distribution directory entry in DIST_DIRS.
-# Syntax: $(call gcc_mk_fn_dist_adjust_dir_entry,distDirEntry)
-gcc_mk_fn_dist_adjust_dir_entry = $(if $(call FN_TOKEN,$(1),:,2),$(1),$(1):)
+# Syntax: $(call include_gcc_mk_fn_dist_adjust_dir_entry,distDirEntry)
+include_gcc_mk_fn_dist_adjust_dir_entry = $(if $(call FN_TOKEN,$(1),:,2),$(1),$(1):)
 
 # Autixiliary function to adjust a distribution file entry in DIST_FILES.
-# Syntax: $(call gcc_mk_fn_dist_adjust_file_entry,distFileEntry)
-gcc_mk_fn_dist_adjust_file_entry = $(if $(call FN_TOKEN,$(1),:,2),$(1),$(1):$(notdir $(1)))
+# Syntax: $(call include_gcc_mk_fn_dist_adjust_file_entry,distFileEntry)
+include_gcc_mk_fn_dist_adjust_file_entry = $(if $(call FN_TOKEN,$(1),:,2),$(1),$(1):$(notdir $(1)))
 
-gcc_mk_dist_dirs := $(call FN_UNIQUE,$(foreach distDirEntry,$(gcc_mk_dist_dirs),$(call gcc_mk_fn_dist_adjust_dir_entry,$(distDirEntry))))
+include_gcc_mk_dist_dirs := $(foreach distDirEntry,$(include_gcc_mk_dist_dirs),$(call include_gcc_mk_fn_dist_adjust_dir_entry,$(distDirEntry)))
 
-DIST_DIRS := $(gcc_mk_dist_dirs)
+DIST_DIRS := $(include_gcc_mk_dist_dirs)
 
-gcc_mk_dist_files := $(gcc_mk_dist_files) $(foreach distDirEntry,$(gcc_mk_dist_dirs),$(foreach distFile,$(call FN_FIND_FILES,$(call FN_TOKEN,$(distDirEntry),:,1)),$(call FN_TOKEN,$(distDirEntry),:,1)/$(distFile):$(if $(call FN_TOKEN,$(distDirEntry),:,2),$(call FN_TOKEN,$(distDirEntry),:,2)/,)$(distFile)))
-gcc_mk_dist_files := $(call FN_UNIQUE,$(foreach distFileEntry,$(gcc_mk_dist_files),$(call gcc_mk_fn_dist_adjust_file_entry,$(distFileEntry))))
-gcc_mk_dist_files := $(call FN_UNIQUE,$(foreach distFileEntry,$(gcc_mk_dist_files),$(call FN_TOKEN,$(distFileEntry),:,1):$(O_DIST_DIR)/$(call FN_TOKEN,$(distFileEntry),:,2)))
+include_gcc_mk_dist_files := $(include_gcc_mk_dist_files) $(foreach distDirEntry,$(include_gcc_mk_dist_dirs),$(foreach distFile,$(call FN_FIND_FILES,$(call FN_TOKEN,$(distDirEntry),:,1)),$(call FN_TOKEN,$(distDirEntry),:,1)/$(distFile):$(if $(call FN_TOKEN,$(distDirEntry),:,2),$(call FN_TOKEN,$(distDirEntry),:,2)/,)$(distFile)))
+include_gcc_mk_dist_files := $(foreach distFileEntry,$(include_gcc_mk_dist_files),$(call include_gcc_mk_fn_dist_adjust_file_entry,$(distFileEntry)))
+include_gcc_mk_dist_files := $(foreach distFileEntry,$(include_gcc_mk_dist_files),$(call FN_TOKEN,$(distFileEntry),:,1):$(O_DIST_DIR)/$(call FN_TOKEN,$(distFileEntry),:,2))
 
-DIST_FILES := $(gcc_mk_dist_files)
+DIST_FILES := $(include_gcc_mk_dist_files)
 
 # Template for distribution artifacts targets
-# $(call gcc_mk_dist_deps_template,src,dest)
-define gcc_mk_dist_deps_template
-gcc_mk_dist_deps += $(2)
+# $(call include_gcc_mk_dist_deps_template,src,dest)
+define include_gcc_mk_dist_deps_template
+include_gcc_mk_dist_deps += $(2)
 
 $(2): $(1)
 	@echo [DIST] $$@
@@ -456,8 +456,7 @@ $(2): $(1)
 	$(VERBOSE)/bin/cp $$< $$@
 endef
 
-$(foreach distFileEntry,$(gcc_mk_dist_files),$(eval $(call gcc_mk_dist_deps_template,$(call FN_TOKEN,$(distFileEntry),:,1),$(call FN_TOKEN,$(distFileEntry),:,2))))
-gcc_mk_dist_deps := $(call FN_UNIQUE,$(gcc_mk_dist_deps))
+$(foreach distFileEntry,$(include_gcc_mk_dist_files),$(eval $(call include_gcc_mk_dist_deps_template,$(call FN_TOKEN,$(distFileEntry),:,1),$(call FN_TOKEN,$(distFileEntry),:,2))))
 
 ifdef PRE_DIST_DEPS
     ifneq ($(origin PRE_DIST_DEPS),file)
@@ -470,51 +469,51 @@ ifdef POST_DIST_DEPS
     endif
 endif
 
---gcc_mk_pre_dist: build $(PRE_DIST_DEPS) ;
+--include_gcc_mk_pre_dist: build $(PRE_DIST_DEPS) ;
 
 ifneq ($(DIST_MARKER),)
-    $(O)/$(DIST_MARKER): $(gcc_mk_dist_deps)
+    $(O)/$(DIST_MARKER): $(include_gcc_mk_dist_deps)
 	    @touch $@
 
-    .PHONY: --gcc_mk_dist
-    --gcc_mk_dist: --gcc_mk_pre_dist $(O)/$(DIST_MARKER) ;
+    .PHONY: --include_gcc_mk_dist
+    --include_gcc_mk_dist: --include_gcc_mk_pre_dist $(O)/$(DIST_MARKER) ;
 else
-    .PHONY: --gcc_mk_dist
-    --gcc_mk_dist: --gcc_mk_pre_dist $(gcc_mk_dist_deps) ;
+    .PHONY: --include_gcc_mk_dist
+    --include_gcc_mk_dist: --include_gcc_mk_pre_dist $(include_gcc_mk_dist_deps) ;
 endif
 
-.PHONY: --gcc_mk_post_dist
---gcc_mk_post_dist: --gcc_mk_dist $(POST_DIST_DEPS) ;
+.PHONY: --include_gcc_mk_post_dist
+--include_gcc_mk_post_dist: --include_gcc_mk_dist $(POST_DIST_DEPS) ;
 
 .PHONY: dist
-dist: --gcc_mk_post_dist ;
+dist: --include_gcc_mk_post_dist ;
 # ==============================================================================
 
-undefine gcc_mk_libs_template1
-undefine gcc_mk_libs_has_lib_dir
-undefine gcc_mk_libs_ldflags
-undefine gcc_mk_libs_proj_dirs
-undefine gcc_mk_libs_fn_lib_name
-undefine gcc_mk_libs_fn_lib_dir
-undefine gcc_mk_libs_template
-undefine gcc_mk_libs_fn_template
-undefine gcc_mk_is_cpp_project
-undefine gcc_mk_ld
-undefine gcc_mk_cflags
-undefine gcc_mk_cxxflags
-undefine gcc_mk_asflags
-undefine gcc_mk_ldflags
-undefine gcc_mk_include_flags
-undefine gcc_mk_obj_suffix
-undefine gcc_mk_obj_files
-undefine gcc_mk_dep_files
-undefine gcc_mk_cxx_template
-undefine gcc_mk_as_template
-undefine gcc_mk_dist_dirs
-undefine gcc_mk_dist_files
-undefine gcc_mk_fn_dist_adjust_dir_entry
-undefine gcc_mk_fn_dist_adjust_file_entry
-undefine gcc_mk_dist_deps_template
-undefine gcc_mk_dist_deps
+undefine include_gcc_mk_libs_template1
+undefine include_gcc_mk_libs_has_lib_dir
+undefine include_gcc_mk_libs_ldflags
+undefine include_gcc_mk_libs_proj_dirs
+undefine include_gcc_mk_libs_fn_lib_name
+undefine include_gcc_mk_libs_fn_lib_dir
+undefine include_gcc_mk_libs_template
+undefine include_gcc_mk_libs_fn_template
+undefine include_gcc_mk_is_cpp_project
+undefine include_gcc_mk_ld
+undefine include_gcc_mk_cflags
+undefine include_gcc_mk_cxxflags
+undefine include_gcc_mk_asflags
+undefine include_gcc_mk_ldflags
+undefine include_gcc_mk_include_flags
+undefine include_gcc_mk_obj_suffix
+undefine include_gcc_mk_obj_files
+undefine include_gcc_mk_dep_files
+undefine include_gcc_mk_cxx_template
+undefine include_gcc_mk_as_template
+undefine include_gcc_mk_dist_dirs
+undefine include_gcc_mk_dist_files
+undefine include_gcc_mk_fn_dist_adjust_dir_entry
+undefine include_gcc_mk_fn_dist_adjust_file_entry
+undefine include_gcc_mk_dist_deps_template
+undefine include_gcc_mk_dist_deps
 
-endif # ifndef gcc_mk
+endif # ifndef include_gcc_mk
