@@ -23,6 +23,10 @@
 ifndef project_mk
 project_mk := 1
 
+override undefine project_mk_self_dir
+override undefine project_mk_src_file_filter
+override undefine project_mk_invalid_src_files
+
 project_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
 include $(project_mk_self_dir)include/functions.mk
@@ -276,13 +280,10 @@ ifneq ($(MAKECMDGOALS),deps)
 
         SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f $(project_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES))
 
-        undefine project_mk_src_file_filter
-
         project_mk_invalid_src_files := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
         ifneq ($(project_mk_invalid_src_files),)
             $(error [SRC_FILES] Unsupported source file(s): $(project_mk_invalid_src_files))
         endif
-        undefine project_mk_invalid_src_files
     endif
 endif
 # ------------------------------------------------------------------------------
@@ -342,6 +343,5 @@ $(eval $(MK_EXTRA_EVAL))
 include $(project_mk_self_dir)include/builder.mk
 # ------------------------------------------------------------------------------
 
-undefine project_mk_self_dir
 
 endif # ifndef project_mk

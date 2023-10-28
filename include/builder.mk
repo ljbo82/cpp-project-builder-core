@@ -66,16 +66,18 @@ ifdef DEPS
     $(error [DEPS] Reserved variable)
 endif
 
+export O_LIBS_DIR ?= $(abspath $(O)/libs)
+
 #$(call include_builder_mk_libs_template1,<lib_name>,[lib_dir])
 define include_builder_mk_libs_template1
 include_builder_mk_libs_has_lib_dir := $$(if $$(or $$(include_builder_mk_libs_has_lib_dir),$(2)),1,)
 include_builder_mk_libs_ldflags += -l$(1)
 include_builder_mk_libs_proj_dirs := $$(strip $$(include_builder_mk_libs_proj_dirs) $(2))
 
-$(if $(2),PRE_BUILD_DEPS += $$(O)/libs/$(1).marker,)
-$(if $(2),--$(1):,)
-$(if $(2),	$$(VERBOSE)$$(MAKE) -C $(2) O=$$(call FN_REL_DIR,$(2),$$(O)/libs) BUILD_SUBDIR=$(1) DIST_MARKER=$(1).marker,)
-$(if $(2),$$(O)/libs/$(1).marker: --$(1) ;,)
+$(if $(2),PRE_BUILD_DEPS += $$(O_LIBS_DIR)/$(1).marker,)
+$(if $(2),--cpb-$(1):,)
+$(if $(2),	$$(VERBOSE)$$(MAKE) -C $(2) O=$$(call FN_REL_DIR,$(2),$$(O_LIBS_DIR)) BUILD_SUBDIR=$(1) DIST_MARKER=$(1).marker,)
+$(if $(2),$$(O_LIBS_DIR)/$(1).marker: --cpb-$(1) ;,)
 
 endef
 
@@ -93,9 +95,9 @@ include_builder_mk_libs_fn_template = $(eval $(call include_builder_mk_libs_temp
 
 $(foreach lib,$(LIBS),$(call include_builder_mk_libs_fn_template,$(lib)))
 ifeq ($(include_builder_mk_libs_has_lib_dir),1)
-    DEPS := $(strip $(include_builder_mk_libs_ldflags) `$(foreach lib_proj,$(strip $(include_builder_mk_libs_proj_dirs)),$$(MAKE) -C $(lib_proj) deps;))`
-    INCLUDE_DIRS += $(O)/libs/dist/include
-    LDFLAGS := $(LDFLAGS) -L$(O)/libs/dist/lib $(DEPS)
+    DEPS := $(strip $(include_builder_mk_libs_ldflags) `$(foreach lib_proj,$(strip $(include_builder_mk_libs_proj_dirs)),$$(MAKE) --no-print-directory -C $(lib_proj) deps;))`
+    INCLUDE_DIRS += $(O_LIBS_DIR)/dist/include
+    LDFLAGS := $(LDFLAGS) -L$(O_LIBS_DIR)/dist/lib $(DEPS)
 else
     DEPS := $(include_builder_mk_libs_ldflags)
     LDFLAGS := $(LDFLAGS) $(include_builder_mk_libs_ldflags)
@@ -242,7 +244,7 @@ CFLAGS   := -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cf
 CXXFLAGS := -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cxxflags) $(CXXFLAGS) $(EXTRA_CXXFLAGS)
 ASFLAGS  := -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_asflags) $(ASFLAGS) $(EXTRA_ASFLAGS)
 ARFLAGS  := rcs $(ARFLAGS) $(EXTRA_ARFLAGS)
-LDFLAGS  := $(include_builder_mk_ldflags) $(LDFLAGS) $(DEPS) $(EXTRA_LDFLAGS)
+LDFLAGS  := $(include_builder_mk_ldflags) $(LDFLAGS) $(EXTRA_LDFLAGS)
 # ------------------------------------------------------------------------------
 
 .NOTPARALLEL:
