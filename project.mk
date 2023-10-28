@@ -61,29 +61,33 @@ endif
 # deps =========================================================================
 ifneq ($(filter deps,$(MAKECMDGOALS)),)
     ifneq ($(MAKECMDGOALS),deps)
-        $(error 'deps' target cannot be invoked along with other targets)
+        $(error deps cannot be invoked along with other targets (extra targets: $(filter-out deps,$(MAKECMDGOALS))))
     endif
 endif
 
 .PHONY: deps
 deps:
-	@printf $(strip $(DEPS))
+	@printf -- "$(strip $(DEPS))"
 # ==============================================================================
 
 # print-vars ===================================================================
-$(warning Adjust here!)
-ifeq ($(PROJ_TYPE),app)
-    VARS ?= $(sort DEBUG HOST DIST_MARKER O O_BUILD_DIR O_DIST_DIR V DIST_DIRS DIST_FILES INCLUDE_DIRS LIB_TYPE POST_BUILD_DEPS POST_CLEAN_DEPS POST_DIST_DEPS PRE_BUILD_DEPS PRE_CLEAN_DEPS PRE_DIST_DEPS PROJ_NAME PROJ_TYPE PROJ_VERSION SRC_DIRS SRC_FILES AR AS ASFLAGS CC CFLAGS CROSS_COMPILE CXX CXXFLAGS LD LDFLAGS HOSTS_DIRS OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL SKIP_DEFAULT_INCLUDE_DIR SKIP_DEFAULT_SRC_DIR SKIPPED_SRC_DIRS SKIPPED_SRC_FILES STRIP_RELEASE ARTIFACT LIBS)
-else ifeq ($(PROJ_TYPE),lib)
-    VARS ?= $(sort DEBUG)
-else ifeq ($(PROJ_TYPE),custom)
-    VARS ?= $(sort DEBUG)
-endif
-
 ifneq ($(filter print-vars,$(MAKECMDGOALS)),)
     ifneq ($(words $(MAKECMDGOALS)),1)
-        $(error print-vars target cannot be invoked along with other targes)
+        $(error print-vars cannot be invoked along with other targets (extra targets: $(filter-out print-vars,$(MAKECMDGOALS))))
     endif
+endif
+
+ifndef VARS
+    VARS = VERBOSE NATIVE_OS NATIVE_ARCH NATIVE_HOST O_BUILD_DIR O_DIST_DIR O V HOST SKIP_DEFAULT_HOSTS_DIR HOSTS_DIRS PROJ_TYPE PROJ_NAME PROJ_VERSION DEBUG BUILD_SUBDIR DIST_SUBDIR STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL ARTIFACT LIBS DEPS PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS
+    ifneq ($(filter app lib,$(PROJ_TYPE)),)
+        VARS += SKIP_DEFAULT_SRC_DIR SRC_DIRS ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES SKIP_DEFAULT_INCLUDE_DIR INCLUDE_DIRS AS ASFLAGS EXTRA_ASFLAGS CC CFLAGS EXTRA_CFLAGS CXX CXXFLAGS EXTRA_CXXFLAGS AR ARFLAGS EXTRA_ARFLAGS LD LDFLAGS EXTRA_LDFLAGS CROSS_COMPILE
+        ifeq ($(PROJ_TYPE),lib)
+            VARS += LIB_TYPE LIB_NAME
+        endif
+    else ifeq ($(PROJ_TYPE),custom)
+        VARS += CUSTOM_CLEAN_CMD CUSTOM_BUILD_CMD
+    endif
+    VARS := $(sort $(VARS))
 endif
 
 .PHONY: print-vars
@@ -272,10 +276,13 @@ ifneq ($(MAKECMDGOALS),deps)
 
         SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f $(project_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES))
 
+        undefine project_mk_src_file_filter
+
         project_mk_invalid_src_files := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
         ifneq ($(project_mk_invalid_src_files),)
             $(error [SRC_FILES] Unsupported source file(s): $(project_mk_invalid_src_files))
         endif
+        undefine project_mk_invalid_src_files
     endif
 endif
 # ------------------------------------------------------------------------------
@@ -312,31 +319,29 @@ ifneq ($(MAKECMDGOALS),deps)
 endif
 # ------------------------------------------------------------------------------
 
-# MAKE_INCLUDES ----------------------------------------------------------------
-ifneq ($(MAKE_INCLUDES),)
-    ifneq ($(origin MAKE_INCLUDES),file)
-        $(error [MAKE_INCLUDES] Not defined in a makefile (origin: $(origin MAKE_INCLUDES)))
+# MK_EXTRA_INCLUDES ----------------------------------------------------------------
+ifneq ($(MK_EXTRA_INCLUDES),)
+    ifneq ($(origin MK_EXTRA_INCLUDES),file)
+        $(error [MK_EXTRA_INCLUDES] Not defined in a makefile (origin: $(origin MK_EXTRA_INCLUDES)))
     endif
-    include $(MAKE_INCLUDES)
+    include $(MK_EXTRA_INCLUDES)
 endif
 # ------------------------------------------------------------------------------
 
-# LAZY_DEFS --------------------------------------------------------------------
-ifdef LAZY_DEFS
-    ifneq ($(origin LAZY_DEFS),file)
-        $(error [LAZY_DEFS] Not defined in a makefile (origin: $(origin LAZY_DEFS)))
+# MK_EXTRA_EVAL --------------------------------------------------------------------
+ifdef MK_EXTRA_EVAL
+    ifneq ($(origin MK_EXTRA_EVAL),file)
+        $(error [MK_EXTRA_EVAL] Not defined in a makefile (origin: $(origin MK_EXTRA_EVAL)))
     endif
 endif
 
-$(eval $(LAZY_DEFS))
+$(eval $(MK_EXTRA_EVAL))
 # ------------------------------------------------------------------------------
 
 # GCC management ---------------------------------------------------------------
-include $(project_mk_self_dir)include/gcc.mk
+include $(project_mk_self_dir)include/builder.mk
 # ------------------------------------------------------------------------------
 
-undefine project_mk_src_file_filter
-undefine project_mk_invalid_src_files
 undefine project_mk_self_dir
 
 endif # ifndef project_mk

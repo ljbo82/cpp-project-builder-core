@@ -23,11 +23,28 @@
 ifndef hosts_osx_mk
 hosts_osx_mk := 1
 
-# NOTE: The only difference between osx and linux build system customizations
-#       is the suffix used for shared libraries
+ifndef project_mk
+    $(error This file cannot be manually included)
+endif
 
-# NOTE: hosts_linux_mk_shared_lib_suffix will be undefined in linux's host.mk
-hosts_linux_mk_shared_lib_suffix := .dylib
-include $(dir $(lastword $(MAKEFILE_LIST)))../linux/host.mk
+override undefine hosts_osx_mk_target_base_name
+
+ifeq ($(PROJ_TYPE),app)
+    ifndef ARTIFACT
+        ARTIFACT := $(PROJ_NAME)
+    endif
+else ifeq ($(PROJ_TYPE),lib)
+    LIB_TYPE ?= shared
+    LIB_NAME ?= $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
+    ifndef ARTIFACT
+        hosts_osx_mk_target_base_name := lib$(LIB_NAME)
+        ifeq ($(LIB_TYPE),static)
+            ARTIFACT := $(hosts_osx_mk_target_base_name).a
+        endif
+        ifeq ($(LIB_TYPE),shared)
+            ARTIFACT := $(hosts_osx_mk_target_base_name).dylib
+        endif
+    endif
+endif
 
 endif # ifndef hosts_osx_mk

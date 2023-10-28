@@ -27,6 +27,8 @@ ifndef project_mk
     $(error This file cannot be manually included)
 endif
 
+override undefine hosts_linux_mk_target_base_name
+
 ifeq ($(PROJ_TYPE),app)
     ifndef ARTIFACT
         ARTIFACT := $(PROJ_NAME)
@@ -40,16 +42,8 @@ else ifeq ($(PROJ_TYPE),lib)
             ARTIFACT := $(hosts_linux_mk_target_base_name).a
         endif
         ifeq ($(LIB_TYPE),shared)
-            # NOTE: hosts_linux_mk_shared_lib_suffix is modified in OSX hosts
-            ifndef hosts_linux_mk_shared_lib_suffix
-                hosts_linux_mk_shared_lib_suffix := .so
-            endif
-            ARTIFACT := $(hosts_linux_mk_target_base_name)$(hosts_linux_mk_shared_lib_suffix)
-            ifdef hosts_linux_mk_shared_lib_suffix
-                undefine hosts_linux_mk_shared_lib_suffix
-            endif
+            ARTIFACT := $(hosts_linux_mk_target_base_name).so
         endif
-        undefine hosts_linux_mk_target_base_name
     endif
 endif
 

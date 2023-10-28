@@ -27,6 +27,19 @@ ifndef project_mk
     $(error This file cannot be manually included)
 endif
 
+override undefine include_hosts_mk_os
+override undefine include_hosts_mk_arch
+override undefine include_hosts_mk_host_factorizer
+override undefine include_hosts_mk_host_factorizer_current
+override undefine include_hosts_mk_host_factorizer_previous
+override undefine include_hosts_mk_host_factorizer_factors
+override undefine include_hosts_mk_host_factorize
+override undefine include_hosts_mk_fn_host_factorize
+override undefine include_hosts_mk_host_layers
+override undefine include_hosts_mk_layer_aux_parser
+override undefine include_hosts_mk_include_hosts_mk_includes
+override undefine include_hosts_mk_hosts_src_dirs
+
 # Native host detection ********************************************************
 
 # Hosts with supported auto-detection:
@@ -143,9 +156,9 @@ endef
 #
 # Syntax: $(call include_hosts_mk_host_factorize,hostString)
 define include_hosts_mk_host_factorize
-    undefine include_hosts_mk_host_factorizer_current
-    undefine include_hosts_mk_host_factorizer_previous
-    undefine include_hosts_mk_host_factorizer_factors
+    override undefine include_hosts_mk_host_factorizer_current
+    override undefine include_hosts_mk_host_factorizer_previous
+    override undefine include_hosts_mk_host_factorizer_factors
     $$(foreach token,$$(subst -, ,$(1)),$$(eval $$(call include_hosts_mk_host_factorizer,$$(token))))
 endef
 # ------------------------------------------------------------------------------
@@ -190,14 +203,14 @@ HOSTS_DIRS := $(strip $(project_mk_self_dir)hosts $(HOSTS_DIRS))
 # Syntax $(call include_hosts_mk_layer_aux_parser,hostsDir,layer)
 define include_hosts_mk_layer_aux_parser
 include_hosts_mk_include_hosts_mk_includes += $(if $(wildcard $(1)/$(2)/host.mk),$(realpath $(1)/$(2)/host.mk),)
-include_hosts_mk_hosts_src_dirs    += $(if $(wildcard $(1)/$(2)/src),$(1)/$(2)/src,)
+include_hosts_mk_hosts_src_dirs += $(if $(wildcard $(1)/$(2)/src),$(1)/$(2)/src,)
 endef
 # ------------------------------------------------------------------------------
 
 $(foreach hostDir,$(HOSTS_DIRS),$(eval $$(foreach layer,$$(include_hosts_mk_host_layers),$$(eval $$(call include_hosts_mk_layer_aux_parser,$(hostDir),$$(layer))))))
 
 include_hosts_mk_include_hosts_mk_includes := $(strip $(include_hosts_mk_include_hosts_mk_includes))
-include_hosts_mk_hosts_src_dirs    := $(strip $(include_hosts_mk_hosts_src_dirs))
+include_hosts_mk_hosts_src_dirs := $(strip $(include_hosts_mk_hosts_src_dirs))
 
 ifneq ($(include_hosts_mk_include_hosts_mk_includes),)
     include $(include_hosts_mk_include_hosts_mk_includes)
@@ -207,18 +220,5 @@ ifneq ($(filter app lib,$(PROJ_TYPE)),)
     SRC_DIRS := $(SRC_DIRS) $(include_hosts_mk_hosts_src_dirs)
 endif
 # ******************************************************************************
-
-undefine include_hosts_mk_os
-undefine include_hosts_mk_arch
-undefine include_hosts_mk_host_factorizer
-undefine include_hosts_mk_host_factorizer_current
-undefine include_hosts_mk_host_factorizer_previous
-undefine include_hosts_mk_host_factorizer_factors
-undefine include_hosts_mk_host_factorize
-undefine include_hosts_mk_fn_host_factorize
-undefine include_hosts_mk_host_layers
-undefine include_hosts_mk_layer_aux_parser
-undefine include_hosts_mk_include_hosts_mk_includes
-undefine include_hosts_mk_hosts_src_dirs
 
 endif # ifndef include_hosts_mk
