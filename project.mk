@@ -315,7 +315,7 @@ ifneq ($(MAKECMDGOALS),deps)
             endif
         endif
 
-        INCLUDE_DIRS := $(SRC_DIRS) $(INCLUDE_DIRS)
+        INCLUDE_DIRS := $(strip $(SRC_DIRS) $(INCLUDE_DIRS))
     endif
 endif
 # ------------------------------------------------------------------------------

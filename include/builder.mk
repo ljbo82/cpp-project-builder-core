@@ -100,6 +100,7 @@ ifeq ($(include_builder_mk_libs_has_lib_dir),1)
 else
     LDFLAGS := $(LDFLAGS) $(DEPS)
 endif
+LDFLAGS := $(strip $(LDFLAGS))
 # ------------------------------------------------------------------------------
 
 ifneq ($(MAKECMDGOALS),deps) # *************************************************
