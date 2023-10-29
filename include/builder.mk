@@ -44,7 +44,6 @@ override undefine include_builder_mk_include_flags
 override undefine include_builder_mk_obj_suffix
 override undefine include_builder_mk_obj_files
 override undefine include_builder_mk_dep_files
-override undefine include_builder_mk_artifact_target
 override undefine include_builder_mk_cxx_template
 override undefine include_builder_mk_as_template
 override undefine include_builder_mk_dist_dirs
@@ -65,17 +64,17 @@ ifdef DEPS
     $(error [DEPS] Reserved variable)
 endif
 
-export O_LIBS_DIR ?= $(abspath $(O)/libs)
+export include_builder_mk_o_libs_dir ?= $(abspath $(O)/libs)
 
 #$(call include_builder_mk_libs_template1,<lib_name>,[lib_dir])
 define include_builder_mk_libs_template1
 include_builder_mk_libs_has_lib_dir := $$(if $$(or $$(include_builder_mk_libs_has_lib_dir),$(2)),1,)
 include_builder_mk_libs_ldflags += $(strip -l$(1) $(if $(2),`$(MAKE) --no-print-directory -C $(2) deps;`,))
 
-$(if $(2),PRE_BUILD_DEPS += $$(O_LIBS_DIR)/$(1).marker,)
+$(if $(2),PRE_BUILD_DEPS += $$(include_builder_mk_o_libs_dir)/$(1).marker,)
 $(if $(2),--cpb-$(1):,)
-$(if $(2),	$$(VERBOSE)$$(MAKE) -C $(2) O=$$(call FN_REL_DIR,$(2),$$(O_LIBS_DIR)) BUILD_SUBDIR=$(1) DIST_MARKER=$(1).marker,)
-$(if $(2),$$(O_LIBS_DIR)/$(1).marker: --cpb-$(1) ;,)
+$(if $(2),	$$(VERBOSE)$$(MAKE) -C $(2) O=$$(call FN_REL_DIR,$(2),$$(include_builder_mk_o_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=$(1).marker,)
+$(if $(2),$$(include_builder_mk_o_libs_dir)/$(1).marker: --cpb-$(1) ;,)
 
 endef
 
@@ -95,8 +94,8 @@ $(foreach lib,$(LIBS),$(call include_builder_mk_libs_fn_template,$(lib)))
 
 DEPS := $(include_builder_mk_libs_ldflags)
 ifeq ($(include_builder_mk_libs_has_lib_dir),1)
-    INCLUDE_DIRS += $(O_LIBS_DIR)/dist/include
-    LDFLAGS := $(LDFLAGS) -L$(O_LIBS_DIR)/dist/lib $(DEPS)
+    INCLUDE_DIRS += $(include_builder_mk_o_libs_dir)/dist/include
+    LDFLAGS := $(LDFLAGS) -L$(include_builder_mk_o_libs_dir)/dist/lib $(DEPS)
 else
     LDFLAGS := $(LDFLAGS) $(DEPS)
 endif
@@ -107,47 +106,35 @@ ifneq ($(MAKECMDGOALS),deps) # *************************************************
 
 # Compiler management ----------------------------------------------------------
 # AS
-ifndef AS
+AS ?= as
+ifeq ($(origin AS),default)
     AS := as
-else
-    ifeq ($(origin AS),default)
-        AS := as
-    else ifeq ($(AS),)
-        $(error [AS] Missing value)
-    endif
+else ifeq ($(AS),)
+    $(error [AS] Missing value)
 endif
 
 # CC
-ifndef CC
+CC ?= gcc
+ifeq ($(origin CC),default)
     CC := gcc
-else
-    ifeq ($(origin CC),default)
-        CC := gcc
-    else ifeq ($(CC),)
-        $(error [CC] Missing value)
-    endif
+else ifeq ($(CC),)
+    $(error [CC] Missing value)
 endif
 
 # CXX
-ifndef CXX
+CXX ?= g++
+ifeq ($(origin CXX),default)
     CXX := g++
-else
-    ifeq ($(origin CXX),default)
-        CXX := g++
-    else ifeq ($(CXX),)
-        $(error [CXX] Missing value)
-    endif
+else ifeq ($(CXX),)
+    $(error [CXX] Missing value)
 endif
 
 # AR
-ifndef AR
+AR ?= ar
+ifeq ($(origin AR),default)
     AR := ar
-else
-    ifeq ($(origin AR),default)
-        AR := ar
-    else ifeq ($(AR),)
-        $(error [AR] Missing value)
-    endif
+else ifeq ($(AR),)
+    $(error [AR] Missing value)
 endif
 
 # LD
@@ -168,14 +155,11 @@ else
     include_builder_mk_ld := gcc
 endif
 
-ifndef LD
-    LD := $(include_builder_mk_ld)
-else
-    ifeq ($(origin LD),default)
-        LD := $(include_builder_mk_ld)
-    else ifeq ($(LD),)
-        $(error [LD] Missing value)
-    endif
+LD ?= $(include_builder_mk_ld)
+ifeq ($(origin LD),default)
+	LD := $(include_builder_mk_ld)
+else ifeq ($(LD),)
+	$(error [LD] Missing value)
 endif
 
 include_builder_mk_cflags += -Wall
@@ -206,44 +190,13 @@ ifeq ($(PROJ_TYPE),lib)
     endif
 endif
 
-ifdef CFLAGS
-    ifeq ($(origin CFLAGS),command line)
-        $(error [CFLAGS] Defined in command line. Consider using EXTRA_CFLAGS)
-    endif
-endif
-
-ifdef CXXFLAGS
-    ifeq ($(origin CXXFLAGS),command line)
-        $(error [CXXFLAGS] Defined in command line. Consider using EXTRA_CXXFLAGS)
-    endif
-endif
-
-ifdef ASFLAGS
-    ifeq ($(origin ASFLAGS),command line)
-        $(error [ASFLAGS] Defined in command line. Consider using EXTRA_ASFLAGS)
-    endif
-endif
-
-ifdef ARFLAGS
-    ifeq ($(origin ARFLAGS),command line)
-        $(error [ARFLAGS] Defined in command line. Consider using EXTRA_ARFLAGS)
-    endif
-    ARFLAGS := $(subst r,,$(subst c,,$(subst s,,$(subst v,,$(ARFLAGS)))))
-endif
-
-ifdef LDFLAGS
-    ifeq ($(origin LDFLAGS),command line)
-        $(error [LDFLAGS] Defined in command line. Consider using EXTRA_LDFLAGS)
-    endif
-endif
-
 include_builder_mk_include_flags := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
 
-CFLAGS   := -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cflags) $(CFLAGS) $(EXTRA_CFLAGS)
-CXXFLAGS := -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cxxflags) $(CXXFLAGS) $(EXTRA_CXXFLAGS)
-ASFLAGS  := -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_asflags) $(ASFLAGS) $(EXTRA_ASFLAGS)
-ARFLAGS  := rcs $(ARFLAGS) $(EXTRA_ARFLAGS)
-LDFLAGS  := $(include_builder_mk_ldflags) $(LDFLAGS) $(EXTRA_LDFLAGS)
+CFLAGS   := -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cflags) $(CFLAGS)
+CXXFLAGS := -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cxxflags) $(CXXFLAGS)
+ASFLAGS  := -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_asflags) $(ASFLAGS)
+ARFLAGS  := rcs $(ARFLAGS)
+LDFLAGS  := $(include_builder_mk_ldflags) $(LDFLAGS)
 # ------------------------------------------------------------------------------
 
 .NOTPARALLEL:
@@ -261,6 +214,11 @@ ifdef PRE_CLEAN_DEPS
         $(error [PRE_CLEAN_DEPS] Not defined in a makefile (origin: $(origin PRE_CLEAN_DEPS)))
     endif
 endif
+ifdef CLEAN_DEPS
+    ifneq ($(origin CLEAN_DEPS),file)
+        $(error [CLEAN_DEPS] Not defined in a makefile (origin: $(origin CLEAN_DEPS)))
+    endif
+endif
 ifdef POST_CLEAN_DEPS
     ifneq ($(origin POST_CLEAN_DEPS),file)
         $(error [POST_CLEAN_DEPS] Not defined in a makefile (origin: $(origin POST_CLEAN_DEPS)))
@@ -271,20 +229,8 @@ endif
 --include_builder_mk_pre_clean: $(PRE_CLEAN_DEPS) ;
 
 .PHONY: --include_builder_mk_clean
-ifneq ($(filter app lib,$(PROJ_TYPE)),)
-    --include_builder_mk_clean: --include_builder_mk_pre_clean
-	    $(VERBOSE)rm -rf $(O)
-else ifeq ($(PROJ_TYPE),custom)
-    ifneq ($(CUSTOM_CLEAN_CMD),)
-        ifneq ($(origin CUSTOM_CLEAN_CMD),file)
-            $(error [CUSTOM_CLEAN_CMD] Not defined in a makefile (origin: $(origin CUSTOM_CLEAN_CMD)))
-        endif
-        --include_builder_mk_clean: --include_builder_mk_pre_clean
-	        $(VERBOSE)$(CUSTOM_CLEAN_CMD)
-    else
-        --include_builder_mk_clean: --include_builder_mk_pre_clean ;
-    endif
-endif
+--include_builder_mk_clean: --include_builder_mk_pre_clean $(CLEAN_DEPS)
+	$(VERBOSE)rm -rf $(O)
 
 .PHONY: --include_builder_mk_post_clean
 --include_builder_mk_post_clean: --include_builder_mk_clean $(POST_CLEAN_DEPS) ;
@@ -299,120 +245,99 @@ ifdef PRE_BUILD_DEPS
         $(error [PRE_BUILD_DEPS] Not defined in a makefile (origin: $(origin PRE_BUILD_DEPS)))
     endif
 endif
+ifdef BUILD_DEPS
+    ifneq ($(origin BUILD_DEPS),file)
+        $(error [BUILD_DEPS] Not defined in a makefile (origin: $(origin BUILD_DEPS)))
+    endif
+endif
 ifdef POST_BUILD_DEPS
     ifneq ($(origin POST_BUILD_DEPS),file)
         $(error [POST_BUILD_DEPS] Not defined in a makefile (origin: $(origin POST_BUILD_DEPS)))
     endif
 endif
 
-ifneq ($(filter app lib,$(PROJ_TYPE)),)
-    ifeq ($(SRC_FILES),)
-        $(error No source files)
-    endif
-
-    ifeq ($(PROJ_TYPE),lib)
-        # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
-        ifneq ($(filter -fPIC,$(CFLAGS) $(CXXFLAGS)),)
-            include_builder_mk_obj_suffix := .lo
-        else
-            include_builder_mk_obj_suffix := .o
-        endif
-    else ifeq ($(PROJ_TYPE),app)
+ifeq ($(PROJ_TYPE),lib)
+    # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
+    ifneq ($(filter -fPIC,$(CFLAGS) $(CXXFLAGS)),)
+        include_builder_mk_obj_suffix := .lo
+    else
         include_builder_mk_obj_suffix := .o
     endif
+else ifeq ($(PROJ_TYPE),app)
+    include_builder_mk_obj_suffix := .o
+endif
 
-    include_builder_mk_obj_files := $(SRC_FILES:%=$(O_BUILD_DIR)/%$(include_builder_mk_obj_suffix))
+include_builder_mk_obj_files := $(SRC_FILES:%=$(O_BUILD_DIR)/%$(include_builder_mk_obj_suffix))
 
-    ifeq ($(PROJ_TYPE),lib)
-        # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
-        ifneq ($(filter -fPIC,$(CFLAGS) $(CXXFLAGS)),)
-            include_builder_mk_dep_files := $(include_builder_mk_obj_files:.lo=.d)
-        else
-            include_builder_mk_dep_files := $(include_builder_mk_obj_files:.o=.d)
-        endif
-    else ifeq ($(PROJ_TYPE),app)
+ifeq ($(PROJ_TYPE),lib)
+    # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
+    ifneq ($(filter -fPIC,$(CFLAGS) $(CXXFLAGS)),)
+        include_builder_mk_dep_files := $(include_builder_mk_obj_files:.lo=.d)
+    else
         include_builder_mk_dep_files := $(include_builder_mk_obj_files:.o=.d)
     endif
+else ifeq ($(PROJ_TYPE),app)
+    include_builder_mk_dep_files := $(include_builder_mk_obj_files:.o=.d)
+endif
 
-    .PHONY: --include_builder_mk_pre_build_check
-    --include_builder_mk_pre_build_check:
-        ifneq ($(HOST),$(NATIVE_HOST))
-            ifeq ($(origin CROSS_COMPILE),undefined)
-	            $(error [CROSS_COMPILE] Missing value for HOST $(HOST))
-            endif
+.PHONY: --include_builder_mk_pre_build_check
+--include_builder_mk_pre_build_check:
+    ifneq ($(HOST),$(NATIVE_HOST))
+        ifeq ($(origin CROSS_COMPILE),undefined)
+	        $(error [CROSS_COMPILE] Missing value for HOST $(HOST))
         endif
-
-    define include_builder_mk_artifact_target
-    $(O_BUILD_DIR)/$(ARTIFACT): $(PRE_BUILD_DEPS) $(include_builder_mk_obj_files)
-        ifeq ($(PROJ_TYPE),lib)
-            ifeq ($(LIB_TYPE),shared)
-	            @echo [LD] $$@
-	            $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $$@ $(include_builder_mk_obj_files) $(LDFLAGS))
-            else ifeq ($(LIB_TYPE),static)
-	            @echo [AR] $$@
-	            $(VERBOSE)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $$@ $(include_builder_mk_obj_files))
-            endif
-        else ifeq ($(PROJ_TYPE),app)
-	        @echo [LD] $$@
-	        $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $$@ $(include_builder_mk_obj_files) $(LDFLAGS))
-        endif
-    endef
-    $(eval $(include_builder_mk_artifact_target))
-
-    .PHONY: build
-    build: --include_builder_mk_pre_build_check $(O_BUILD_DIR)/$(ARTIFACT) $(POST_BUILD_DEPS) ;
-
-    # C sources ----------------------------------------------------------------
-    $(O_BUILD_DIR)/%.c$(include_builder_mk_obj_suffix): %.c
-	    @echo [CC] $@
-	    @mkdir -p $(dir $@)
-	    $(VERBOSE)$(CROSS_COMPILE)$(CC) $(strip $(CFLAGS) -c $< -o $@)
-    # --------------------------------------------------------------------------
-
-    # C++ sources --------------------------------------------------------------
-    define include_builder_mk_cxx_template =
-    $(O_BUILD_DIR)/%.$(1)$(include_builder_mk_obj_suffix): %.$(1)
-	    @echo [CXX] $$@
-	    @mkdir -p $$(dir $$@)
-	    $(VERBOSE)$(CROSS_COMPILE)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
-    endef
-
-    $(eval $(call include_builder_mk_cxx_template,cpp))
-    $(eval $(call include_builder_mk_cxx_template,cxx))
-    $(eval $(call include_builder_mk_cxx_template,cc))
-    # --------------------------------------------------------------------------
-
-    # Assembly sources ---------------------------------------------------------
-    define include_builder_mk_as_template =
-    $(O_BUILD_DIR)/%.$(1)$(include_builder_mk_obj_suffix): %.$(1)
-	    @echo [AS] $$@
-	    @mkdir -p $$(dir $$@)
-	    $(VERBOSE)$(CROSS_COMPILE)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
-    endef
-
-    $(eval $(call include_builder_mk_as_template,s))
-    $(eval $(call include_builder_mk_as_template,S))
-    # --------------------------------------------------------------------------
-
-    -include $(include_builder_mk_dep_files)
-else ifeq ($(PROJ_TYPE), custom)
-    .PHONY: --include_builder_mk_pre_build
-    --include_builder_mk_pre_build: $(PRE_BUILD_DEPS) ;
-
-    .PHONY: --include_builder_mk_build
-    ifeq ($(CUSTOM_BUILD_CMD),)
-        --include_builder_mk_build: --include_builder_mk_pre_build ;
-    else
-        --include_builder_mk_build: --include_builder_mk_pre_build
-	        $(VERBOSE)$(CUSTOM_BUILD_CMD)
     endif
 
-    .PHONY: --include_builder_mk_post_build
-    --include_builder_mk_post_build: --include_builder_mk_build $(POST_BUILD_DEPS) ;
+$(O_BUILD_DIR)/$(ARTIFACT): $(include_builder_mk_obj_files)
+    ifeq ($(PROJ_TYPE),lib)
+        ifeq ($(LIB_TYPE),shared)
+	        @echo [LD] $@
+	        $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(include_builder_mk_obj_files) $(LDFLAGS))
+        else ifeq ($(LIB_TYPE),static)
+	        @echo [AR] $@
+	        $(VERBOSE)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(include_builder_mk_obj_files))
+        endif
+    else ifeq ($(PROJ_TYPE),app)
+	    @echo [LD] $@
+	    $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(include_builder_mk_obj_files) $(LDFLAGS))
+    endif
 
-    .PHONY: build
-    build: --include_builder_mk_post_build ;
-endif
+.PHONY: build
+build: $(if $(SRC_FILES),--include_builder_mk_pre_build_check,) $(PRE_BUILD_DEPS) $(BUILD_DEPS) $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT),) $(POST_BUILD_DEPS) ;
+
+# C sources --------------------------------------------------------------------
+$(O_BUILD_DIR)/%.c$(include_builder_mk_obj_suffix): %.c
+	@echo [CC] $@
+	@mkdir -p $(dir $@)
+	$(VERBOSE)$(CROSS_COMPILE)$(CC) $(strip $(CFLAGS) -c $< -o $@)
+# ------------------------------------------------------------------------------
+
+# C++ sources ------------------------------------------------------------------
+define include_builder_mk_cxx_template =
+$(O_BUILD_DIR)/%.$(1)$(include_builder_mk_obj_suffix): %.$(1)
+	echo [CXX] $$@
+	@mkdir -p $$(dir $$@)
+	$(VERBOSE)$(CROSS_COMPILE)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
+endef
+
+$(eval $(call include_builder_mk_cxx_template,cpp))
+$(eval $(call include_builder_mk_cxx_template,cxx))
+$(eval $(call include_builder_mk_cxx_template,cc))
+# ------------------------------------------------------------------------------
+
+# Assembly sources -------------------------------------------------------------
+define include_builder_mk_as_template =
+$(O_BUILD_DIR)/%.$(1)$(include_builder_mk_obj_suffix): %.$(1)
+	@echo [AS] $$@
+	@mkdir -p $$(dir $$@)
+	$(VERBOSE)$(CROSS_COMPILE)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
+endef
+
+$(eval $(call include_builder_mk_as_template,s))
+$(eval $(call include_builder_mk_as_template,S))
+# ------------------------------------------------------------------------------
+
+-include $(include_builder_mk_dep_files)
 # ==============================================================================
 
 # dist =========================================================================
@@ -487,6 +412,11 @@ ifdef PRE_DIST_DEPS
         $(error [PRE_DIST_DEPS] Not defined in a makefile (origin: $(origin PRE_DIST_DEPS)))
     endif
 endif
+ifdef DIST_DEPS
+    ifneq ($(origin DIST_DEPS),file)
+        $(error [DIST_DEPS] Not defined in a makefile (origin: $(origin DIST_DEPS)))
+    endif
+endif
 ifdef POST_DIST_DEPS
     ifneq ($(origin POST_DIST_DEPS),file)
         $(error [POST_DIST_DEPS] Not defined in a makefile (origin: $(origin POST_DIST_DEPS)))
@@ -500,10 +430,10 @@ ifneq ($(DIST_MARKER),)
 	    @touch $@
 
     .PHONY: --include_builder_mk_dist
-    --include_builder_mk_dist: --include_builder_mk_pre_dist $(O)/$(DIST_MARKER) ;
+    --include_builder_mk_dist: --include_builder_mk_pre_dist $(O)/$(DIST_MARKER) $(DIST_DEPS) ;
 else
     .PHONY: --include_builder_mk_dist
-    --include_builder_mk_dist: --include_builder_mk_pre_dist $(include_builder_mk_dist_deps) ;
+    --include_builder_mk_dist: --include_builder_mk_pre_dist $(include_builder_mk_dist_deps) $(DIST_DEPS) ;
 endif
 
 .PHONY: --include_builder_mk_post_dist

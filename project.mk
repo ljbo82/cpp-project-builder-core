@@ -31,6 +31,7 @@ project_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
 include $(project_mk_self_dir)include/functions.mk
 include $(project_mk_self_dir)include/common.mk
+include $(project_mk_self_dir)include/gcc.mk
 
 # Checks for whitespace in CWD -------------------------------------------------
 ifneq ($(words $(shell pwd)),1)
@@ -45,7 +46,7 @@ endif
 ifneq ($(origin PROJ_TYPE),file)
     $(error [PROJ_TYPE] Not defined in a makefile (origin: $(origin PROJ_TYPE)))
 endif
-ifneq ($(call FN_INVALID_OPTION,$(PROJ_TYPE),app lib custom),)
+ifneq ($(call FN_INVALID_OPTION,$(PROJ_TYPE),app lib),)
     $(error [PROJ_TYPE] Invalid value: $(PROJ_TYPE))
 endif
 # ------------------------------------------------------------------------------
@@ -81,18 +82,7 @@ ifneq ($(filter print-vars,$(MAKECMDGOALS)),)
     endif
 endif
 
-ifndef VARS
-    VARS = VERBOSE NATIVE_OS NATIVE_ARCH NATIVE_HOST O_BUILD_DIR O_DIST_DIR O V HOST SKIP_DEFAULT_HOSTS_DIR HOSTS_DIRS PROJ_TYPE PROJ_NAME PROJ_VERSION DEBUG BUILD_SUBDIR DIST_SUBDIR STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL ARTIFACT LIBS DEPS PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS
-    ifneq ($(filter app lib,$(PROJ_TYPE)),)
-        VARS += SKIP_DEFAULT_SRC_DIR SRC_DIRS ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES SKIP_DEFAULT_INCLUDE_DIR INCLUDE_DIRS AS ASFLAGS EXTRA_ASFLAGS CC CFLAGS EXTRA_CFLAGS CXX CXXFLAGS EXTRA_CXXFLAGS AR ARFLAGS EXTRA_ARFLAGS LD LDFLAGS EXTRA_LDFLAGS CROSS_COMPILE
-        ifeq ($(PROJ_TYPE),lib)
-            VARS += LIB_TYPE LIB_NAME
-        endif
-    else ifeq ($(PROJ_TYPE),custom)
-        VARS += CUSTOM_CLEAN_CMD CUSTOM_BUILD_CMD
-    endif
-    VARS := $(sort $(VARS))
-endif
+VARS ?= $(sort O V VERBOSE PROJ_TYPE PROJ_NAME DEPS PROJ_VERSION DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SKIP_DEFAULT_SRC_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST SKIP_DEFAULT_HOSTS_DIR HOSTS_DIRS STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES SKIP_DEFAULT_INCLUDE_DIR INCLUDE_DIRS MK_EXTRA_INCLUDES MK_EXTRA_EVAL LIBS CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS PRE_CLEAN_DEPS CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS DIST_DEPS POST_DIST_DEPS)
 
 .PHONY: print-vars
 print-vars:
@@ -160,27 +150,25 @@ else
 endif
 # ------------------------------------------------------------------------------
 
-# Source directories (only for `app` and `lib` project types) ------------------
+# Source directories -----------------------------------------------------------
 ifneq ($(MAKECMDGOALS),deps)
-    ifneq ($(filter app lib,$(PROJ_TYPE)),)
-        SKIP_DEFAULT_SRC_DIR ?= 0
-        ifneq ($(origin SKIP_DEFAULT_SRC_DIR),file)
-            $(error [SKIP_DEFAULT_SRC_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_SRC_DIR)))
+    SKIP_DEFAULT_SRC_DIR ?= 0
+    ifneq ($(origin SKIP_DEFAULT_SRC_DIR),file)
+        $(error [SKIP_DEFAULT_SRC_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_SRC_DIR)))
+    endif
+    ifneq ($(SKIP_DEFAULT_SRC_DIR),0)
+        ifneq ($(SKIP_DEFAULT_SRC_DIR),1)
+            $(error [SKIP_DEFAULT_SRC_DIR] Invalid value: $(SKIP_DEFAULT_SRC_DIR))
         endif
-        ifneq ($(SKIP_DEFAULT_SRC_DIR),0)
-            ifneq ($(SKIP_DEFAULT_SRC_DIR),1)
-                $(error [SKIP_DEFAULT_SRC_DIR] Invalid value: $(SKIP_DEFAULT_SRC_DIR))
-            endif
+    endif
+    ifdef SRC_DIRS
+        ifneq ($(origin SRC_DIRS),file)
+            $(error [SRC_DIRS] Not defined in a makefile (origin: $(origin SRC_DIRS)))
         endif
-        ifdef SRC_DIRS
-            ifneq ($(origin SRC_DIRS),file)
-                $(error [SRC_DIRS] Not defined in a makefile (origin: $(origin SRC_DIRS)))
-            endif
-        endif
-        ifeq ($(SKIP_DEFAULT_SRC_DIR),0)
-            ifneq ($(wildcard src),)
-                SRC_DIRS += src
-            endif
+    endif
+    ifeq ($(SKIP_DEFAULT_SRC_DIR),0)
+        ifneq ($(wildcard src),)
+            SRC_DIRS += src
         endif
     endif
 endif
@@ -227,14 +215,12 @@ endif
 
 # LIB_TYPE ---------------------------------------------------------------------
 # NOTE: A host layer may have set LIB_TYPE
-ifeq ($(PROJ_TYPE),lib)
-    LIB_TYPE ?= shared
-    ifeq ($(LIB_TYPE),)
-        $(error [LIB_TYPE] Missing value)
-    endif
-    ifneq ($(call FN_INVALID_OPTION,$(LIB_TYPE),shared static),)
-        $(error [LIB_TYPE] Invalid value: $(LIB_TYPE))
-    endif
+LIB_TYPE ?= shared
+ifeq ($(LIB_TYPE),)
+    $(error [LIB_TYPE] Missing value)
+endif
+ifneq ($(call FN_INVALID_OPTION,$(LIB_TYPE),shared static),)
+    $(error [LIB_TYPE] Invalid value: $(LIB_TYPE))
 endif
 # ------------------------------------------------------------------------------
 
@@ -249,74 +235,70 @@ ifneq ($(words $(ARTIFACT)),1)
 endif
 # ------------------------------------------------------------------------------
 
-# Identify source files (only for `app` and `lib` project types) ---------------
+# Identify source files --------------------------------------------------------
 # NOTE: Source files must be searched after host layers
 ifneq ($(MAKECMDGOALS),deps)
-    ifneq ($(filter app lib,$(PROJ_TYPE)),)
-        ifdef SKIPPED_SRC_DIRS
-            ifneq ($(origin SKIPPED_SRC_DIRS),file)
-                $(error [SKIPPED_SRC_DIRS] Not defined in a makefile (origin: $(origin SKIPPED_SRC_DIRS)))
-            endif
+    ifdef SKIPPED_SRC_DIRS
+        ifneq ($(origin SKIPPED_SRC_DIRS),file)
+            $(error [SKIPPED_SRC_DIRS] Not defined in a makefile (origin: $(origin SKIPPED_SRC_DIRS)))
         endif
+    endif
 
-        ifdef SKIPPED_SRC_FILES
-            ifneq ($(origin SKIPPED_SRC_FILES),file)
-                $(error [SKIPPED_SRC_FILES] Not defined in a makefile (origin: $(origin SKIPPED_SRC_FILES)))
-            endif
+    ifdef SKIPPED_SRC_FILES
+        ifneq ($(origin SKIPPED_SRC_FILES),file)
+            $(error [SKIPPED_SRC_FILES] Not defined in a makefile (origin: $(origin SKIPPED_SRC_FILES)))
         endif
+    endif
 
-        ifdef SRC_FILES
-            ifneq ($(origin SRC_FILES),file)
-                $(error [SRC_FILES] Not defined in a makefile (origin: $(origin SRC_FILES)))
-            endif
+    ifdef SRC_FILES
+        ifneq ($(origin SRC_FILES),file)
+            $(error [SRC_FILES] Not defined in a makefile (origin: $(origin SRC_FILES)))
         endif
+    endif
 
-        SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
+    SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
 
-        # Checks if any SRC_DIR is outside CURDIR
-        $(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Invalid directory: $(srcDir))))
+    # Checks if any SRC_DIR is outside CURDIR
+    $(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Invalid directory: $(srcDir))))
 
-        project_mk_src_file_filter := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
+    project_mk_src_file_filter := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
 
-        SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f $(project_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES))
+    SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f $(project_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES))
 
-        project_mk_invalid_src_files := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
-        ifneq ($(project_mk_invalid_src_files),)
-            $(error [SRC_FILES] Unsupported source file(s): $(project_mk_invalid_src_files))
-        endif
+    project_mk_invalid_src_files := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
+    ifneq ($(project_mk_invalid_src_files),)
+        $(error [SRC_FILES] Unsupported source file(s): $(project_mk_invalid_src_files))
     endif
 endif
 # ------------------------------------------------------------------------------
 
-# Include directories (only for `app` and `lib` project types) -----------------
+# Include directories ----------------------------------------------------------
 # NOTE: Include directories must be managed after host layers
 ifneq ($(MAKECMDGOALS),deps)
-    ifneq ($(filter app lib,$(PROJ_TYPE)),)
-        SKIP_DEFAULT_INCLUDE_DIR ?= 0
-        ifneq ($(origin SKIP_DEFAULT_INCLUDE_DIR),file)
-            $(error [SKIP_DEFAULT_INCLUDE_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_INCLUDE_DIR)))
-        endif
-
-        ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
-            ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),1)
-                $(error [SKIP_DEFAULT_INCLUDE_DIR] Invalid value: $(SKIP_DEFAULT_INCLUDE_DIR))
-            endif
-        endif
-
-        ifdef INCLUDE_DIRS
-            ifneq ($(origin INCLUDE_DIRS),file)
-                $(error [INCLUDE_DIRS] Not defined in a makefile (origin: $(origin INCLUDE_DIRS)))
-            endif
-        endif
-
-        ifeq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
-            ifneq ($(wildcard include),)
-                INCLUDE_DIRS += include
-            endif
-        endif
-
-        INCLUDE_DIRS := $(strip $(SRC_DIRS) $(INCLUDE_DIRS))
+    SKIP_DEFAULT_INCLUDE_DIR ?= 0
+    ifneq ($(origin SKIP_DEFAULT_INCLUDE_DIR),file)
+        $(error [SKIP_DEFAULT_INCLUDE_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_INCLUDE_DIR)))
     endif
+
+    ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
+        ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),1)
+            $(error [SKIP_DEFAULT_INCLUDE_DIR] Invalid value: $(SKIP_DEFAULT_INCLUDE_DIR))
+        endif
+    endif
+
+    ifdef INCLUDE_DIRS
+        ifneq ($(origin INCLUDE_DIRS),file)
+            $(error [INCLUDE_DIRS] Not defined in a makefile (origin: $(origin INCLUDE_DIRS)))
+        endif
+    endif
+
+    ifeq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
+        ifneq ($(wildcard include),)
+            INCLUDE_DIRS += include
+        endif
+    endif
+
+    INCLUDE_DIRS := $(strip $(SRC_DIRS) $(INCLUDE_DIRS))
 endif
 # ------------------------------------------------------------------------------
 
@@ -342,6 +324,5 @@ $(eval $(MK_EXTRA_EVAL))
 # GCC management ---------------------------------------------------------------
 include $(project_mk_self_dir)include/builder.mk
 # ------------------------------------------------------------------------------
-
 
 endif # ifndef project_mk

@@ -216,9 +216,7 @@ ifneq ($(include_hosts_mk_include_hosts_mk_includes),)
     include $(include_hosts_mk_include_hosts_mk_includes)
 endif
 
-ifneq ($(filter app lib,$(PROJ_TYPE)),)
-    SRC_DIRS := $(SRC_DIRS) $(include_hosts_mk_hosts_src_dirs)
-endif
+SRC_DIRS := $(SRC_DIRS) $(include_hosts_mk_hosts_src_dirs)
 # ******************************************************************************
 
 endif # ifndef include_hosts_mk

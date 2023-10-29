@@ -20,57 +20,34 @@
 
 # Common definitions
 
-ifndef include_common_mk
-include_common_mk := 1
-
-# Output directory -------------------------------------------------------------
-O ?= output
-ifeq ($(O),)
-    $(error [O] Missing value)
-endif
-ifneq ($(words $(O)),1)
-    $(error [O] Value cannot have whitespaces: $(O))
-endif
-# ------------------------------------------------------------------------------
-
-# Enable/Disable verbose mode --------------------------------------------------
-V ?= 0
-ifeq ($(V),)
-    $(error [V] Missing value)
-endif
-ifneq ($(call FN_INVALID_OPTION,$(V),0 1),)
-    $(error [V] Invalid value: $(V))
-endif
-ifdef VERBOSE
-    $(error [VERBOSE] Reserved variable)
-endif
-VERBOSE := $(if $(filter 0,$(V)),@,)
-# ------------------------------------------------------------------------------
+ifndef include_gcc_mk
+include_gcc_mk := 1
 
 # Allows passing additional compiler flags via command line --------------------
-override undefine common_mk_tmp
+override undefine include_common_mk_tmp
 
-common_mk_tmp := $(ASFLAGS)
+include_common_mk_tmp := $(ASFLAGS)
 override undefine ASFLAGS
-ASFLAGS := $(common_mk_tmp)
+ASFLAGS := $(include_common_mk_tmp)
 
-common_mk_tmp := $(CFLAGS)
+include_common_mk_tmp := $(CFLAGS)
 override undefine CFLAGS
-CFLAGS := $(common_mk_tmp)
+CFLAGS := $(include_common_mk_tmp)
 
-common_mk_tmp := $(CXXFLAGS)
+include_common_mk_tmp := $(CXXFLAGS)
 override undefine CXXFLAGS
-CXXFLAGS := $(common_mk_tmp)
+CXXFLAGS := $(include_common_mk_tmp)
 
-common_mk_tmp := $(ARFLAGS)
+override ARFLAGS := $(subst r,,$(subst c,,$(subst s,,$(subst v,,$(ARFLAGS)))))
+include_common_mk_tmp := $(ARFLAGS)
 override undefine ARFLAGS
-ARFLAGS := $(common_mk_tmp)
+ARFLAGS := $(include_common_mk_tmp)
 
-common_mk_tmp := $(LDFLAGS)
+include_common_mk_tmp := $(LDFLAGS)
 override undefine LDFLAGS
-LDFLAGS := $(common_mk_tmp)
+LDFLAGS := $(include_common_mk_tmp)
 
-undefine common_mk_tmp
+undefine include_common_mk_tmp
 # ------------------------------------------------------------------------------
 
-endif # ifndef include_common_mk
+endif # ifndef include_gcc_mk
