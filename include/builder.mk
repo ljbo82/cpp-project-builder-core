@@ -30,7 +30,6 @@ endif
 override undefine include_builder_mk_libs_template1
 override undefine include_builder_mk_libs_has_lib_dir
 override undefine include_builder_mk_libs_ldflags
-override undefine include_builder_mk_libs_proj_dirs
 override undefine include_builder_mk_libs_fn_lib_name
 override undefine include_builder_mk_libs_fn_lib_dir
 override undefine include_builder_mk_libs_template
@@ -71,8 +70,7 @@ export O_LIBS_DIR ?= $(abspath $(O)/libs)
 #$(call include_builder_mk_libs_template1,<lib_name>,[lib_dir])
 define include_builder_mk_libs_template1
 include_builder_mk_libs_has_lib_dir := $$(if $$(or $$(include_builder_mk_libs_has_lib_dir),$(2)),1,)
-include_builder_mk_libs_ldflags += -l$(1)
-include_builder_mk_libs_proj_dirs := $$(strip $$(include_builder_mk_libs_proj_dirs) $(2))
+include_builder_mk_libs_ldflags += $(strip -l$(1) $(if $(2),`$(MAKE) --no-print-directory -C $(2) deps;`,))
 
 $(if $(2),PRE_BUILD_DEPS += $$(O_LIBS_DIR)/$(1).marker,)
 $(if $(2),--cpb-$(1):,)
@@ -94,13 +92,13 @@ include_builder_mk_libs_template = $(call include_builder_mk_libs_template1,$(ca
 include_builder_mk_libs_fn_template = $(eval $(call include_builder_mk_libs_template,$(1)))
 
 $(foreach lib,$(LIBS),$(call include_builder_mk_libs_fn_template,$(lib)))
+
+DEPS := $(include_builder_mk_libs_ldflags)
 ifeq ($(include_builder_mk_libs_has_lib_dir),1)
-    DEPS := $(strip $(include_builder_mk_libs_ldflags) `$(foreach lib_proj,$(strip $(include_builder_mk_libs_proj_dirs)),$$(MAKE) --no-print-directory -C $(lib_proj) deps;))`
     INCLUDE_DIRS += $(O_LIBS_DIR)/dist/include
     LDFLAGS := $(LDFLAGS) -L$(O_LIBS_DIR)/dist/lib $(DEPS)
 else
-    DEPS := $(include_builder_mk_libs_ldflags)
-    LDFLAGS := $(LDFLAGS) $(include_builder_mk_libs_ldflags)
+    LDFLAGS := $(LDFLAGS) $(DEPS)
 endif
 # ------------------------------------------------------------------------------
 
