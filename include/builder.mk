@@ -194,11 +194,11 @@ endif
 
 include_builder_mk_include_flags := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
 
-CFLAGS   := -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cflags) $(CFLAGS)
-CXXFLAGS := -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cxxflags) $(CXXFLAGS)
-ASFLAGS  := -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_asflags) $(ASFLAGS)
-ARFLAGS  := rcs $(ARFLAGS)
-LDFLAGS  := $(include_builder_mk_ldflags) $(LDFLAGS)
+CFLAGS   := $(strip -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cflags) $(CFLAGS))
+CXXFLAGS := $(strip -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cxxflags) $(CXXFLAGS))
+ASFLAGS  := $(strip -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_asflags) $(ASFLAGS))
+ARFLAGS  := $(strip rcs $(ARFLAGS))
+LDFLAGS  := $(strip $(include_builder_mk_ldflags) $(LDFLAGS))
 # ------------------------------------------------------------------------------
 
 .NOTPARALLEL:
@@ -290,22 +290,27 @@ endif
         endif
     endif
 
-$(O_BUILD_DIR)/$(ARTIFACT): $(PRE_BUILD_DEPS) $(include_builder_mk_obj_files) $(BUILD_DEPS)
-    ifeq ($(PROJ_TYPE),lib)
-        ifeq ($(LIB_TYPE),shared)
+ifneq ($(SRC_FILES),)
+    $(O_BUILD_DIR)/$(ARTIFACT): $(PRE_BUILD_DEPS) $(include_builder_mk_obj_files) $(BUILD_DEPS)
+        ifeq ($(PROJ_TYPE),lib)
+            ifeq ($(LIB_TYPE),shared)
+	            @echo [LD] $@
+	            $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(include_builder_mk_obj_files) $(LDFLAGS))
+            else ifeq ($(LIB_TYPE),static)
+	            @echo [AR] $@
+	            $(VERBOSE)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(include_builder_mk_obj_files))
+            endif
+        else ifeq ($(PROJ_TYPE),app)
 	        @echo [LD] $@
 	        $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(include_builder_mk_obj_files) $(LDFLAGS))
-        else ifeq ($(LIB_TYPE),static)
-	        @echo [AR] $@
-	        $(VERBOSE)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(include_builder_mk_obj_files))
         endif
-    else ifeq ($(PROJ_TYPE),app)
-	    @echo [LD] $@
-	    $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(include_builder_mk_obj_files) $(LDFLAGS))
-    endif
 
-.PHONY: build
-build: $(if $(SRC_FILES),--include_builder_mk_pre_build_check,) $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT),) $(POST_BUILD_DEPS) ;
+    .PHONY: build
+    build: --include_builder_mk_pre_build_check $(O_BUILD_DIR)/$(ARTIFACT) $(POST_BUILD_DEPS) ;
+else
+    .PHONY: build
+    build: $(PRE_BUILD_DEPS) $(BUILD_DEPS) $(POST_BUILD_DEPS) ;
+endif
 
 # C sources --------------------------------------------------------------------
 $(O_BUILD_DIR)/%.c$(include_builder_mk_obj_suffix): %.c
@@ -369,10 +374,12 @@ ifdef DIST_FILES
         $(error [DIST_FILES] Not defined in a makefile (origin: $(origin DIST_FILES)))
     endif
 endif
-ifeq ($(PROJ_TYPE),app)
-    include_builder_mk_dist_files := $(O_BUILD_DIR)/$(ARTIFACT):bin/$(ARTIFACT)
-else ifeq ($(PROJ_TYPE),lib)
-    include_builder_mk_dist_files := $(O_BUILD_DIR)/$(ARTIFACT):lib/$(ARTIFACT)
+ifneq ($(SRC_FILES),)
+    ifeq ($(PROJ_TYPE),app)
+        include_builder_mk_dist_files := $(O_BUILD_DIR)/$(ARTIFACT):bin/$(ARTIFACT)
+    else ifeq ($(PROJ_TYPE),lib)
+        include_builder_mk_dist_files := $(O_BUILD_DIR)/$(ARTIFACT):lib/$(ARTIFACT)
+    endif
 endif
 include_builder_mk_dist_files := $(include_builder_mk_dist_files) $(DIST_FILES)
 

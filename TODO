@@ -1,2 +1,3 @@
 Test cases
-Test case: Track recompilation upon dependency change (use touch to emulate changes)
+Test case: Track recompilation upon dependency change (use touch to emulate changes. see demos/deps)
+Test cases: no source files (see demos/deps/libB)

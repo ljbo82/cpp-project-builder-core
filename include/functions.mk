@@ -100,7 +100,7 @@ FN_SEMVER_PATCH = $(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,3)
 ifdef FN_FIND_FILES
     $(error [FN_FIND_FILES] Reserved variable)
 endif
-FN_FIND_FILES = $(shell cd $(1); find . -type f $(2) | sed 's:./::')
+FN_FIND_FILES = $(shell cd $(1) 2> /dev/null && find . -type f $(2) | sed 's:./::')
 
 # Returns the relative path between src and destination.
 # Syntax: $(call FN_REL_DIR,srcDir,destDir)
