@@ -75,7 +75,7 @@ include_builder_mk_libs_ldflags += $(strip -l$(1) $(if $(2),`$(MAKE) --no-print-
 
 $(if $(2),PRE_BUILD_DEPS += $$(include_builder_mk_o_libs_rel_dir)/$(1).marker,)
 $(if $(2),--cpb-$(1):,)
-$(if $(2),	$$(VERBOSE)$$(MAKE) -C $(2) O=$$(call FN_REL_DIR,$(2),$$(include_builder_mk_o_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=$(1).marker,)
+$(if $(2),	$$(VERBOSE)$$(MAKE) -C $(call FN_REL_DIR,$(CURDIR),$(2)) O=$$(call FN_REL_DIR,$(2),$$(include_builder_mk_o_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=$(1).marker,)
 $(if $(2),$$(include_builder_mk_o_libs_rel_dir)/$(1).marker: --cpb-$(1) ;,)
 
 endef
@@ -290,7 +290,7 @@ endif
         endif
     endif
 
-$(O_BUILD_DIR)/$(ARTIFACT): $(include_builder_mk_obj_files)
+$(O_BUILD_DIR)/$(ARTIFACT): $(PRE_BUILD_DEPS) $(include_builder_mk_obj_files) $(BUILD_DEPS)
     ifeq ($(PROJ_TYPE),lib)
         ifeq ($(LIB_TYPE),shared)
 	        @echo [LD] $@
@@ -305,7 +305,7 @@ $(O_BUILD_DIR)/$(ARTIFACT): $(include_builder_mk_obj_files)
     endif
 
 .PHONY: build
-build: $(if $(SRC_FILES),--include_builder_mk_pre_build_check,) $(PRE_BUILD_DEPS) $(BUILD_DEPS) $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT),) $(POST_BUILD_DEPS) ;
+build: $(if $(SRC_FILES),--include_builder_mk_pre_build_check,) $(if $(SRC_FILES),$(O_BUILD_DIR)/$(ARTIFACT),) $(POST_BUILD_DEPS) ;
 
 # C sources --------------------------------------------------------------------
 $(O_BUILD_DIR)/%.c$(include_builder_mk_obj_suffix): %.c
