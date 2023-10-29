@@ -27,6 +27,7 @@ ifndef project_mk
     $(error This file cannot be manually included)
 endif
 
+override undefine include_builder_mk_o_libs_rel_dir
 override undefine include_builder_mk_libs_template1
 override undefine include_builder_mk_libs_has_lib_dir
 override undefine include_builder_mk_libs_ldflags
