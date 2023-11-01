@@ -31,7 +31,6 @@ project_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
 include $(project_mk_self_dir)include/functions.mk
 include $(project_mk_self_dir)include/common.mk
-include $(project_mk_self_dir)include/gcc.mk
 
 # Checks for whitespace in CWD -------------------------------------------------
 ifneq ($(words $(shell pwd)),1)
