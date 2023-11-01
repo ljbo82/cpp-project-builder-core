@@ -110,15 +110,20 @@ ifneq ($(MAKECMDGOALS),deps) # *************************************************
 ifeq ($(origin CFLAGS),command line)
     $(error [CFLAGS] Variable cannot be defined via command line. Consider using EXTRA_CFLAGS)
 endif
+
 ifeq ($(origin CXXFLAGS),command line)
     $(error [CXXFLAGS] Variable cannot be defined via command line. Consider using EXTRA_CXXFLAGS)
 endif
+
 ifeq ($(origin ASFLAGS),command line)
     $(error [ASFLAGS] Variable cannot be defined via command line. Consider using EXTRA_ASFLAGS)
 endif
+
 ifeq ($(origin ARFLAGS),command line)
     $(error [ARFLAGS] Variable cannot be defined via command line. Consider using EXTRA_ARFLAGS)
 endif
+ARFLAGS := $(subst s,,$(subst c,,$(subst r,,$(ARFLAGS))))
+
 ifeq ($(origin LDFLAGS),command line)
     $(error [LDFLAGS] Variable cannot be defined via command line. Consider using EXTRA_LDFLAGS)
 endif
