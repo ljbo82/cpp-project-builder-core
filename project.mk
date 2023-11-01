@@ -150,26 +150,36 @@ else
 endif
 # ------------------------------------------------------------------------------
 
-# Source directories -----------------------------------------------------------
-ifneq ($(MAKECMDGOALS),deps)
-    SKIP_DEFAULT_SRC_DIR ?= 0
-    ifneq ($(origin SKIP_DEFAULT_SRC_DIR),file)
-        $(error [SKIP_DEFAULT_SRC_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_SRC_DIR)))
+# SKIP_DEFAULT_SRC_DIR ---------------------------------------------------------
+SKIP_DEFAULT_SRC_DIR ?= 0
+ifneq ($(origin SKIP_DEFAULT_SRC_DIR),file)
+    $(error [SKIP_DEFAULT_SRC_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_SRC_DIR)))
+endif
+ifneq ($(SKIP_DEFAULT_SRC_DIR),0)
+    ifneq ($(SKIP_DEFAULT_SRC_DIR),1)
+        $(error [SKIP_DEFAULT_SRC_DIR] Invalid value: $(SKIP_DEFAULT_SRC_DIR))
     endif
-    ifneq ($(SKIP_DEFAULT_SRC_DIR),0)
-        ifneq ($(SKIP_DEFAULT_SRC_DIR),1)
-            $(error [SKIP_DEFAULT_SRC_DIR] Invalid value: $(SKIP_DEFAULT_SRC_DIR))
-        endif
+endif
+ifdef SRC_DIRS
+    ifneq ($(origin SRC_DIRS),file)
+        $(error [SRC_DIRS] Not defined in a makefile (origin: $(origin SRC_DIRS)))
     endif
-    ifdef SRC_DIRS
-        ifneq ($(origin SRC_DIRS),file)
-            $(error [SRC_DIRS] Not defined in a makefile (origin: $(origin SRC_DIRS)))
-        endif
+endif
+# ------------------------------------------------------------------------------
+
+# SKIP_DEFAULT_INCLUDE_DIR -----------------------------------------------------
+SKIP_DEFAULT_INCLUDE_DIR ?= 0
+ifneq ($(origin SKIP_DEFAULT_INCLUDE_DIR),file)
+    $(error [SKIP_DEFAULT_INCLUDE_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_INCLUDE_DIR)))
+endif
+ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
+    ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),1)
+        $(error [SKIP_DEFAULT_INCLUDE_DIR] Invalid value: $(SKIP_DEFAULT_INCLUDE_DIR))
     endif
-    ifeq ($(SKIP_DEFAULT_SRC_DIR),0)
-        ifneq ($(wildcard src),)
-            SRC_DIRS += src
-        endif
+endif
+ifdef INCLUDE_DIRS
+    ifneq ($(origin INCLUDE_DIRS),file)
+        $(error [INCLUDE_DIRS] Not defined in a makefile (origin: $(origin INCLUDE_DIRS)))
     endif
 endif
 # ------------------------------------------------------------------------------
@@ -256,6 +266,12 @@ ifneq ($(MAKECMDGOALS),deps)
         endif
     endif
 
+    ifeq ($(SKIP_DEFAULT_SRC_DIR),0)
+        ifneq ($(wildcard src),)
+            SRC_DIRS := src $(SRC_DIRS)
+        endif
+    endif
+
     SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
 
     # Checks if any SRC_DIR is outside CURDIR
@@ -275,26 +291,9 @@ endif
 # Include directories ----------------------------------------------------------
 # NOTE: Include directories must be managed after host layers
 ifneq ($(MAKECMDGOALS),deps)
-    SKIP_DEFAULT_INCLUDE_DIR ?= 0
-    ifneq ($(origin SKIP_DEFAULT_INCLUDE_DIR),file)
-        $(error [SKIP_DEFAULT_INCLUDE_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_INCLUDE_DIR)))
-    endif
-
-    ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
-        ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),1)
-            $(error [SKIP_DEFAULT_INCLUDE_DIR] Invalid value: $(SKIP_DEFAULT_INCLUDE_DIR))
-        endif
-    endif
-
-    ifdef INCLUDE_DIRS
-        ifneq ($(origin INCLUDE_DIRS),file)
-            $(error [INCLUDE_DIRS] Not defined in a makefile (origin: $(origin INCLUDE_DIRS)))
-        endif
-    endif
-
     ifeq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
         ifneq ($(wildcard include),)
-            INCLUDE_DIRS += include
+            INCLUDE_DIRS := include $(INCLUDE_DIRS)
         endif
     endif
 

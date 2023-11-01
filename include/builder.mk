@@ -322,7 +322,7 @@ $(O_BUILD_DIR)/%.c$(include_builder_mk_obj_suffix): %.c
 # C++ sources ------------------------------------------------------------------
 define include_builder_mk_cxx_template =
 $(O_BUILD_DIR)/%.$(1)$(include_builder_mk_obj_suffix): %.$(1)
-	echo [CXX] $$@
+	@echo [CXX] $$@
 	@mkdir -p $$(dir $$@)
 	$(VERBOSE)$(CROSS_COMPILE)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
 endef
