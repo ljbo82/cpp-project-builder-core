@@ -20,14 +20,12 @@
 
 # Linux host standard definitions
 
-ifndef hosts_linux_mk
-hosts_linux_mk := 1
+ifndef hosts_linux_host_mk
+hosts_linux_host_mk := 1
 
 ifndef project_mk
     $(error This file cannot be manually included)
 endif
-
-override undefine hosts_linux_mk_target_base_name
 
 ifeq ($(PROJ_TYPE),app)
     ifndef ARTIFACT
@@ -37,14 +35,13 @@ else ifeq ($(PROJ_TYPE),lib)
     LIB_TYPE ?= shared
     LIB_NAME ?= $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
     ifndef ARTIFACT
-        hosts_linux_mk_target_base_name := lib$(LIB_NAME)
         ifeq ($(LIB_TYPE),static)
-            ARTIFACT := $(hosts_linux_mk_target_base_name).a
+            ARTIFACT := lib$(LIB_NAME).a
         endif
         ifeq ($(LIB_TYPE),shared)
-            ARTIFACT := $(hosts_linux_mk_target_base_name).so
+            ARTIFACT := lib$(LIB_NAME).so
         endif
     endif
 endif
 
-endif # ifndef hosts_linux_mk
+endif # ifndef hosts_linux_host_mk

@@ -20,8 +20,8 @@
 
 # Windows host standard definitions
 
-ifndef hosts_windows_mk
-hosts_windows_mk := 1
+ifndef hosts_windows_host_mk
+hosts_windows_host_mk := 1
 
 ifndef project_mk
     $(error This file cannot be manually included)
@@ -60,4 +60,4 @@ ifneq ($(filter app lib,$(PROJ_TYPE)),)
 	endif
 endif
 
-endif #hosts_windows_mk
+endif #hosts_windows_host_mk
