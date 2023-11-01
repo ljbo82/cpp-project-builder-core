@@ -122,7 +122,7 @@ endif
 ifeq ($(origin ARFLAGS),command line)
     $(error [ARFLAGS] Variable cannot be defined via command line. Consider using EXTRA_ARFLAGS)
 endif
-ARFLAGS := $(subst s,,$(subst c,,$(subst r,,$(ARFLAGS))))
+ARFLAGS := $(subst v,,$(subst r,,$(ARFLAGS)))
 
 ifeq ($(origin LDFLAGS),command line)
     $(error [LDFLAGS] Variable cannot be defined via command line. Consider using EXTRA_LDFLAGS)
