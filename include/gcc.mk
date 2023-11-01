@@ -24,30 +24,28 @@ ifndef include_gcc_mk
 include_gcc_mk := 1
 
 # Allows passing additional compiler flags via command line --------------------
-override undefine include_common_mk_tmp
+override undefine include_gcc_mk_tmp
 
-include_common_mk_tmp := $(ASFLAGS)
+include_gcc_mk_tmp := $(ASFLAGS)
 override undefine ASFLAGS
-ASFLAGS := $(include_common_mk_tmp)
+ASFLAGS := $(include_gcc_mk_tmp)
 
-include_common_mk_tmp := $(CFLAGS)
+include_gcc_mk_tmp := $(CFLAGS)
 override undefine CFLAGS
-CFLAGS := $(include_common_mk_tmp)
+CFLAGS := $(include_gcc_mk_tmp)
 
-include_common_mk_tmp := $(CXXFLAGS)
+include_gcc_mk_tmp := $(CXXFLAGS)
 override undefine CXXFLAGS
-CXXFLAGS := $(include_common_mk_tmp)
+CXXFLAGS := $(include_gcc_mk_tmp)
 
 override ARFLAGS := $(subst r,,$(subst c,,$(subst s,,$(subst v,,$(ARFLAGS)))))
-include_common_mk_tmp := $(ARFLAGS)
+include_gcc_mk_tmp := $(ARFLAGS)
 override undefine ARFLAGS
-ARFLAGS := $(include_common_mk_tmp)
+ARFLAGS := $(include_gcc_mk_tmp)
 
-include_common_mk_tmp := $(LDFLAGS)
+include_gcc_mk_tmp := $(LDFLAGS)
 override undefine LDFLAGS
-LDFLAGS := $(include_common_mk_tmp)
-
-undefine include_common_mk_tmp
+LDFLAGS := $(include_gcc_mk_tmp)
 # ------------------------------------------------------------------------------
 
 endif # ifndef include_gcc_mk

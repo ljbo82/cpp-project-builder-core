@@ -47,30 +47,4 @@ endif
 VERBOSE := $(if $(filter 0,$(V)),@,)
 # ------------------------------------------------------------------------------
 
-# Allows passing additional compiler flags via command line --------------------
-override undefine common_mk_tmp
-
-common_mk_tmp := $(ASFLAGS)
-override undefine ASFLAGS
-ASFLAGS := $(common_mk_tmp)
-
-common_mk_tmp := $(CFLAGS)
-override undefine CFLAGS
-CFLAGS := $(common_mk_tmp)
-
-common_mk_tmp := $(CXXFLAGS)
-override undefine CXXFLAGS
-CXXFLAGS := $(common_mk_tmp)
-
-common_mk_tmp := $(ARFLAGS)
-override undefine ARFLAGS
-ARFLAGS := $(common_mk_tmp)
-
-common_mk_tmp := $(LDFLAGS)
-override undefine LDFLAGS
-LDFLAGS := $(common_mk_tmp)
-
-undefine common_mk_tmp
-# ------------------------------------------------------------------------------
-
 endif # ifndef include_common_mk
