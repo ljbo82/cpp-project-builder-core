@@ -31,6 +31,7 @@ project_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
 include $(project_mk_self_dir)include/functions.mk
 include $(project_mk_self_dir)include/common.mk
+include $(project_mk_self_dir)include/native.mk
 
 # Checks for whitespace in CWD -------------------------------------------------
 ifneq ($(words $(shell pwd)),1)
@@ -183,7 +184,7 @@ ifdef INCLUDE_DIRS
 endif
 # ------------------------------------------------------------------------------
 
-# Manages target host ----------------------------------------------------------
+# Manages host layers ----------------------------------------------------------
 include $(project_mk_self_dir)include/hosts.mk
 # ------------------------------------------------------------------------------
 
