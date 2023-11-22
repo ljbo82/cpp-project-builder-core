@@ -68,26 +68,29 @@ endif
 export include_builder_mk_o_libs_dir ?= $(abspath $(O)/libs)
 include_builder_mk_o_libs_rel_dir =$(call FN_REL_DIR,$(CURDIR),$(include_builder_mk_o_libs_dir))
 
-#$(call include_builder_mk_libs_template1,<lib_name>,[lib_dir])
+#$(call include_builder_mk_libs_template1,<lib_name>,[lib_dir],[host])
 define include_builder_mk_libs_template1
 include_builder_mk_libs_has_lib_dir := $$(if $$(or $$(include_builder_mk_libs_has_lib_dir),$(2)),1,)
-include_builder_mk_libs_ldflags += $(strip -l$(1) $(if $(2),`$(MAKE) --no-print-directory -C $(call FN_REL_DIR,$(CURDIR),$(2)) deps;`,))
+include_builder_mk_libs_ldflags += $(strip -l$(1) $(if $(2),`$(MAKE) --no-print-directory -C $(call FN_REL_DIR,$(CURDIR),$(2)) deps$(if $(3), HOST=$(3),);`,))
 
 $(if $(2),PRE_BUILD_DEPS += $$(include_builder_mk_o_libs_rel_dir)/$(1).marker,)
 $(if $(2),--cpb-$(1):,)
-$(if $(2),	$$(VERBOSE)$$(MAKE) -C $(call FN_REL_DIR,$(CURDIR),$(2)) O=$$(call FN_REL_DIR,$(2),$$(include_builder_mk_o_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=$(1).marker,)
+$(if $(2),	$$(VERBOSE)$$(MAKE) -C $(call FN_REL_DIR,$(CURDIR),$(2)) O=$$(call FN_REL_DIR,$(2),$$(include_builder_mk_o_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=$(1).marker$(if $(3), HOST=$(3),),)
 $(if $(2),$$(include_builder_mk_o_libs_rel_dir)/$(1).marker: --cpb-$(1) ;,)
 
 endef
 
 # $(call include_builder_mk_libs_fn_lib_name,<lib_entry>)
-include_builder_mk_libs_fn_lib_name = $(word 1, $(subst :, ,$(1)))
+include_builder_mk_libs_fn_lib_name = $(word 1,$(subst :, ,$(1)))
 
 # $(call include_builder_mk_libs_fn_lib_dir,<lib_entry>)
-include_builder_mk_libs_fn_lib_dir = $(word 2, $(subst :, ,$(1)))
+include_builder_mk_libs_fn_lib_dir = $(word 2,$(subst :, ,$(1)))
+
+# $(call include_builder_mk_libs_fn_lib_host,<lib_entry>)
+include_builder_mk_libs_fn_lib_host = $(word 3,$(subst :, ,$(1)))
 
 # $(call include_builder_mk_libs_template,<lib_entry>)
-include_builder_mk_libs_template = $(call include_builder_mk_libs_template1,$(call include_builder_mk_libs_fn_lib_name,$(1)),$(call include_builder_mk_libs_fn_lib_dir,$(1)))
+include_builder_mk_libs_template = $(call include_builder_mk_libs_template1,$(call include_builder_mk_libs_fn_lib_name,$(1)),$(call include_builder_mk_libs_fn_lib_dir,$(1)),$(call include_builder_mk_libs_fn_lib_host,$(1)))
 
 # $(call include_builder_mk_libs_fn_template,<lib_entry>)
 include_builder_mk_libs_fn_template = $(eval $(call include_builder_mk_libs_template,$(1)))
