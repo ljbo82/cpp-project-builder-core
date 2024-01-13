@@ -40,21 +40,15 @@ endif
 # ------------------------------------------------------------------------------
 
 # Project type -----------------------------------------------------------------
-ifeq ($(PROJ_TYPE),)
-    $(error [PROJ_TYPE] Missing value)
-endif
 $(call FN_CHECK_ORIGIN,PROJ_TYPE,file)
+$(call FN_CHECK_NON_EMPTY,PROJ_TYPE)
 $(call FN_CHECK_WORDS,PROJ_TYPE,app lib)
 # ------------------------------------------------------------------------------
 
 # Project name -----------------------------------------------------------------
-ifeq ($(PROJ_NAME),)
-    $(error [PROJ_NAME] Missing value)
-endif
 $(call FN_CHECK_ORIGIN,PROJ_NAME,file)
-ifneq ($(words $(PROJ_NAME)),1)
-    $(error [PROJ_NAME] Value cannot have whitespaces: $(PROJ_NAME))
-endif
+$(call FN_CHECK_NON_EMPTY,PROJ_NAME)
+$(call FN_CHECK_NO_WHITESPACE,PROJ_NAME)
 # ------------------------------------------------------------------------------
 
 # deps =========================================================================
@@ -80,9 +74,7 @@ VARS ?= $(sort O V VERBOSE PROJ_TYPE PROJ_NAME DEPS PROJ_VERSION DEBUG BUILD_SUB
 
 .PHONY: print-vars
 print-vars:
-    ifeq ($(VARS),)
-	    $(error [VARS] Missing value)
-    endif
+	$(call FN_CHECK_NON_EMPTY,VARS)
 	$(foreach varName,$(VARS),$(info $(varName) = $($(varName))))
 	@printf ''
 # ==============================================================================
@@ -90,9 +82,7 @@ print-vars:
 # Project version --------------------------------------------------------------
 PROJ_VERSION ?= 0.1.0
 $(call FN_CHECK_ORIGIN,PROJ_VERSION,file)
-ifeq ($(PROJ_VERSION),)
-    $(error [PROJ_VERSION] Missing value)
-endif
+$(call FN_CHECK_NON_EMPTY,PROJ_VERSION)
 ifeq ($(call FN_SEMVER_CHECK,$(PROJ_VERSION)),)
     $(error [PROJ_VERSION] Invalid semantic version: $(PROJ_VERSION))
 endif
@@ -100,17 +90,13 @@ endif
 
 # Debug / release --------------------------------------------------------------
 DEBUG ?= 0
-ifeq ($(DEBUG),)
-    $(error [DEBUG] Missing value)
-endif
+$(call FN_CHECK_NON_EMPTY,DEBUG)
 $(call FN_CHECK_WORDS,DEBUG,0 1)
 # ------------------------------------------------------------------------------
 
 # Build sub-directory ----------------------------------------------------------
 ifneq ($(BUILD_SUBDIR),)
-    ifneq ($(words $(BUILD_SUBDIR)),1)
-        $(error [BUILD_SUBDIR] Value cannot have whitespaces: $(BUILD_SUBDIR))
-    endif
+    $(call FN_CHECK_NO_WHITESPACE,BUILD_SUBDIR)
     $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(BUILD_SUBDIR)),,$(error [BUILD_SUBDIR] Invalid path: $(BUILD_SUBDIR)))
 endif
 ifdef O_BUILD_DIR
@@ -125,9 +111,7 @@ endif
 
 # Distribution sub-directory ---------------------------------------------------
 ifneq ($(DIST_SUBDIR),)
-    ifneq ($(words $(DIST_SUBDIR)),1)
-        $(error [DIST_SUBDIR] Value cannot have whitespaces: $(DIST_SUBDIR))
-    endif
+    $(call FN_CHECK_NO_WHITESPACE,DIST_SUBDIR)
     $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(DIST_SUBDIR)),,$(error [DIST_SUBDIR] Invalid path: $(DIST_SUBDIR)))
 endif
 ifdef O_DIST_DIR
@@ -186,21 +170,15 @@ endif
 # LIB_TYPE ---------------------------------------------------------------------
 # NOTE: A host layer may have set LIB_TYPE
 LIB_TYPE ?= shared
-ifeq ($(LIB_TYPE),)
-    $(error [LIB_TYPE] Missing value)
-endif
+$(call FN_CHECK_NON_EMPTY,LIB_TYPE)
 $(call FN_CHECK_WORDS,LIB_TYPE,shared static)
 # ------------------------------------------------------------------------------
 
 # ARTIFACT ---------------------------------------------------------------------
 # NOTE: A host layer may have set ARTIFACT
 ARTIFACT ?= a.out
-ifeq ($(ARTIFACT),)
-    $(error [ARTIFACT] Missing value)
-endif
-ifneq ($(words $(ARTIFACT)),1)
-    $(error [ARTIFACT] Value cannot have whitespaces: $(ARTIFACT))
-endif
+$(call FN_CHECK_NON_EMPTY,ARTIFACT)
+$(call FN_CHECK_NO_WHITESPACE,ARTIFACT)
 # ------------------------------------------------------------------------------
 
 # Identify source files --------------------------------------------------------

@@ -23,21 +23,21 @@
 ifndef include_common_mk
 include_common_mk := 1
 
+override undefine include_common_mk_self_dir
+
+include_common_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+
+include $(include_common_mk_self_dir)functions.mk
+
 # Output directory -------------------------------------------------------------
 O ?= output
-ifeq ($(O),)
-    $(error [O] Missing value)
-endif
-ifneq ($(words $(O)),1)
-    $(error [O] Value cannot have whitespaces: $(O))
-endif
+$(call FN_CHECK_NON_EMPTY,O)
+$(call FN_CHECK_NO_WHITESPACE,O)
 # ------------------------------------------------------------------------------
 
 # Enable/Disable verbose mode --------------------------------------------------
 V ?= 0
-ifeq ($(V),)
-    $(error [V] Missing value)
-endif
+$(call FN_CHECK_NON_EMPTY,V)
 $(call FN_CHECK_WORDS,V,0 1)
 ifdef VERBOSE
     $(error [VERBOSE] Reserved variable)

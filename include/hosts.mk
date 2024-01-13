@@ -44,13 +44,8 @@ ifndef HOST
     endif
 endif
 
-ifeq ($(HOST),)
-    $(error [HOST] Missing value)
-else
-    ifneq ($(words $(HOST)),1)
-       $(error [HOST] Value cannot have whitespaces: $(HOST))
-    endif
-endif
+$(call FN_CHECK_NON_EMPTY,HOST)
+$(call FN_CHECK_NO_WHITESPACE,HOST)
 
 SKIP_DEFAULT_HOSTS_DIR ?= 0
 $(call FN_CHECK_NON_EMPTY,SKIP_DEFAULT_INCLUDE_DIR)

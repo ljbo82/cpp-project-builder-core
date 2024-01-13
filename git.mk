@@ -23,14 +23,15 @@
 ifndef git_mk
 git_mk := 1
 
-GIT_REPO_DIR ?= .
-ifeq ($(GIT_REPO_DIR),)
-    $(error [GIT_REPO_DIR] Missing value)
-endif
+override undefine git_mk_self_dir
 
-ifneq ($(words $(GIT_REPO_DIR)),1)
-    $(error [GIT_REPO_DIR] Value cannot have whitespaces: $(GIT_REPO_DIR))
-endif
+git_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+
+include $(git_mk_self_dir)include/functions.mk
+
+GIT_REPO_DIR ?= .
+$(call FN_CHECK_NON_EMPTY,GIT_REPO_DIR)
+$(call FN_CHECK_NO_WHITESPACE,GIT_REPO_DIR)
 
 git_mk_repo_available := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1 && echo y)
 ifneq ($(git_mk_repo_available),)

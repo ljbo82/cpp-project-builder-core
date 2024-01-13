@@ -133,32 +133,32 @@ endif
 AS ?= as
 ifeq ($(origin AS),default)
     AS := as
-else ifeq ($(AS),)
-    $(error [AS] Missing value)
+else
+    $(call FN_CHECK_NON_EMPTY,AS)
 endif
 
 # CC
 CC ?= gcc
 ifeq ($(origin CC),default)
     CC := gcc
-else ifeq ($(CC),)
-    $(error [CC] Missing value)
+else
+    $(call FN_CHECK_NON_EMPTY,CC)
 endif
 
 # CXX
 CXX ?= g++
 ifeq ($(origin CXX),default)
     CXX := g++
-else ifeq ($(CXX),)
-    $(error [CXX] Missing value)
+else
+    $(call FN_CHECK_NON_EMPTY,CXX)
 endif
 
 # AR
 AR ?= ar
 ifeq ($(origin AR),default)
     AR := ar
-else ifeq ($(AR),)
-    $(error [AR] Missing value)
+else
+    $(call FN_CHECK_NON_EMPTY,AR)
 endif
 
 # LD
@@ -181,9 +181,9 @@ endif
 
 LD ?= $(include_builder_mk_ld)
 ifeq ($(origin LD),default)
-	LD := $(include_builder_mk_ld)
-else ifeq ($(LD),)
-	$(error [LD] Missing value)
+    LD := $(include_builder_mk_ld)
+else
+    $(call FN_CHECK_NON_EMPTY,LD)
 endif
 
 include_builder_mk_cflags += -Wall
@@ -359,9 +359,7 @@ $(eval $(call include_builder_mk_as_template,S))
 
 # dist =========================================================================
 ifneq ($(DIST_MARKER),)
-    ifneq ($(words $(DIST_MARKER)),1)
-        $(error [DIST_MARKER] Value cannot have whitespaces: $(DIST_MARKER))
-    endif
+    $(call FN_CHECK_NO_WHITESPACE,DIST_MARKER)
     $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(DIST_MARKER)),,$(error [DIST_MARKER] Invalid path: $(DIST_MARKER)))
 endif
 ifdef DIST_DIRS

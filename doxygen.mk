@@ -23,17 +23,16 @@
 ifndef doxygen_mk
 doxygen_mk := 1
 
-include $(dir $(lastword $(MAKEFILE_LIST)))include/common.mk
-include $(dir $(lastword $(MAKEFILE_LIST)))include/functions.mk
+override undefine doxygen_mk_self_dir
+
+doxygen_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+
+include $(doxygen_mk_self_dir)include/common.mk
 
 # Doc src/output directories----------------------------------------------------
 DOC_DIR ?= doc
-ifneq ($(words $(DOC_DIR)),1)
-    $(error [DOC_DIR] Value cannot have whitespaces: $(DOC_DIR))
-endif
-ifeq ($(DOC_DIR),)
-    $(error [DOC_DIR] Missing value)
-endif
+$(call FN_CHECK_NON_EMPTY,DOC_DIR)
+$(call FN_CHECK_NO_WHITESPACE,DOC_DIR)
 ifdef O_DOC_DIR
     $(error [O_DOC_DIR] Reserved variable)
 endif
@@ -42,12 +41,8 @@ O_DOC_DIR := $(O)/doc
 
 # Doxyfile definition ----------------------------------------------------------
 DOXYFILE ?= Doxyfile
-ifeq ($(DOXYFILE),)
-    $(error [DOXYFILE] Missing value)
-endif
-ifneq ($(words $(DOXYFILE)),1)
-    $(error [DOXYFILE] Value cannot have whitespaces: $(DOXYFILE))
-endif
+$(call FN_CHECK_NON_EMPTY,DOXYFILE)
+$(call FN_CHECK_NO_WHITESPACE,DOXYFILE)
 # ------------------------------------------------------------------------------
 
 # doc ==========================================================================
