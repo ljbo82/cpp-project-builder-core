@@ -48,14 +48,6 @@ ifdef FN_EQ
     $(error [FN_EQ] Reserved variable)
 endif
 FN_EQ = $(and $(findstring $(1),$(2)),$(findstring $(2),$(1)))
-
-# Get an unexpected or invalid option
-#
-# Syntax: $(call FN_INVALID_OPTION,options,accepted_options)
-ifdef FN_INVALID_OPTION
-    $(error [FN_INVALID_OPTION] Reserved variable)
-endif
-FN_INVALID_OPTION=$(or $(word 2,$(1)),$(filter-out $(2),$(1)))
 # ------------------------------------------------------------------------------
 
 # Semantic version functions ---------------------------------------------------
@@ -109,7 +101,7 @@ ifdef FN_REL_DIR
 endif
 FN_REL_DIR = $(shell realpath -m --relative-to=$(1) $(2))
 
-# Check if a path is inside a directory (on success, returns the path,
+# Checks if a path is inside a directory (on success, returns the path,
 # otherwise returns an empty value).
 #
 # Syntax $(call FN_IS_INSIDE_DIR,dir,path)
@@ -121,7 +113,7 @@ FN_IS_INSIDE_DIR = $(filter $(abspath $(1)) $(abspath $(1)/%),$(abspath $(2)))
 
 # Makefile utils ---------------------------------------------------------------
 
-# Check if the origin of a variable matches with an expected value. If matching
+# Checks if the origin of a variable matches with an expected value. If matching
 # fails, throws an error.
 #
 # Syntax $(call FN_CHECK_ORIGIN,varName,expectedOrigin)
@@ -129,6 +121,14 @@ ifdef FN_CHECK_ORIGIN
     $(error [FN_CHECK_ORIGIN] Reserved variable)
 endif
 FN_CHECK_ORIGIN = $(if $(call FN_EQ,$(origin $(1)),$(2)),,$(error [$(1)] Unexpected origin: "$(origin $(1))" (expected: "$(2)")))
+
+# Checks for an unexpected/invalid words.
+#
+# Syntax: $(call FN_CHECK_WORDS,varName,accepted_words)
+ifdef FN_CHECK_WORDS
+    $(error [FN_CHECK_WORDS] Reserved variable)
+endif
+FN_CHECK_WORDS=$(if $(or $(word 2,$($(1))),$(filter-out $(2),$($(1)))),$(error [$(1)] Invalid value: $($(1))),)
 # ------------------------------------------------------------------------------
 
 

@@ -38,9 +38,7 @@ V ?= 0
 ifeq ($(V),)
     $(error [V] Missing value)
 endif
-ifneq ($(call FN_INVALID_OPTION,$(V),0 1),)
-    $(error [V] Invalid value: $(V))
-endif
+$(call FN_CHECK_WORDS,V,0 1)
 ifdef VERBOSE
     $(error [VERBOSE] Reserved variable)
 endif

@@ -44,9 +44,7 @@ ifeq ($(PROJ_TYPE),)
     $(error [PROJ_TYPE] Missing value)
 endif
 $(call FN_CHECK_ORIGIN,PROJ_TYPE,file)
-ifneq ($(call FN_INVALID_OPTION,$(PROJ_TYPE),app lib),)
-    $(error [PROJ_TYPE] Invalid value: $(PROJ_TYPE))
-endif
+$(call FN_CHECK_WORDS,PROJ_TYPE,app lib)
 # ------------------------------------------------------------------------------
 
 # Project name -----------------------------------------------------------------
@@ -105,9 +103,7 @@ DEBUG ?= 0
 ifeq ($(DEBUG),)
     $(error [DEBUG] Missing value)
 endif
-ifneq ($(call FN_INVALID_OPTION,$(DEBUG),0 1),)
-    $(error [DEBUG] Invalid value: $(DEBUG))
-endif
+$(call FN_CHECK_WORDS,DEBUG,0 1)
 # ------------------------------------------------------------------------------
 
 # Build sub-directory ----------------------------------------------------------
@@ -211,9 +207,7 @@ LIB_TYPE ?= shared
 ifeq ($(LIB_TYPE),)
     $(error [LIB_TYPE] Missing value)
 endif
-ifneq ($(call FN_INVALID_OPTION,$(LIB_TYPE),shared static),)
-    $(error [LIB_TYPE] Invalid value: $(LIB_TYPE))
-endif
+$(call FN_CHECK_WORDS,LIB_TYPE,shared static)
 # ------------------------------------------------------------------------------
 
 # ARTIFACT ---------------------------------------------------------------------
