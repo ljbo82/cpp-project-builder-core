@@ -71,10 +71,10 @@ define include_builder_mk_libs_template1
 include_builder_mk_libs_has_lib_dir := $$(if $$(or $$(include_builder_mk_libs_has_lib_dir),$(2)),1,)
 include_builder_mk_libs_ldflags += $(strip -l$(1) $(if $(2),`$(MAKE) --no-print-directory -C $(call FN_REL_DIR,$(CURDIR),$(2)) deps$(if $(3), HOST=$(3),);`,))
 
-$(if $(2),PRE_BUILD_DEPS += $$(include_builder_mk_o_libs_rel_dir)/$(1).marker,)
+$(if $(2),PRE_BUILD_DEPS += $$(include_builder_mk_o_libs_rel_dir)/.$(1),)
 $(if $(2),--cpb-$(1):,)
-$(if $(2),	$$(VERBOSE)$$(MAKE) -C $(call FN_REL_DIR,$(CURDIR),$(2)) O=$$(call FN_REL_DIR,$(2),$$(include_builder_mk_o_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=$(1).marker$(if $(3), HOST=$(3),),)
-$(if $(2),$$(include_builder_mk_o_libs_rel_dir)/$(1).marker: --cpb-$(1) ;,)
+$(if $(2),	$$(VERBOSE)$$(MAKE) -C $(call FN_REL_DIR,$(CURDIR),$(2)) O=$$(call FN_REL_DIR,$(2),$$(include_builder_mk_o_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=.$(1)$(if $(3), HOST=$(3),),)
+$(if $(2),$$(include_builder_mk_o_libs_rel_dir)/.$(1): --cpb-$(1) ;,)
 
 endef
 
