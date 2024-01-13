@@ -116,13 +116,14 @@ FN_IS_INSIDE_DIR = $(filter $(abspath $(1)) $(abspath $(1)/%),$(abspath $(2)))
 # Checks if the origin of a variable matches with an expected value. If matching
 # fails, throws an error.
 #
-# Syntax $(call FN_CHECK_ORIGIN,varName,expectedOrigin)
+# Syntax $(call FN_CHECK_ORIGIN,varName,expectedOrigin[,errorMessage])
 ifdef FN_CHECK_ORIGIN
     $(error [FN_CHECK_ORIGIN] Reserved variable)
 endif
-FN_CHECK_ORIGIN = $(if $(call FN_EQ,$(origin $(1)),$(2)),,$(error [$(1)] Unexpected origin: "$(origin $(1))" (expected: "$(2)")))
+FN_CHECK_ORIGIN = $(if $(call FN_EQ,$(origin $(1)),$(2)),,$(error [$(1)] $(if $(3),$(3),Unexpected origin: "$(origin $(1))" (expected: "$(2)"))))
 
-# Checks for an unexpected/invalid words.
+# Checks for an unexpected/invalid words. If an invalid word is found,
+# throws an error.
 #
 # Syntax: $(call FN_CHECK_WORDS,varName,accepted_words[,errorMessage])
 ifdef FN_CHECK_WORDS
@@ -130,7 +131,8 @@ ifdef FN_CHECK_WORDS
 endif
 FN_CHECK_WORDS=$(if $(or $(word 2,$($(1))),$(filter-out $(2),$($(1)))),$(error [$(1)] $(if $(3),$(3),Invalid value: $($(1)))),)
 
-# Checks for a non-empty variable.
+# Checks for a non-empty variable. If the value of $(varName) is empty, throws
+# an error.
 #
 # Syntax: $(call FN_CHECK_NON_EMPTY,varName[,errorMessage])
 ifdef FN_CHECK_NON_EMPTY
@@ -138,7 +140,8 @@ ifdef FN_CHECK_NON_EMPTY
 endif
 FN_CHECK_NON_EMPTY=$(if $(strip $($(1))),,$(error [$(1)] $(if $(2),$(2),Missing value)))
 
-# Checks for a no whitespaces in a variable's value.
+# Checks if whitespaces are found in an expected non-whitespace variable.
+# If a whitespace is found in $(varName), throws an error.
 #
 # Syntax: $(call FN_CHECK_NO_WHITESPACE,varName[,errorMessage])
 ifdef FN_CHECK_NO_WHITESPACE
