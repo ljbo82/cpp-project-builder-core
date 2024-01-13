@@ -144,7 +144,7 @@ FN_CHECK_NON_EMPTY=$(if $(strip $($(1))),,$(error [$(1)] $(if $(2),$(2),Missing 
 ifdef FN_CHECK_NO_WHITESPACE
     $(error [FN_CHECK_NO_WHITESPACE] Reserved variable)
 endif
-FN_CHECK_NO_WHITESPACE=$(if $(call FN_EQ,0,$(words $($(1)))),,$(error [$(1)] $(if $(2),$(2),Value cannot have whitespaces: "$($(1))")))
+FN_CHECK_NO_WHITESPACE=$(if $(call FN_EQ,0,$(words $($(1)))),,$(if $(call FN_EQ,1,$(words $($(1)))),,$(error [$(1)] $(if $(2),$(2),Value cannot have whitespaces: "$($(1))"))))
 # ------------------------------------------------------------------------------
 
 endif # ifndef include_functions_mk
