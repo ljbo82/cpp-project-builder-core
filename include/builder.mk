@@ -56,9 +56,7 @@ override undefine include_builder_mk_dist_deps
 
 # Libs -------------------------------------------------------------------------
 ifdef LIBS
-    ifneq ($(origin LIBS),file)
-        $(error [LIBS] Not defined in a makefile (origin: $(origin LIBS)))
-    endif
+    $(call FN_CHECK_ORIGIN,LIBS,file)
 endif
 
 ifdef DEPS
@@ -236,19 +234,13 @@ all: dist ;
 
 # clean ========================================================================
 ifdef PRE_CLEAN_DEPS
-    ifneq ($(origin PRE_CLEAN_DEPS),file)
-        $(error [PRE_CLEAN_DEPS] Not defined in a makefile (origin: $(origin PRE_CLEAN_DEPS)))
-    endif
+    $(call FN_CHECK_ORIGIN,PRE_CLEAN_DEPS,file)
 endif
 ifdef CLEAN_DEPS
-    ifneq ($(origin CLEAN_DEPS),file)
-        $(error [CLEAN_DEPS] Not defined in a makefile (origin: $(origin CLEAN_DEPS)))
-    endif
+    $(call FN_CHECK_ORIGIN,CLEAN_DEPS,file)
 endif
 ifdef POST_CLEAN_DEPS
-    ifneq ($(origin POST_CLEAN_DEPS),file)
-        $(error [POST_CLEAN_DEPS] Not defined in a makefile (origin: $(origin POST_CLEAN_DEPS)))
-    endif
+    $(call FN_CHECK_ORIGIN,POST_CLEAN_DEPS,file)
 endif
 
 .PHONY: --include_builder_mk_pre_clean
@@ -267,19 +259,13 @@ clean: --include_builder_mk_post_clean ;
 
 # build ========================================================================
 ifdef PRE_BUILD_DEPS
-    ifneq ($(origin PRE_BUILD_DEPS),file)
-        $(error [PRE_BUILD_DEPS] Not defined in a makefile (origin: $(origin PRE_BUILD_DEPS)))
-    endif
+    $(call FN_CHECK_ORIGIN,PRE_BUILD_DEPS,file)
 endif
 ifdef BUILD_DEPS
-    ifneq ($(origin BUILD_DEPS),file)
-        $(error [BUILD_DEPS] Not defined in a makefile (origin: $(origin BUILD_DEPS)))
-    endif
+    $(call FN_CHECK_ORIGIN,BUILD_DEPS,file)
 endif
 ifdef POST_BUILD_DEPS
-    ifneq ($(origin POST_BUILD_DEPS),file)
-        $(error [POST_BUILD_DEPS] Not defined in a makefile (origin: $(origin POST_BUILD_DEPS)))
-    endif
+    $(call FN_CHECK_ORIGIN,POST_BUILD_DEPS,file)
 endif
 
 ifeq ($(PROJ_TYPE),lib)
@@ -379,9 +365,7 @@ ifneq ($(DIST_MARKER),)
     $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(DIST_MARKER)),,$(error [DIST_MARKER] Invalid path: $(DIST_MARKER)))
 endif
 ifdef DIST_DIRS
-    ifneq ($(origin DIST_DIRS),file)
-        $(error [DIST_DIRS] Not defined in a makefile (origin: $(origin DIST_DIRS)))
-    endif
+    $(call FN_CHECK_ORIGIN,DIST_DIRS,file)
 endif
 ifeq ($(PROJ_TYPE),lib)
     ifeq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
@@ -394,9 +378,7 @@ endif
 include_builder_mk_dist_dirs := $(include_builder_mk_dist_dirs) $(DIST_DIRS)
 
 ifdef DIST_FILES
-    ifneq ($(origin DIST_FILES),file)
-        $(error [DIST_FILES] Not defined in a makefile (origin: $(origin DIST_FILES)))
-    endif
+    $(call FN_CHECK_ORIGIN,DIST_FILES,file)
 endif
 ifneq ($(SRC_FILES),)
     ifeq ($(PROJ_TYPE),app)
@@ -441,19 +423,13 @@ endef
 $(foreach distFileEntry,$(include_builder_mk_dist_files),$(eval $(call include_builder_mk_dist_deps_template,$(call FN_TOKEN,$(distFileEntry),:,1),$(call FN_TOKEN,$(distFileEntry),:,2))))
 
 ifdef PRE_DIST_DEPS
-    ifneq ($(origin PRE_DIST_DEPS),file)
-        $(error [PRE_DIST_DEPS] Not defined in a makefile (origin: $(origin PRE_DIST_DEPS)))
-    endif
+    $(call FN_CHECK_ORIGIN,PRE_DIST_DEPS,file)
 endif
 ifdef DIST_DEPS
-    ifneq ($(origin DIST_DEPS),file)
-        $(error [DIST_DEPS] Not defined in a makefile (origin: $(origin DIST_DEPS)))
-    endif
+    $(call FN_CHECK_ORIGIN,DIST_DEPS,file)
 endif
 ifdef POST_DIST_DEPS
-    ifneq ($(origin POST_DIST_DEPS),file)
-        $(error [POST_DIST_DEPS] Not defined in a makefile (origin: $(origin POST_DIST_DEPS)))
-    endif
+    $(call FN_CHECK_ORIGIN,POST_DIST_DEPS,file)
 endif
 
 --include_builder_mk_pre_dist: build $(PRE_DIST_DEPS) ;

@@ -24,6 +24,7 @@ ifndef doxygen_mk
 doxygen_mk := 1
 
 include $(dir $(lastword $(MAKEFILE_LIST)))include/common.mk
+include $(dir $(lastword $(MAKEFILE_LIST)))include/functions.mk
 
 # Doc src/output directories----------------------------------------------------
 DOC_DIR ?= doc
@@ -51,14 +52,10 @@ endif
 
 # doc ==========================================================================
 ifdef PRE_DOC_DEPS
-    ifneq ($(origin PRE_DOC_DEPS),file)
-        $(error [PRE_DOC_DEPS] Not defined in a makefile (origin: $(origin PRE_DOC_DEPS)))
-    endif
+    $(call FN_CHECK_ORIGIN,PRE_DOC_DEPS,file)
 endif
 ifdef POST_DOC_DEPS
-    ifneq ($(origin POST_DOC_DEPS),file)
-        $(error [POST_DOC_DEPS] Not defined in a makefile (origin: $(origin POST_DOC_DEPS)))
-    endif
+    $(call FN_CHECK_ORIGIN,POST_DOC_DEPS,file)
 endif
 
 .PHONY: --doxygen_mk_pre_doc

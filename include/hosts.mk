@@ -53,18 +53,14 @@ else
 endif
 
 SKIP_DEFAULT_HOSTS_DIR ?= 0
-ifneq ($(origin SKIP_DEFAULT_HOSTS_DIR),file)
-    $(error [SKIP_DEFAULT_HOSTS_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_HOSTS_DIR)))
-endif
+$(call FN_CHECK_ORIGIN,SKIP_DEFAULT_HOSTS_DIR,file)
 ifneq ($(SKIP_DEFAULT_HOSTS_DIR),0)
     ifneq ($(SKIP_DEFAULT_HOSTS_DIR),1)
         $(error [SKIP_DEFAULT_HOSTS_DIR] Invalid value: $(SKIP_DEFAULT_HOSTS_DIR))
     endif
 endif
 ifdef $(HOSTS_DIRS)
-    ifneq ($(origin HOSTS_DIRS),file)
-        $(error [HOSTS_DIRS] Not defined in a makefile (origin: $(origin HOSTS_DIRS)))
-    endif
+    $(call FN_CHECK_ORIGIN,HOSTS_DIRS,file)
 endif
 ifeq ($(SKIP_DEFAULT_HOSTS_DIR),0)
     ifneq ($(wildcard hosts),)

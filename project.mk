@@ -43,9 +43,7 @@ endif
 ifeq ($(PROJ_TYPE),)
     $(error [PROJ_TYPE] Missing value)
 endif
-ifneq ($(origin PROJ_TYPE),file)
-    $(error [PROJ_TYPE] Not defined in a makefile (origin: $(origin PROJ_TYPE)))
-endif
+$(call FN_CHECK_ORIGIN,PROJ_TYPE,file)
 ifneq ($(call FN_INVALID_OPTION,$(PROJ_TYPE),app lib),)
     $(error [PROJ_TYPE] Invalid value: $(PROJ_TYPE))
 endif
@@ -55,9 +53,7 @@ endif
 ifeq ($(PROJ_NAME),)
     $(error [PROJ_NAME] Missing value)
 endif
-ifneq ($(origin PROJ_NAME),file)
-    $(error [PROJ_NAME] Not defined in a makefile (origin: $(origin PROJ_NAME)))
-endif
+$(call FN_CHECK_ORIGIN,PROJ_NAME,file)
 ifneq ($(words $(PROJ_NAME)),1)
     $(error [PROJ_NAME] Value cannot have whitespaces: $(PROJ_NAME))
 endif
@@ -95,9 +91,7 @@ print-vars:
 
 # Project version --------------------------------------------------------------
 PROJ_VERSION ?= 0.1.0
-ifneq ($(origin PROJ_VERSION),file)
-    $(error [PROJ_VERSION] Not defined in a makefile (origin: $(origin PROJ_VERSION)))
-endif
+$(call FN_CHECK_ORIGIN,PROJ_VERSION,file)
 ifeq ($(PROJ_VERSION),)
     $(error [PROJ_VERSION] Missing value)
 endif
@@ -152,35 +146,27 @@ endif
 
 # SKIP_DEFAULT_SRC_DIR ---------------------------------------------------------
 SKIP_DEFAULT_SRC_DIR ?= 0
-ifneq ($(origin SKIP_DEFAULT_SRC_DIR),file)
-    $(error [SKIP_DEFAULT_SRC_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_SRC_DIR)))
-endif
+$(call FN_CHECK_ORIGIN,SKIP_DEFAULT_SRC_DIR,file)
 ifneq ($(SKIP_DEFAULT_SRC_DIR),0)
     ifneq ($(SKIP_DEFAULT_SRC_DIR),1)
         $(error [SKIP_DEFAULT_SRC_DIR] Invalid value: $(SKIP_DEFAULT_SRC_DIR))
     endif
 endif
 ifdef SRC_DIRS
-    ifneq ($(origin SRC_DIRS),file)
-        $(error [SRC_DIRS] Not defined in a makefile (origin: $(origin SRC_DIRS)))
-    endif
+    $(call FN_CHECK_ORIGIN,SRC_DIRS,file)
 endif
 # ------------------------------------------------------------------------------
 
 # SKIP_DEFAULT_INCLUDE_DIR -----------------------------------------------------
 SKIP_DEFAULT_INCLUDE_DIR ?= 0
-ifneq ($(origin SKIP_DEFAULT_INCLUDE_DIR),file)
-    $(error [SKIP_DEFAULT_INCLUDE_DIR] Not defined in a makefile (origin: $(origin SKIP_DEFAULT_INCLUDE_DIR)))
-endif
+$(call FN_CHECK_ORIGIN,SKIP_DEFAULT_INCLUDE_DIR,file)
 ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
     ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),1)
         $(error [SKIP_DEFAULT_INCLUDE_DIR] Invalid value: $(SKIP_DEFAULT_INCLUDE_DIR))
     endif
 endif
 ifdef INCLUDE_DIRS
-    ifneq ($(origin INCLUDE_DIRS),file)
-        $(error [INCLUDE_DIRS] Not defined in a makefile (origin: $(origin INCLUDE_DIRS)))
-    endif
+    $(call FN_CHECK_ORIGIN,INCLUDE_DIRS,file)
 endif
 # ------------------------------------------------------------------------------
 
@@ -191,9 +177,7 @@ include $(project_mk_self_dir)include/hosts.mk
 # Strips release build ---------------------------------------------------------
 # NOTE: A host layer may have set STRIP_RELEASE
 STRIP_RELEASE ?= 1
-ifneq ($(origin STRIP_RELEASE),file)
-    $(error [STRIP_RELEASE] Not defined in a makefile (origin: $(origin STRIP_RELEASE)))
-endif
+$(call FN_CHECK_ORIGIN,STRIP_RELEASE,file)
 ifeq ($(STRIP_RELEASE),)
     $(error [STRIP_RELEASE] Missing value)
 endif
@@ -207,9 +191,7 @@ endif
 # Optimizes release build ------------------------------------------------------
 # NOTE: A host layer may have set OPTIMIZE_RELEASE and RELEASE_OPTIMIZATION_LEVEL
 OPTIMIZE_RELEASE ?= 1
-ifneq ($(origin OPTIMIZE_RELEASE),file)
-    $(error [OPTIMIZE_RELEASE] Not defined in a makefile (origin: $(origin OPTIMIZE_RELEASE)))
-endif
+$(call FN_CHECK_ORIGIN,OPTIMIZE_RELEASE,file)
 ifeq ($(OPTIMIZE_RELEASE),)
     $(error [OPTIMIZE_RELEASE] Missing value)
 endif
@@ -249,21 +231,15 @@ endif
 # NOTE: Source files must be searched after host layers
 ifneq ($(MAKECMDGOALS),deps)
     ifdef SKIPPED_SRC_DIRS
-        ifneq ($(origin SKIPPED_SRC_DIRS),file)
-            $(error [SKIPPED_SRC_DIRS] Not defined in a makefile (origin: $(origin SKIPPED_SRC_DIRS)))
-        endif
+        $(call FN_CHECK_ORIGIN,SKIPPED_SRC_DIRS,file)
     endif
 
     ifdef SKIPPED_SRC_FILES
-        ifneq ($(origin SKIPPED_SRC_FILES),file)
-            $(error [SKIPPED_SRC_FILES] Not defined in a makefile (origin: $(origin SKIPPED_SRC_FILES)))
-        endif
+        $(call FN_CHECK_ORIGIN,SKIPPED_SRC_FILES,file)
     endif
 
     ifdef SRC_FILES
-        ifneq ($(origin SRC_FILES),file)
-            $(error [SRC_FILES] Not defined in a makefile (origin: $(origin SRC_FILES)))
-        endif
+        $(call FN_CHECK_ORIGIN,SRC_FILES,file)
     endif
 
     ifeq ($(SKIP_DEFAULT_SRC_DIR),0)
@@ -303,21 +279,16 @@ endif
 
 # MK_EXTRA_INCLUDES ----------------------------------------------------------------
 ifneq ($(MK_EXTRA_INCLUDES),)
-    ifneq ($(origin MK_EXTRA_INCLUDES),file)
-        $(error [MK_EXTRA_INCLUDES] Not defined in a makefile (origin: $(origin MK_EXTRA_INCLUDES)))
-    endif
+    $(call FN_CHECK_ORIGIN,MK_EXTRA_INCLUDES,file)
     include $(MK_EXTRA_INCLUDES)
 endif
 # ------------------------------------------------------------------------------
 
 # MK_EXTRA_EVAL --------------------------------------------------------------------
 ifdef MK_EXTRA_EVAL
-    ifneq ($(origin MK_EXTRA_EVAL),file)
-        $(error [MK_EXTRA_EVAL] Not defined in a makefile (origin: $(origin MK_EXTRA_EVAL)))
-    endif
+    $(call FN_CHECK_ORIGIN,MK_EXTRA_EVAL,file)
+    $(eval $(MK_EXTRA_EVAL))
 endif
-
-$(eval $(MK_EXTRA_EVAL))
 # ------------------------------------------------------------------------------
 
 # GCC management ---------------------------------------------------------------

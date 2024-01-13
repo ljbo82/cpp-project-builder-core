@@ -119,4 +119,17 @@ endif
 FN_IS_INSIDE_DIR = $(filter $(abspath $(1)) $(abspath $(1)/%),$(abspath $(2)))
 # ------------------------------------------------------------------------------
 
+# Makefile utils ---------------------------------------------------------------
+
+# Check if the origin of a variable matches with an expected value. If matching
+# fails, throws an error.
+#
+# Syntax $(call FN_CHECK_ORIGIN,varName,expectedOrigin)
+ifdef FN_CHECK_ORIGIN
+    $(error [FN_CHECK_ORIGIN] Reserved variable)
+endif
+FN_CHECK_ORIGIN = $(if $(call FN_EQ,$(origin $(1)),$(2)),,$(error [$(1)] Unexpected origin: "$(origin $(1))" (expected: "$(2)")))
+# ------------------------------------------------------------------------------
+
+
 endif # ifndef include_functions_mk
