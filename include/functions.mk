@@ -124,11 +124,11 @@ FN_CHECK_ORIGIN = $(if $(call FN_EQ,$(origin $(1)),$(2)),,$(error [$(1)] Unexpec
 
 # Checks for an unexpected/invalid words.
 #
-# Syntax: $(call FN_CHECK_WORDS,varName,accepted_words)
+# Syntax: $(call FN_CHECK_WORDS,varName,accepted_words[,errorMessage])
 ifdef FN_CHECK_WORDS
     $(error [FN_CHECK_WORDS] Reserved variable)
 endif
-FN_CHECK_WORDS=$(if $(or $(word 2,$($(1))),$(filter-out $(2),$($(1)))),$(error [$(1)] Invalid value: $($(1))),)
+FN_CHECK_WORDS=$(if $(or $(word 2,$($(1))),$(filter-out $(2),$($(1)))),$(error [$(1)] $(if $(3),$(3),Invalid value: $($(1)))),)
 
 # Checks for a non-empty variable.
 #
