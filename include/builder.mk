@@ -109,24 +109,24 @@ ifneq ($(MAKECMDGOALS),deps) # *************************************************
 
 # Compiler management ----------------------------------------------------------
 ifeq ($(origin CFLAGS),command line)
-    $(error [CFLAGS] Variable cannot be defined via command line. Consider using EXTRA_CFLAGS)
+    $(error [CFLAGS] Variable cannot be defined via command line)
 endif
 
 ifeq ($(origin CXXFLAGS),command line)
-    $(error [CXXFLAGS] Variable cannot be defined via command line. Consider using EXTRA_CXXFLAGS)
+    $(error [CXXFLAGS] Variable cannot be defined via command line)
 endif
 
 ifeq ($(origin ASFLAGS),command line)
-    $(error [ASFLAGS] Variable cannot be defined via command line. Consider using EXTRA_ASFLAGS)
+    $(error [ASFLAGS] Variable cannot be defined via command line)
 endif
 
 ifeq ($(origin ARFLAGS),command line)
-    $(error [ARFLAGS] Variable cannot be defined via command line. Consider using EXTRA_ARFLAGS)
+    $(error [ARFLAGS] Variable cannot be defined via command line)
 endif
 ARFLAGS := $(subst v,,$(subst r,,$(ARFLAGS)))
 
 ifeq ($(origin LDFLAGS),command line)
-    $(error [LDFLAGS] Variable cannot be defined via command line. Consider using EXTRA_LDFLAGS)
+    $(error [LDFLAGS] Variable cannot be defined via command line)
 endif
 
 # AS
@@ -216,11 +216,11 @@ endif
 
 include_builder_mk_include_flags := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
 
-CFLAGS   := $(strip -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cflags) $(CFLAGS) $(EXTRA_CFLAGS))
-CXXFLAGS := $(strip -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cxxflags) $(CXXFLAGS) $(EXTRA_CXXFLAGS))
-ASFLAGS  := $(strip -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_asflags) $(ASFLAGS) $(EXTRA_ASFLAGS))
-ARFLAGS  := $(strip rcs $(ARFLAGS) $(EXTRA_ARFLAGS))
-LDFLAGS  := $(strip $(include_builder_mk_ldflags) $(LDFLAGS) $(EXTRA_LDFLAGS))
+CFLAGS   := $(strip -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cflags) $(CFLAGS))
+CXXFLAGS := $(strip -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_cxxflags) $(CXXFLAGS))
+ASFLAGS  := $(strip -MMD -MP $(include_builder_mk_include_flags) $(include_builder_mk_asflags) $(ASFLAGS))
+ARFLAGS  := $(strip rcs $(ARFLAGS))
+LDFLAGS  := $(strip $(include_builder_mk_ldflags) $(LDFLAGS))
 # ------------------------------------------------------------------------------
 
 .NOTPARALLEL:
