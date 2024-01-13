@@ -143,11 +143,8 @@ endif
 # SKIP_DEFAULT_SRC_DIR ---------------------------------------------------------
 SKIP_DEFAULT_SRC_DIR ?= 0
 $(call FN_CHECK_ORIGIN,SKIP_DEFAULT_SRC_DIR,file)
-ifneq ($(SKIP_DEFAULT_SRC_DIR),0)
-    ifneq ($(SKIP_DEFAULT_SRC_DIR),1)
-        $(error [SKIP_DEFAULT_SRC_DIR] Invalid value: $(SKIP_DEFAULT_SRC_DIR))
-    endif
-endif
+$(call FN_CHECK_NON_EMPTY,SKIP_DEFAULT_SRC_DIR)
+$(call FN_CHECK_WORDS,SKIP_DEFAULT_SRC_DIR,0 1)
 ifdef SRC_DIRS
     $(call FN_CHECK_ORIGIN,SRC_DIRS,file)
 endif
@@ -156,11 +153,8 @@ endif
 # SKIP_DEFAULT_INCLUDE_DIR -----------------------------------------------------
 SKIP_DEFAULT_INCLUDE_DIR ?= 0
 $(call FN_CHECK_ORIGIN,SKIP_DEFAULT_INCLUDE_DIR,file)
-ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
-    ifneq ($(SKIP_DEFAULT_INCLUDE_DIR),1)
-        $(error [SKIP_DEFAULT_INCLUDE_DIR] Invalid value: $(SKIP_DEFAULT_INCLUDE_DIR))
-    endif
-endif
+$(call FN_CHECK_NON_EMPTY,SKIP_DEFAULT_INCLUDE_DIR)
+$(call FN_CHECK_WORDS,SKIP_DEFAULT_INCLUDE_DIR,0 1)
 ifdef INCLUDE_DIRS
     $(call FN_CHECK_ORIGIN,INCLUDE_DIRS,file)
 endif
@@ -174,28 +168,16 @@ include $(project_mk_self_dir)include/hosts.mk
 # NOTE: A host layer may have set STRIP_RELEASE
 STRIP_RELEASE ?= 1
 $(call FN_CHECK_ORIGIN,STRIP_RELEASE,file)
-ifeq ($(STRIP_RELEASE),)
-    $(error [STRIP_RELEASE] Missing value)
-endif
-ifneq ($(STRIP_RELEASE),0)
-    ifneq ($(STRIP_RELEASE),1)
-        $(error [STRIP_RELEASE] Invalid value: $(STRIP_RELEASE))
-    endif
-endif
+$(call FN_CHECK_NON_EMPTY,STRIP_RELEASE)
+$(call FN_CHECK_WORDS,STRIP_RELEASE,0 1)
 # ------------------------------------------------------------------------------
 
 # Optimizes release build ------------------------------------------------------
 # NOTE: A host layer may have set OPTIMIZE_RELEASE and RELEASE_OPTIMIZATION_LEVEL
 OPTIMIZE_RELEASE ?= 1
 $(call FN_CHECK_ORIGIN,OPTIMIZE_RELEASE,file)
-ifeq ($(OPTIMIZE_RELEASE),)
-    $(error [OPTIMIZE_RELEASE] Missing value)
-endif
-ifneq ($(OPTIMIZE_RELEASE),0)
-    ifneq ($(OPTIMIZE_RELEASE),1)
-        $(error [OPTIMIZE_RELEASE] Invalid value: $(OPTIMIZE_RELEASE))
-    endif
-endif
+$(call FN_CHECK_NON_EMPTY,OPTIMIZE_RELEASE)
+$(call FN_CHECK_WORDS,OPTIMIZE_RELEASE,0 1)
 ifneq ($(OPTIMIZE_RELEASE),0)
     RELEASE_OPTIMIZATION_LEVEL ?= 2
 endif

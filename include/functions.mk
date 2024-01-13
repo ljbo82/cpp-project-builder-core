@@ -129,7 +129,14 @@ ifdef FN_CHECK_WORDS
     $(error [FN_CHECK_WORDS] Reserved variable)
 endif
 FN_CHECK_WORDS=$(if $(or $(word 2,$($(1))),$(filter-out $(2),$($(1)))),$(error [$(1)] Invalid value: $($(1))),)
-# ------------------------------------------------------------------------------
 
+# Checks for a non-empty variable.
+#
+# Syntax: $(call FN_CHECK_NON_EMPTY,varName)
+ifdef FN_CHECK_NON_EMPTY
+    $(error [FN_CHECK_NON_EMPTY] Reserved variable)
+endif
+FN_CHECK_NON_EMPTY=$(if $(strip $($(1))),,$(error [$(1)] Missing value))
+# ------------------------------------------------------------------------------
 
 endif # ifndef include_functions_mk
