@@ -33,7 +33,6 @@ ifeq ($(PROJ_TYPE),app)
     endif
 else ifeq ($(PROJ_TYPE),lib)
     LIB_TYPE ?= shared
-    LIB_NAME ?= $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
     ifndef ARTIFACT
         ifeq ($(LIB_TYPE),static)
             ARTIFACT := lib$(LIB_NAME).a

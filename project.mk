@@ -39,16 +39,29 @@ ifneq ($(words $(shell pwd)),1)
 endif
 # ------------------------------------------------------------------------------
 
-# Project type -----------------------------------------------------------------
-$(call FN_CHECK_ORIGIN,PROJ_TYPE,file)
-$(call FN_CHECK_NON_EMPTY,PROJ_TYPE)
-$(call FN_CHECK_WORDS,PROJ_TYPE,app lib)
-# ------------------------------------------------------------------------------
-
 # Project name -----------------------------------------------------------------
 $(call FN_CHECK_ORIGIN,PROJ_NAME,file)
 $(call FN_CHECK_NON_EMPTY,PROJ_NAME)
 $(call FN_CHECK_NO_WHITESPACE,PROJ_NAME)
+# ------------------------------------------------------------------------------
+
+# Project version --------------------------------------------------------------
+PROJ_VERSION ?= 0.1.0
+$(call FN_CHECK_ORIGIN,PROJ_VERSION,file)
+$(call FN_CHECK_NON_EMPTY,PROJ_VERSION)
+ifeq ($(call FN_SEMVER_CHECK,$(PROJ_VERSION)),)
+    $(error [PROJ_VERSION] Invalid semantic version: $(PROJ_VERSION))
+endif
+# ------------------------------------------------------------------------------
+
+# Project type -----------------------------------------------------------------
+$(call FN_CHECK_ORIGIN,PROJ_TYPE,file)
+$(call FN_CHECK_NON_EMPTY,PROJ_TYPE)
+$(call FN_CHECK_WORDS,PROJ_TYPE,app lib)
+
+ifeq ($(PROJ_TYPE),lib)
+    LIB_NAME ?= $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
+endif
 # ------------------------------------------------------------------------------
 
 # deps =========================================================================
@@ -70,7 +83,7 @@ ifneq ($(filter print-vars,$(MAKECMDGOALS)),)
     endif
 endif
 
-VARS ?= $(sort O V VERBOSE PROJ_TYPE PROJ_NAME DEPS PROJ_VERSION DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SKIP_DEFAULT_SRC_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST SKIP_DEFAULT_HOSTS_DIR HOSTS_DIRS STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES SKIP_DEFAULT_INCLUDE_DIR INCLUDE_DIRS POST_INCLUDES POST_EVAL LIBS CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS PRE_CLEAN_DEPS CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS DIST_DEPS POST_DIST_DEPS)
+VARS ?= $(sort O V VERBOSE PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEPS DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SKIP_DEFAULT_SRC_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST SKIP_DEFAULT_HOSTS_DIR HOSTS_DIRS STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES SKIP_DEFAULT_INCLUDE_DIR INCLUDE_DIRS POST_INCLUDES POST_EVAL LIBS CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS PRE_CLEAN_DEPS CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS DIST_DEPS POST_DIST_DEPS)
 
 .PHONY: print-vars
 print-vars:
@@ -79,14 +92,7 @@ print-vars:
 	@printf ''
 # ==============================================================================
 
-# Project version --------------------------------------------------------------
-PROJ_VERSION ?= 0.1.0
-$(call FN_CHECK_ORIGIN,PROJ_VERSION,file)
-$(call FN_CHECK_NON_EMPTY,PROJ_VERSION)
-ifeq ($(call FN_SEMVER_CHECK,$(PROJ_VERSION)),)
-    $(error [PROJ_VERSION] Invalid semantic version: $(PROJ_VERSION))
-endif
-# ------------------------------------------------------------------------------
+
 
 # Debug / release --------------------------------------------------------------
 DEBUG ?= 0
