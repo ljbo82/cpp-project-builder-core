@@ -70,7 +70,7 @@ ifneq ($(filter print-vars,$(MAKECMDGOALS)),)
     endif
 endif
 
-VARS ?= $(sort O V VERBOSE PROJ_TYPE PROJ_NAME DEPS PROJ_VERSION DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SKIP_DEFAULT_SRC_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST SKIP_DEFAULT_HOSTS_DIR HOSTS_DIRS STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES SKIP_DEFAULT_INCLUDE_DIR INCLUDE_DIRS MK_EXTRA_INCLUDES MK_EXTRA_EVAL LIBS CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS PRE_CLEAN_DEPS CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS DIST_DEPS POST_DIST_DEPS EXTRA_CFLAGS EXTRA_CXXFLAGS EXTRA_ASFLAGS EXTRA_ARFLAGS EXTRA_LDFLAGS)
+VARS ?= $(sort O V VERBOSE PROJ_TYPE PROJ_NAME DEPS PROJ_VERSION DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SKIP_DEFAULT_SRC_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST SKIP_DEFAULT_HOSTS_DIR HOSTS_DIRS STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES SKIP_DEFAULT_INCLUDE_DIR INCLUDE_DIRS POST_INCLUDES POST_EVAL LIBS CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS PRE_CLEAN_DEPS CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS DIST_DEPS POST_DIST_DEPS EXTRA_CFLAGS EXTRA_CXXFLAGS EXTRA_ASFLAGS EXTRA_ARFLAGS EXTRA_LDFLAGS)
 
 .PHONY: print-vars
 print-vars:
@@ -182,7 +182,7 @@ $(call FN_CHECK_NO_WHITESPACE,ARTIFACT)
 # ------------------------------------------------------------------------------
 
 # Identify source files --------------------------------------------------------
-# NOTE: Source files must be searched after host layers
+# NOTE: A host layer could have added source directories.
 ifneq ($(MAKECMDGOALS),deps)
     ifdef SKIPPED_SRC_DIRS
         $(call FN_CHECK_ORIGIN,SKIPPED_SRC_DIRS,file)
@@ -219,7 +219,7 @@ endif
 # ------------------------------------------------------------------------------
 
 # Include directories ----------------------------------------------------------
-# NOTE: Include directories must be managed after host layers
+# NOTE: Include directories could have added directories.
 ifneq ($(MAKECMDGOALS),deps)
     ifeq ($(SKIP_DEFAULT_INCLUDE_DIR),0)
         ifneq ($(wildcard include),)
@@ -231,17 +231,17 @@ ifneq ($(MAKECMDGOALS),deps)
 endif
 # ------------------------------------------------------------------------------
 
-# MK_EXTRA_INCLUDES ----------------------------------------------------------------
-ifneq ($(MK_EXTRA_INCLUDES),)
-    $(call FN_CHECK_ORIGIN,MK_EXTRA_INCLUDES,file)
-    include $(MK_EXTRA_INCLUDES)
+# POST_INCLUDES ----------------------------------------------------------------
+ifneq ($(POST_INCLUDES),)
+    $(call FN_CHECK_ORIGIN,POST_INCLUDES,file)
+    include $(POST_INCLUDES)
 endif
 # ------------------------------------------------------------------------------
 
-# MK_EXTRA_EVAL --------------------------------------------------------------------
-ifdef MK_EXTRA_EVAL
-    $(call FN_CHECK_ORIGIN,MK_EXTRA_EVAL,file)
-    $(eval $(MK_EXTRA_EVAL))
+# POST_EVAL --------------------------------------------------------------------
+ifdef POST_EVAL
+    $(call FN_CHECK_ORIGIN,POST_EVAL,file)
+    $(eval $(POST_EVAL))
 endif
 # ------------------------------------------------------------------------------
 
