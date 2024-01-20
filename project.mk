@@ -57,6 +57,7 @@ endif
 # Project type -----------------------------------------------------------------
 $(call FN_CHECK_ORIGIN,PROJ_TYPE,file)
 $(call FN_CHECK_NON_EMPTY,PROJ_TYPE)
+$(call FN_CHECK_NO_WHITESPACE,PROJ_TYPE)
 $(call FN_CHECK_WORDS,PROJ_TYPE,app lib)
 
 ifeq ($(PROJ_TYPE),lib)

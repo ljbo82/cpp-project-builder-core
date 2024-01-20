@@ -23,7 +23,24 @@
 ifndef include_functions_mk
 include_functions_mk := 1
 
+override undefine include_functions_mk_token_prefix
+
+include_functions_mk_token_prefix := __?__
+
+
 # Text functions ---------------------------------------------------------------
+
+# Splits a string into tokens.
+#
+# Since in makefiles empty tokens can be ignored, a token prefix can be
+# used to force split of empty tokens (afterwards token prefix shall be
+# removed).
+#
+# Syntax: $(call FN_SPLIT,baseString,delimiter,tokenPrefix=$(include_functions_mk_token_prefix)
+ifdef FN_SPLIT
+    $(error [FN_SPLIT] Reserved variable)
+endif
+FN_SPLIT = $(subst $(2), $(if $(3),$(3),$(include_functions_mk_token_prefix)),$(if $(3),$(3),$(include_functions_mk_token_prefix))$(1))
 
 # Returns a token on delimited string.
 #
@@ -31,7 +48,7 @@ include_functions_mk := 1
 ifdef FN_TOKEN
     $(error [FN_TOKEN] Reserved variable)
 endif
-FN_TOKEN = $(word $(3),$(subst $(2), ,$(1)))
+FN_TOKEN = $(subst $(include_functions_mk_token_prefix),,$(word $(3),$(call FN_SPLIT,$(1),$(2))))
 
 # Removes duplicate words without sorting.
 #
@@ -52,12 +69,14 @@ FN_EQ = $(and $(findstring $(1),$(2)),$(findstring $(2),$(1)))
 
 # Semantic version functions ---------------------------------------------------
 
-# Checks if a semantic version string is valid (returns the string if valid, otherwise returns an empty value).
+# Checks if a semantic version string is valid (returns the string if valid,
+# otherwise returns an empty string).
+#
 # Syntax: $(call FN_SEMVER_CHECK,semanticVersion)
 ifdef FN_SEMVER_CHECK
     $(error [FN_SEMVER_CHECK] Reserved variable)
 endif
-FN_SEMVER_CHECK = $(if $(filter-out 1 2 3,$(words $(subst ., ,$(1)))),,$(1))
+FN_SEMVER_CHECK = $(if $(filter-out 1 2 3,$(words $(call FN_SPLIT,$(1),.))),,$(1))
 
 # Returns the major component for given version.
 #
