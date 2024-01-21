@@ -40,23 +40,23 @@ endif
 # ------------------------------------------------------------------------------
 
 # Project name -----------------------------------------------------------------
-$(call FN_CHECK_ORIGIN,PROJ_NAME,file)
 $(call FN_CHECK_NON_EMPTY,PROJ_NAME)
+$(call FN_CHECK_ORIGIN,PROJ_NAME,file)
 $(call FN_CHECK_NO_WHITESPACE,PROJ_NAME)
 # ------------------------------------------------------------------------------
 
 # Project version --------------------------------------------------------------
 PROJ_VERSION ?= 0.1.0
-$(call FN_CHECK_ORIGIN,PROJ_VERSION,file)
 $(call FN_CHECK_NON_EMPTY,PROJ_VERSION)
+$(call FN_CHECK_ORIGIN,PROJ_VERSION,file)
 ifeq ($(call FN_SEMVER_CHECK,$(PROJ_VERSION)),)
     $(error [PROJ_VERSION] Invalid semantic version: $(PROJ_VERSION))
 endif
 # ------------------------------------------------------------------------------
 
 # Project type -----------------------------------------------------------------
-$(call FN_CHECK_ORIGIN,PROJ_TYPE,file)
 $(call FN_CHECK_NON_EMPTY,PROJ_TYPE)
+$(call FN_CHECK_ORIGIN,PROJ_TYPE,file)
 $(call FN_CHECK_NO_WHITESPACE,PROJ_TYPE)
 $(call FN_CHECK_WORDS,PROJ_TYPE,app lib)
 
@@ -93,11 +93,10 @@ print-vars:
 	@printf ''
 # ==============================================================================
 
-
-
 # Debug / release --------------------------------------------------------------
 DEBUG ?= 0
 $(call FN_CHECK_NON_EMPTY,DEBUG)
+$(call FN_CHECK_NO_WHITESPACE,DEBUG)
 $(call FN_CHECK_WORDS,DEBUG,0 1)
 # ------------------------------------------------------------------------------
 
