@@ -125,7 +125,7 @@ ifdef O_DIST_DIR
 else
     O_DIST_DIR := $(O)/dist
     ifneq ($(DIST_SUBDIR),)
-        O_DIST_DIR := $(DIST_SUBDIR)/$(DIST_SUBDIR)
+        O_DIST_DIR := $(O_DIST_DIR)/$(DIST_SUBDIR)
     endif
 endif
 # ------------------------------------------------------------------------------
