@@ -134,21 +134,23 @@ endif
 SKIP_DEFAULT_SRC_DIR ?= 0
 $(call FN_CHECK_ORIGIN,SKIP_DEFAULT_SRC_DIR,file)
 $(call FN_CHECK_NON_EMPTY,SKIP_DEFAULT_SRC_DIR)
+$(call FN_CHECK_NO_WHITESPACE,SKIP_DEFAULT_SRC_DIR)
 $(call FN_CHECK_WORDS,SKIP_DEFAULT_SRC_DIR,0 1)
+# ------------------------------------------------------------------------------
 ifdef SRC_DIRS
     $(call FN_CHECK_ORIGIN,SRC_DIRS,file)
 endif
-# ------------------------------------------------------------------------------
 
 # SKIP_DEFAULT_INCLUDE_DIR -----------------------------------------------------
 SKIP_DEFAULT_INCLUDE_DIR ?= 0
 $(call FN_CHECK_ORIGIN,SKIP_DEFAULT_INCLUDE_DIR,file)
 $(call FN_CHECK_NON_EMPTY,SKIP_DEFAULT_INCLUDE_DIR)
+$(call FN_CHECK_NO_WHITESPACE,SKIP_DEFAULT_INCLUDE_DIR)
 $(call FN_CHECK_WORDS,SKIP_DEFAULT_INCLUDE_DIR,0 1)
+# ------------------------------------------------------------------------------
 ifdef INCLUDE_DIRS
     $(call FN_CHECK_ORIGIN,INCLUDE_DIRS,file)
 endif
-# ------------------------------------------------------------------------------
 
 # Manages host layers ----------------------------------------------------------
 include $(project_mk_self_dir)include/hosts.mk
