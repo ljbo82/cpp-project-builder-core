@@ -62,7 +62,7 @@ endif
 	    $(error [DOXYFILE] File not found: $(DOXYFILE))
     else
 	    @mkdir -p $(O_DOC_DIR)
-	    $(VERBOSE)(cat $(DOXYFILE)$(foreach arg,$(strip OUTPUT_DIRECTORY=$(O_DOC_DIR) $(DOXYARGS)),; echo cat $(arg))) | doxygen -
+	    $(VERBOSE)(cat $(DOXYFILE)$(foreach arg,$(strip OUTPUT_DIRECTORY=$(O_DOC_DIR) $(DOXYARGS)),; echo "$(arg)")) | doxygen -
     endif
 
 .PHONY: --doxygen_mk_post_doc
