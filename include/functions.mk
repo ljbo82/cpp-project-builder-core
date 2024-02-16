@@ -65,6 +65,25 @@ ifdef FN_EQ
     $(error [FN_EQ] Reserved variable)
 endif
 FN_EQ = $(and $(findstring $(1),$(2)),$(findstring $(2),$(1)))
+
+# Reverses a list of words.
+#
+# Syntax: $(call FN_REVERSE,word1 word2 ...)
+ifdef FN_REVERSE
+    $(error [FN_REVERSE] Reserved variable)
+endif
+FN_REVERSE = $(strip $(if $(1),$(call FN_REVERSE,$(wordlist 2,$(words $(1)),$(1)))) $(firstword $(1)))
+
+# Factorizes a host string (used to decompose host string into compatible layers).
+#
+# Syntax: $(call FN_HOST_FACTORIZE,factorized_string,[delimiter=-],[replacements=delimiter])
+ifdef FN_HOST_FACTORIZE
+    $(error [FN_HOST_FACTORIZE] Reserved variable)
+endif
+ifdef FN_HOST_FACTORIZE_previous
+    $(error [FN_HOST_FACTORIZE_previous] Reserved variable)
+endif
+FN_HOST_FACTORIZE = $(foreach token,$(subst $(if $(2),$(2),-), ,$(1)),$(eval FN_HOST_FACTORIZE_previous=$(if $(FN_HOST_FACTORIZE_previous),$(FN_HOST_FACTORIZE_previous)$(if $(3),$(3),$(if $(2),$(2),-))$(token),$(token)))$(FN_HOST_FACTORIZE_previous))$(eval undefine FN_HOST_FACTORIZE_previous)
 # ------------------------------------------------------------------------------
 
 # Semantic version functions ---------------------------------------------------
