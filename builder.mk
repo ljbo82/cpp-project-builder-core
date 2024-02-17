@@ -250,7 +250,7 @@ include $(cpb_builder_mk_self_dir)include/toolchains.mk
 # ------------------------------------------------------------------------------
 
 # print-vars ===================================================================
-DEFAULT_VAR_SET += O V VERBOSE PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL LIBS PRE_CLEAN_DEPS CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS DIST_DEPS POST_DIST_DEPS
+DEFAULT_VAR_SET += O V VERBOSE PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL LIBS PRE_CLEAN_DEPS CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS
 $(call FN_CHECK_NON_EMPTY,DEFAULT_VAR_SET)
 $(call FN_CHECK_ORIGIN,DEFAULT_VAR_SET,file)
 
@@ -324,9 +324,6 @@ $(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(eval $(call include_build
 ifdef PRE_DIST_DEPS
     $(call FN_CHECK_ORIGIN,PRE_DIST_DEPS,file)
 endif
-ifdef DIST_DEPS
-    $(call FN_CHECK_ORIGIN,DIST_DEPS,file)
-endif
 ifdef POST_DIST_DEPS
     $(call FN_CHECK_ORIGIN,POST_DIST_DEPS,file)
 endif
@@ -338,10 +335,10 @@ ifneq ($(DIST_MARKER),)
 	    @touch $@
 
     .PHONY: --include_builder_mk_dist
-    --include_builder_mk_dist: --include_builder_mk_pre_dist $(O)/$(DIST_MARKER) $(DIST_DEPS) ;
+    --include_builder_mk_dist: --include_builder_mk_pre_dist $(O)/$(DIST_MARKER) ;
 else
     .PHONY: --include_builder_mk_dist
-    --include_builder_mk_dist: --include_builder_mk_pre_dist $(include_builder_mk_dist_deps) $(DIST_DEPS) ;
+    --include_builder_mk_dist: --include_builder_mk_pre_dist $(include_builder_mk_dist_deps) ;
 endif
 
 .PHONY: --include_builder_mk_post_dist
