@@ -18,19 +18,32 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Host management
+# Host layers management
 
 ifndef cpb_include_hosts_mk
-cpb_include_hosts_mk := 1
+cpb_include_hosts_mk := $(lastword $(MAKEFILE_LIST))
 
 ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
 
-override undefine cpb_include_hosts_mk_layers
-override undefine cpb_include_hosts_mk_layer_aux_parser
-override undefine cpb_include_hosts_mk_includes
-override undefine cpb_include_hosts_mk_src_dirs
+# Reserved variables -----------------------------------------------------------
+ifdef cpb_include_hosts_mk_layers
+    $(error [cpb_include_hosts_mk_layers] Reserved variable)
+endif
+
+ifdef cpb_include_hosts_mk_layer_aux_parser
+    $(error [cpb_include_hosts_mk_layer_aux_parser] Reserved variable)
+endif
+
+ifdef cpb_include_hosts_mk_includes
+    $(error [cpb_include_hosts_mk_includes] Reserved variable)
+endif
+
+ifdef cpb_include_hosts_mk_src_dirs
+    $(error [cpb_include_hosts_mk_src_dirs] Reserved variable)
+endif
+# ------------------------------------------------------------------------------
 
 ifndef HOST
     ifdef NATIVE_HOST
@@ -50,9 +63,9 @@ else
 endif
 
 # Precedence: From most specific to most generic. For example,
-# for host linux-arm-v7, accepted layers are:
+# for host 'linux-arm-v7', accepted layers are:
 #     linux-arm-v7 > linux/arm/v7 > linux/arm > linux
-cpb_include_hosts_mk_layers = $(HOST) $(call FN_REVERSE,$(call FN_FACTORIZE,$(HOST),-,/))
+cpb_include_hosts_mk_layers = $(HOST) $(call FN_REVERSE,$(call FN_HOST_FACTORIZE,$(HOST),-,/))
 
 # Auxiliar checker for 'host.mk' and 'src' directory in a layer directory ----
 #
