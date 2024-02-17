@@ -21,7 +21,7 @@
 # OSX customizations for GCC toolchain
 
 ifndef cpb_toolchains_gcc_osx_toolchain_mk
-cpb_toolchains_gcc_osx_toolchain_mk := 1
+cpb_toolchains_gcc_osx_toolchain_mk := $(lastword $(MAKEFILE_LIST))
 
 ifndef cpb_builder_mk
     $(error This file cannot be manually included)

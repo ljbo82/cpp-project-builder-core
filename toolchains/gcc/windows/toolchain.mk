@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Leandro José Britto de Oliveira
+# Copyright (c) 2022-2024 Leandro José Britto de Oliveira
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
 # Windows customizations for GCC toolchain
 
 ifndef cpb_toolchains_gcc_windows_toolchain_mk
-cpb_toolchains_gcc_windows_toolchain_mk := 1
+cpb_toolchains_gcc_windows_toolchain_mk := $(lastword $(MAKEFILE_LIST))
 
 ifndef cpb_builder_mk
     $(error This file cannot be manually included)
@@ -50,8 +50,8 @@ ifneq ($(filter app lib,$(PROJ_TYPE)),)
                 ARTIFACT := $(LIB_NAME).dll
             endif
 
-            LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
-            LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
+            override LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
+            override LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
 
             DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).lib->lib/$(ARTIFACT).lib
             DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).def->lib/$(ARTIFACT).def

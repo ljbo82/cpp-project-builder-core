@@ -21,21 +21,65 @@
 # Builder entrypoint makefile
 
 ifndef cpb_builder_mk
-cpb_builder_mk := 1
+cpb_builder_mk := $(lastword $(MAKEFILE_LIST))
 
-override undefine cpb_builder_mk_self_dir
-override undefine cpb_builder_mk_src_file_filter
-override undefine cpb_builder_mk_invalid_src_files
-override undefine cpb_builder_mk_dist_dirs
-override undefine cpb_builder_mk_dist_files
+# Reserved variables -----------------------------------------------------------
+ifdef cpb_builder_mk_self_dir
+    $(error [cpb_builder_mk_self_dir] Reserved variable)
+endif
 
-cpb_builder_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+ifdef cpb_builder_mk_min_make_version
+    $(error [cpb_builder_mk_min_make_version] Reserved variable)
+endif
 
-include $(cpb_builder_mk_self_dir)include/functions.mk
+ifdef cpb_builder_mk_make_version
+    $(error [cpb_builder_mk_make_version] Reserved variable)
+endif
+
+ifdef cpb_builder_mk_make_version_cmp
+    $(error [cpb_builder_mk_make_version_cmp] Reserved variable)
+endif
+
+ifdef cpb_builder_mk_src_file_filter
+    $(error [cpb_builder_mk_src_file_filter] Reserved variable)
+endif
+
+ifdef cpb_builder_mk_invalid_src_files
+    $(error [cpb_builder_mk_invalid_src_files] Reserved variable)
+endif
+
+ifdef cpb_builder_mk_dist_dirs
+    $(error [cpb_builder_mk_dist_dirs] Reserved variable)
+endif
+
+ifdef cpb_builder_mk_dist_files
+    $(error [cpb_builder_mk_dist_files] Reserved variable)
+endif
+
+ifdef O_BUILD_DIR
+    $(error [O_BUILD_DIR] Reserved variable)
+endif
+
+ifdef O_DIST_DIR
+    $(error [O_DIST_DIR] Reserved variable)
+endif
+
+ifdef CPB_DEFAULT_VAR_SET
+    $(error [CPB_DEFAULT_VAR_SET] Reserved variable)
+endif
+# ------------------------------------------------------------------------------
+
+cpb_builder_mk_self_dir := $(dir $(cpb_builder_mk))
+
 include $(cpb_builder_mk_self_dir)include/common.mk
 include $(cpb_builder_mk_self_dir)include/native.mk
 
-#TODO check min make version
+# Checks if GNU Make is supported ----------------------------------------------
+cpb_builder_mk_min_make_version := 4.0
+cpb_builder_mk_make_version := $(word 3,$(shell $(MAKE) --version | grep "GNU Make"))
+cpb_builder_mk_make_version_cmp := $(call FN_SEMVER_CMP,$(cpb_builder_mk_make_version),$(cpb_builder_mk_min_make_version))
+$(call FN_CHECK_WORDS,cpb_builder_mk_make_version_cmp,0 1,Incompatible GNU Make version: $(if $(cpb_builder_mk_make_version),$(cpb_builder_mk_make_version),unknown) (min version is $(cpb_builder_mk_min_make_version)))
+# ------------------------------------------------------------------------------
 
 # Checks for whitespace in CWD -------------------------------------------------
 ifneq ($(words $(shell pwd)),1)
@@ -89,13 +133,10 @@ ifneq ($(BUILD_SUBDIR),)
     $(call FN_CHECK_NO_WHITESPACE,BUILD_SUBDIR)
     $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(BUILD_SUBDIR)),,$(error [BUILD_SUBDIR] Invalid path: $(BUILD_SUBDIR)))
 endif
-ifdef O_BUILD_DIR
-    $(error [O_BUILD_DIR] Reserved variable)
-else
-    O_BUILD_DIR := $(O)/build
-    ifneq ($(BUILD_SUBDIR),)
-        O_BUILD_DIR := $(O_BUILD_DIR)/$(BUILD_SUBDIR)
-    endif
+
+O_BUILD_DIR := $(O)/build
+ifneq ($(BUILD_SUBDIR),)
+    O_BUILD_DIR := $(O_BUILD_DIR)/$(BUILD_SUBDIR)
 endif
 # ------------------------------------------------------------------------------
 
@@ -104,33 +145,27 @@ ifneq ($(DIST_SUBDIR),)
     $(call FN_CHECK_NO_WHITESPACE,DIST_SUBDIR)
     $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(DIST_SUBDIR)),,$(error [DIST_SUBDIR] Invalid path: $(DIST_SUBDIR)))
 endif
-ifdef O_DIST_DIR
-    $(error [O_DIST_DIR] Reserved variable)
-else
-    O_DIST_DIR := $(O)/dist
-    ifneq ($(DIST_SUBDIR),)
-        O_DIST_DIR := $(O_DIST_DIR)/$(DIST_SUBDIR)
-    endif
+O_DIST_DIR := $(O)/dist
+ifneq ($(DIST_SUBDIR),)
+    O_DIST_DIR := $(O_DIST_DIR)/$(DIST_SUBDIR)
 endif
 # ------------------------------------------------------------------------------
 
 # Default include & source directories -----------------------------------------
-ifneq ($(MAKECMDGOALS),deps)
-    ifdef SRC_DIRS
-        $(call FN_CHECK_ORIGIN,SRC_DIRS,file)
-    else
-        ifneq ($(wildcard src),)
-            SRC_DIRS := src
-        endif
+ifdef SRC_DIRS
+    $(call FN_CHECK_ORIGIN,SRC_DIRS,file)
+else
+    ifneq ($(wildcard src),)
+        SRC_DIRS := src
     endif
-    ifdef INCLUDE_DIRS
-        $(call FN_CHECK_ORIGIN,INCLUDE_DIRS,file)
-    else
-        ifneq ($(wildcard include),)
-            INCLUDE_DIRS := include
-            ifeq ($(PROJ_TYPE),lib)
-                DIST_DIRS += include
-            endif
+endif
+ifdef INCLUDE_DIRS
+    $(call FN_CHECK_ORIGIN,INCLUDE_DIRS,file)
+else
+    ifneq ($(wildcard include),)
+        INCLUDE_DIRS := include
+        ifeq ($(PROJ_TYPE),lib)
+            DIST_DIRS += include
         endif
     endif
 endif
@@ -142,7 +177,7 @@ include $(cpb_builder_mk_self_dir)include/hosts.mk
 
 # LIB_TYPE ---------------------------------------------------------------------
 # NOTE: A host layer may have set LIB_TYPE
-LIB_TYPE ?= shared
+LIB_TYPE ?= static
 $(call FN_CHECK_NON_EMPTY,LIB_TYPE)
 $(call FN_CHECK_WORDS,LIB_TYPE,shared static)
 # ------------------------------------------------------------------------------
@@ -154,42 +189,46 @@ $(call FN_CHECK_NON_EMPTY,ARTIFACT)
 $(call FN_CHECK_NO_WHITESPACE,ARTIFACT)
 # ------------------------------------------------------------------------------
 
+# Skips directory inspection to get file lists ---------------------------------
+SKIP_DIR_INSPECTION ?= 0
+$(call FN_CHECK_NON_EMPTY,SKIP_DIR_INSPECTION)
+$(call FN_CHECK_WORDS,SKIP_DIR_INSPECTION,0 1)
+# ------------------------------------------------------------------------------
+
 # Identify source files --------------------------------------------------------
 # NOTE: A host layer could have added source directories.
-ifneq ($(MAKECMDGOALS),deps)
-    ifdef SKIPPED_SRC_DIRS
-        $(call FN_CHECK_ORIGIN,SKIPPED_SRC_DIRS,file)
-    endif
+ifdef SKIPPED_SRC_DIRS
+    $(call FN_CHECK_ORIGIN,SKIPPED_SRC_DIRS,file)
+endif
 
-    ifdef SKIPPED_SRC_FILES
-        $(call FN_CHECK_ORIGIN,SKIPPED_SRC_FILES,file)
-    endif
+ifdef SKIPPED_SRC_FILES
+    $(call FN_CHECK_ORIGIN,SKIPPED_SRC_FILES,file)
+endif
 
-    ifdef SRC_FILES
-        $(call FN_CHECK_ORIGIN,SRC_FILES,file)
-    endif
+ifdef SRC_FILES
+    $(call FN_CHECK_ORIGIN,SRC_FILES,file)
+endif
 
-    SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
+SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
 
-    # Checks if any SRC_DIR is outside CURDIR
-    $(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Invalid directory: $(srcDir))))
+# Checks if any SRC_DIR is outside CURDIR
+$(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Invalid directory: $(srcDir))))
 
-    cpb_builder_mk_src_file_filter := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
+cpb_builder_mk_src_file_filter := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
 
+ifeq ($(SKIP_DIR_INSPECTION),0)
     SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f $(cpb_builder_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES))
+endif
 
-    cpb_builder_mk_invalid_src_files := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
-    ifneq ($(cpb_builder_mk_invalid_src_files),)
-        $(error [SRC_FILES] Unsupported source file(s): $(cpb_builder_mk_invalid_src_files))
-    endif
+cpb_builder_mk_invalid_src_files := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
+ifneq ($(cpb_builder_mk_invalid_src_files),)
+    $(error [SRC_FILES] Unsupported source file(s): $(cpb_builder_mk_invalid_src_files))
 endif
 # ------------------------------------------------------------------------------
 
 # Include directories ----------------------------------------------------------
 # NOTE: A host layer could have added directories.
-ifneq ($(MAKECMDGOALS),deps)
-    INCLUDE_DIRS := $(strip $(SRC_DIRS) $(INCLUDE_DIRS))
-endif
+INCLUDE_DIRS := $(strip $(SRC_DIRS) $(INCLUDE_DIRS))
 # ------------------------------------------------------------------------------
 
 # POST_INCLUDES ----------------------------------------------------------------
@@ -206,8 +245,16 @@ ifdef POST_EVAL
 endif
 # ------------------------------------------------------------------------------
 
+# Process toolchain layers -----------------------------------------------------
+include $(cpb_builder_mk_self_dir)include/toolchains.mk
+# ------------------------------------------------------------------------------
+
 # print-vars ===================================================================
-VARS ?= $(sort O V VERBOSE PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEPS DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SKIP_DEFAULT_SRC_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST SKIP_DEFAULT_HOSTS_DIR HOSTS_DIRS STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES SKIP_DEFAULT_INCLUDE_DIR INCLUDE_DIRS POST_INCLUDES POST_EVAL LIBS CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS PRE_CLEAN_DEPS CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS DIST_DEPS POST_DIST_DEPS)
+DEFAULT_VAR_SET += O V VERBOSE PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL LIBS PRE_CLEAN_DEPS CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS DIST_DEPS POST_DIST_DEPS
+$(call FN_CHECK_NON_EMPTY,DEFAULT_VAR_SET)
+$(call FN_CHECK_ORIGIN,DEFAULT_VAR_SET,file)
+
+VARS ?= $(sort $(DEFAULT_VAR_SET))
 
 .PHONY: print-vars
 print-vars:
@@ -216,7 +263,6 @@ print-vars:
 	@printf ''
 # ==============================================================================
 
-ifneq ($(MAKECMDGOALS),deps) # *************************************************
 # dist =========================================================================
 ifneq ($(DIST_MARKER),)
     $(call FN_CHECK_NO_WHITESPACE,DIST_MARKER)
@@ -254,7 +300,9 @@ cpb_builder_mk_dist_dirs := $(foreach distDirEntry,$(cpb_builder_mk_dist_dirs),$
 
 DIST_DIRS := $(cpb_builder_mk_dist_dirs)
 
-cpb_builder_mk_dist_files := $(cpb_builder_mk_dist_files) $(foreach distDirEntry,$(cpb_builder_mk_dist_dirs),$(foreach distFile,$(call FN_FIND_FILES,$(call FN_TOKEN,$(distDirEntry),->,1)),$(call FN_TOKEN,$(distDirEntry),->,1)/$(distFile)->$(if $(call FN_TOKEN,$(distDirEntry),->,2),$(call FN_TOKEN,$(distDirEntry),->,2)/,)$(distFile)))
+ifeq ($(SKIP_DIR_INSPECTION),0)
+    cpb_builder_mk_dist_files := $(cpb_builder_mk_dist_files) $(foreach distDirEntry,$(cpb_builder_mk_dist_dirs),$(foreach distFile,$(call FN_FIND_FILES,$(call FN_TOKEN,$(distDirEntry),->,1)),$(call FN_TOKEN,$(distDirEntry),->,1)/$(distFile)->$(if $(call FN_TOKEN,$(distDirEntry),->,2),$(call FN_TOKEN,$(distDirEntry),->,2)/,)$(distFile)))
+endif
 cpb_builder_mk_dist_files := $(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(call include_builder_mk_fn_dist_adjust_file_entry,$(distFileEntry)))
 cpb_builder_mk_dist_files := $(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(call FN_TOKEN,$(distFileEntry),->,1)->$(O_DIST_DIR)/$(call FN_TOKEN,$(distFileEntry),->,2))
 
@@ -302,10 +350,5 @@ endif
 .PHONY: dist
 dist: --include_builder_mk_post_dist ;
 # ==============================================================================
-endif # ifneq ($(MAKECMDGOALS),deps) *******************************************
-
-# Process toolchain layers -----------------------------------------------------
-include $(cpb_builder_mk_self_dir)include/toolchains.mk
-# ------------------------------------------------------------------------------
 
 endif # ifndef cpb_builder_mk
