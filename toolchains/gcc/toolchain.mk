@@ -21,7 +21,7 @@
 # GCC toolchain
 
 ifndef cpb_toolchains_gcc_toolchain_mk
-cpb_toolchains_gcc_toolchain_mk := 1
+cpb_toolchains_gcc_toolchain_mk := $(lastword $(MAKEFILE_LIST))
 
 ifndef cpb_builder_mk
     $(error This file cannot be manually included)
@@ -52,6 +52,12 @@ override undefine cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_file_entry
 override undefine cpb_toolchains_gcc_toolchain_mk_dist_deps_template
 override undefine cpb_toolchains_gcc_toolchain_mk_dist_deps
 
+ifdef CPB_DEPS
+    $(error [CPB_DEPS] Reserved variable)
+endif
+
+DEFAULT_VAR_SET += CPB_DEPS LIBS STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS
+
 # Strips release build ---------------------------------------------------------
 # NOTE: A host layer may have set STRIP_RELEASE
 STRIP_RELEASE ?= 1
@@ -76,7 +82,7 @@ endif
 # deps =========================================================================
 .PHONY: deps
 deps:
-	@printf -- "$(strip $(DEPS))"
+	@printf -- "$(strip $(CPB_DEPS))"
 # ==============================================================================
 
 # Libs -------------------------------------------------------------------------
@@ -84,12 +90,11 @@ ifdef LIBS
     $(call FN_CHECK_ORIGIN,LIBS,file)
 endif
 
-ifdef DEPS
-    $(error [DEPS] Reserved variable)
-endif
-
 export cpb_toolchains_gcc_toolchain_mk_o_libs_dir ?= $(abspath $(O)/libs)
 cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir =$(call FN_REL_DIR,$(CURDIR),$(cpb_toolchains_gcc_toolchain_mk_o_libs_dir))
+
+#### TODO: INSTEAD OF lib_name[:lib_dir[:host]] use lib_name[:lib_dir[:target]]
+####       By declaring a target application can define its way to build the library
 
 #$(call cpb_toolchains_gcc_toolchain_mk_libs_template1,<lib_name>,[lib_dir],[host])
 define cpb_toolchains_gcc_toolchain_mk_libs_template1
@@ -120,12 +125,12 @@ cpb_toolchains_gcc_toolchain_mk_libs_fn_template = $(eval $(call cpb_toolchains_
 
 $(foreach lib,$(LIBS),$(call cpb_toolchains_gcc_toolchain_mk_libs_fn_template,$(lib)))
 
-DEPS := $(cpb_toolchains_gcc_toolchain_mk_libs_ldflags)
+CPB_DEPS := $(cpb_toolchains_gcc_toolchain_mk_libs_ldflags)
 ifeq ($(cpb_toolchains_gcc_toolchain_mk_libs_has_lib_dir),1)
     INCLUDE_DIRS += $(cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir)/dist/include
-    LDFLAGS := $(LDFLAGS) -L$(cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir)/dist/lib $(DEPS)
+    LDFLAGS := $(LDFLAGS) -L$(cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir)/dist/lib $(CPB_DEPS)
 else
-    LDFLAGS := $(LDFLAGS) $(DEPS)
+    LDFLAGS := $(LDFLAGS) $(CPB_DEPS)
 endif
 LDFLAGS := $(strip $(LDFLAGS))
 # ------------------------------------------------------------------------------
@@ -247,40 +252,6 @@ ASFLAGS  := $(strip -MMD -MP $(cpb_toolchains_gcc_toolchain_mk_include_flags) $(
 ARFLAGS  := $(strip rcs $(ARFLAGS))
 LDFLAGS  := $(strip $(cpb_toolchains_gcc_toolchain_mk_ldflags) $(LDFLAGS))
 # ------------------------------------------------------------------------------
-
-.NOTPARALLEL:
-
-# all (default) ================================================================
-.DEFAULT_GOAL := all
-
-.PHONY: all
-all: dist ;
-# ==============================================================================
-
-# clean ========================================================================
-ifdef PRE_CLEAN_DEPS
-    $(call FN_CHECK_ORIGIN,PRE_CLEAN_DEPS,file)
-endif
-ifdef CLEAN_DEPS
-    $(call FN_CHECK_ORIGIN,CLEAN_DEPS,file)
-endif
-ifdef POST_CLEAN_DEPS
-    $(call FN_CHECK_ORIGIN,POST_CLEAN_DEPS,file)
-endif
-
-.PHONY: --cpb_toolchains_gcc_toolchain_mk_pre_clean
---cpb_toolchains_gcc_toolchain_mk_pre_clean: $(PRE_CLEAN_DEPS) ;
-
-.PHONY: --cpb_toolchains_gcc_toolchain_mk_clean
---cpb_toolchains_gcc_toolchain_mk_clean: --cpb_toolchains_gcc_toolchain_mk_pre_clean $(CLEAN_DEPS)
-	$(VERBOSE)rm -rf $(O)
-
-.PHONY: --cpb_toolchains_gcc_toolchain_mk_post_clean
---cpb_toolchains_gcc_toolchain_mk_post_clean: --cpb_toolchains_gcc_toolchain_mk_clean $(POST_CLEAN_DEPS) ;
-
-.PHONY: clean
-clean: --cpb_toolchains_gcc_toolchain_mk_post_clean ;
-# ==============================================================================
 
 # build ========================================================================
 ifdef PRE_BUILD_DEPS
