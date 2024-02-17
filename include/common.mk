@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Common definitions
+# Common definitions for standalone makefiles
 
 ifndef cpb_include_common_mk
 cpb_include_common_mk := $(lastword $(MAKEFILE_LIST))
