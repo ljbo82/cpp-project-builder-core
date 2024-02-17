@@ -56,6 +56,18 @@ ifdef cpb_builder_mk_dist_files
     $(error [cpb_builder_mk_dist_files] Reserved variable)
 endif
 
+ifdef cpb_builder_mk_fn_dist_adjust_dir_entry
+    $(error [cpb_builder_mk_fn_dist_adjust_dir_entry] Reserved variable)
+endif
+
+ifdef cpb_builder_mk_fn_dist_adjust_file_entry
+    $(error [cpb_builder_mk_fn_dist_adjust_file_entry] Reserved variable)
+endif
+
+ifdef cpb_builder_mk_dist_deps_template
+    $(error [cpb_builder_mk_dist_deps_template] Reserved variable)
+endif
+
 ifdef O_BUILD_DIR
     $(error [O_BUILD_DIR] Reserved variable)
 endif
@@ -249,8 +261,17 @@ endif
 include $(cpb_builder_mk_self_dir)include/toolchains.mk
 # ------------------------------------------------------------------------------
 
+.NOTPARALLEL:
+
+# all (default) ================================================================
+.DEFAULT_GOAL := all
+
+.PHONY: all
+all: dist ;
+# ==============================================================================
+
 # print-vars ===================================================================
-DEFAULT_VAR_SET += O V VERBOSE PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL LIBS PRE_CLEAN_DEPS CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS
+DEFAULT_VAR_SET += O V VERBOSE PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL LIBS PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS
 $(call FN_CHECK_NON_EMPTY,DEFAULT_VAR_SET)
 $(call FN_CHECK_ORIGIN,DEFAULT_VAR_SET,file)
 
@@ -261,6 +282,43 @@ print-vars:
 	$(call FN_CHECK_NON_EMPTY,VARS)
 	$(foreach varName,$(VARS),$(info $(varName) = $($(varName))))
 	@printf ''
+# ==============================================================================
+
+# clean ========================================================================
+ifdef PRE_CLEAN_DEPS
+    $(call FN_CHECK_ORIGIN,PRE_CLEAN_DEPS,file)
+endif
+ifdef POST_CLEAN_DEPS
+    $(call FN_CHECK_ORIGIN,POST_CLEAN_DEPS,file)
+endif
+
+.PHONY: --cpb_builder_mk_pre_clean
+--cpb_builder_mk_pre_clean: $(PRE_CLEAN_DEPS) ;
+
+.PHONY: --cpb_builder_mk_clean
+--cpb_builder_mk_clean: --cpb_builder_mk_pre_clean
+	$(VERBOSE)rm -rf $(O)
+
+.PHONY: --cpb_builder_mk_post_clean
+--cpb_builder_mk_post_clean: --cpb_builder_mk_clean $(POST_CLEAN_DEPS) ;
+
+.PHONY: clean
+clean: --cpb_builder_mk_post_clean ;
+# ==============================================================================
+
+# build ========================================================================
+ifdef PRE_BUILD_DEPS
+    $(call FN_CHECK_ORIGIN,PRE_BUILD_DEPS,file)
+endif
+ifdef BUILD_DEPS
+    $(call FN_CHECK_ORIGIN,BUILD_DEPS,file)
+endif
+ifdef POST_BUILD_DEPS
+    $(call FN_CHECK_ORIGIN,POST_BUILD_DEPS,file)
+endif
+
+.PHONY: build
+build: $(PRE_BUILD_DEPS) $(BUILD_DEPS) $(POST_BUILD_DEPS) ;
 # ==============================================================================
 
 # dist =========================================================================
@@ -289,29 +347,29 @@ cpb_builder_mk_dist_files := $(cpb_builder_mk_dist_files) $(DIST_FILES)
 # Each entry (either DIST_DIR or DIST_FILE) has the syntax: src->destPathInDistDir
 
 # Autixiliary function to adjust a distribution directory entry in DIST_DIRS.
-# Syntax: $(call include_builder_mk_fn_dist_adjust_dir_entry,distDirEntry)
-include_builder_mk_fn_dist_adjust_dir_entry = $(if $(call FN_TOKEN,$(1),->,2),$(1),$(1)->$(1))
+# Syntax: $(call cpb_builder_mk_fn_dist_adjust_dir_entry,distDirEntry)
+cpb_builder_mk_fn_dist_adjust_dir_entry = $(if $(call FN_TOKEN,$(1),->,2),$(1),$(1)->$(1))
 
 # Autixiliary function to adjust a distribution file entry in DIST_FILES.
-# Syntax: $(call include_builder_mk_fn_dist_adjust_file_entry,distFileEntry)
-include_builder_mk_fn_dist_adjust_file_entry = $(if $(call FN_TOKEN,$(1),->,2),$(1),$(1)->$(notdir $(1)))
+# Syntax: $(call cpb_builder_mk_fn_dist_adjust_file_entry,distFileEntry)
+cpb_builder_mk_fn_dist_adjust_file_entry = $(if $(call FN_TOKEN,$(1),->,2),$(1),$(1)->$(notdir $(1)))
 
-cpb_builder_mk_dist_dirs := $(foreach distDirEntry,$(cpb_builder_mk_dist_dirs),$(call include_builder_mk_fn_dist_adjust_dir_entry,$(distDirEntry)))
+cpb_builder_mk_dist_dirs := $(foreach distDirEntry,$(cpb_builder_mk_dist_dirs),$(call cpb_builder_mk_fn_dist_adjust_dir_entry,$(distDirEntry)))
 
 DIST_DIRS := $(cpb_builder_mk_dist_dirs)
 
 ifeq ($(SKIP_DIR_INSPECTION),0)
     cpb_builder_mk_dist_files := $(cpb_builder_mk_dist_files) $(foreach distDirEntry,$(cpb_builder_mk_dist_dirs),$(foreach distFile,$(call FN_FIND_FILES,$(call FN_TOKEN,$(distDirEntry),->,1)),$(call FN_TOKEN,$(distDirEntry),->,1)/$(distFile)->$(if $(call FN_TOKEN,$(distDirEntry),->,2),$(call FN_TOKEN,$(distDirEntry),->,2)/,)$(distFile)))
 endif
-cpb_builder_mk_dist_files := $(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(call include_builder_mk_fn_dist_adjust_file_entry,$(distFileEntry)))
+cpb_builder_mk_dist_files := $(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(call cpb_builder_mk_fn_dist_adjust_file_entry,$(distFileEntry)))
 cpb_builder_mk_dist_files := $(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(call FN_TOKEN,$(distFileEntry),->,1)->$(O_DIST_DIR)/$(call FN_TOKEN,$(distFileEntry),->,2))
 
 DIST_FILES := $(cpb_builder_mk_dist_files)
 
 # Template for distribution artifacts targets
-# $(call include_builder_mk_dist_deps_template,src,dest)
-define include_builder_mk_dist_deps_template
-include_builder_mk_dist_deps += $(2)
+# $(call cpb_builder_mk_dist_deps_template,src,dest)
+define cpb_builder_mk_dist_deps_template
+cpb_builder_mk_dist_deps += $(2)
 
 $(2): $(1)
 	@echo [DIST] $$@
@@ -319,7 +377,7 @@ $(2): $(1)
 	$(VERBOSE)/bin/cp $$< $$@
 endef
 
-$(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(eval $(call include_builder_mk_dist_deps_template,$(call FN_TOKEN,$(distFileEntry),->,1),$(call FN_TOKEN,$(distFileEntry),->,2))))
+$(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(eval $(call cpb_builder_mk_dist_deps_template,$(call FN_TOKEN,$(distFileEntry),->,1),$(call FN_TOKEN,$(distFileEntry),->,2))))
 
 ifdef PRE_DIST_DEPS
     $(call FN_CHECK_ORIGIN,PRE_DIST_DEPS,file)
@@ -328,24 +386,24 @@ ifdef POST_DIST_DEPS
     $(call FN_CHECK_ORIGIN,POST_DIST_DEPS,file)
 endif
 
---include_builder_mk_pre_dist: build $(PRE_DIST_DEPS) ;
+--cpb_builder_mk_pre_dist: build $(PRE_DIST_DEPS) ;
 
 ifneq ($(DIST_MARKER),)
-    $(O)/$(DIST_MARKER): $(include_builder_mk_dist_deps)
+    $(O)/$(DIST_MARKER): $(cpb_builder_mk_dist_deps)
 	    @touch $@
 
-    .PHONY: --include_builder_mk_dist
-    --include_builder_mk_dist: --include_builder_mk_pre_dist $(O)/$(DIST_MARKER) ;
+    .PHONY: --cpb_builder_mk_dist
+    --cpb_builder_mk_dist: --cpb_builder_mk_pre_dist $(O)/$(DIST_MARKER) ;
 else
-    .PHONY: --include_builder_mk_dist
-    --include_builder_mk_dist: --include_builder_mk_pre_dist $(include_builder_mk_dist_deps) ;
+    .PHONY: --cpb_builder_mk_dist
+    --cpb_builder_mk_dist: --cpb_builder_mk_pre_dist $(cpb_builder_mk_dist_deps) ;
 endif
 
-.PHONY: --include_builder_mk_post_dist
---include_builder_mk_post_dist: --include_builder_mk_dist $(POST_DIST_DEPS) ;
+.PHONY: --cpb_builder_mk_post_dist
+--cpb_builder_mk_post_dist: --cpb_builder_mk_dist $(POST_DIST_DEPS) ;
 
 .PHONY: dist
-dist: --include_builder_mk_post_dist ;
+dist: --cpb_builder_mk_post_dist ;
 # ==============================================================================
 
 endif # ifndef cpb_builder_mk
