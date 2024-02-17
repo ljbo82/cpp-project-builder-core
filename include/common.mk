@@ -21,9 +21,11 @@
 # Common definitions
 
 ifndef cpb_include_common_mk
-cpb_include_common_mk := 1
+cpb_include_common_mk := $(lastword $(MAKEFILE_LIST))
 
-override undefine cpb_include_common_mk_self_dir
+ifdef cpb_include_common_mk_self_dir
+    $(error [cpb_include_common_mk_self_dir] Reserved variable)
+endif
 
 cpb_include_common_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
