@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Leandro José Britto de Oliveira
+# Copyright (c) 2022-2024 Leandro José Britto de Oliveira
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,21 +20,21 @@
 
 # Git repository support
 
-ifndef git_mk
-git_mk := 1
+ifndef cpb_git_mk
+cpb_git_mk := 1
 
-override undefine git_mk_self_dir
+override undefine cpb_git_mk_self_dir
 
-git_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+cpb_git_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
-include $(git_mk_self_dir)include/functions.mk
+include $(cpb_git_mk_self_dir)include/functions.mk
 
 GIT_REPO_DIR ?= .
 $(call FN_CHECK_NON_EMPTY,GIT_REPO_DIR)
 $(call FN_CHECK_NO_WHITESPACE,GIT_REPO_DIR)
 
-git_mk_repo_available := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1 && echo y)
-ifneq ($(git_mk_repo_available),)
+cpb_git_mk_repo_available := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1 && echo y)
+ifneq ($(cpb_git_mk_repo_available),)
     ifdef GIT_COMMIT
         $(error [GIT_COMMIT] Reserved variable)
     endif
@@ -86,6 +86,6 @@ ifneq ($(GIT_VERSION),)
     endif
 endif
 
-undefine git_mk_repo_available
+undefine cpb_git_mk_repo_available
 
-endif # ifndef git_mk
+endif # ifndef cpb_git_mk

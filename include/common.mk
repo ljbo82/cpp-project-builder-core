@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Leandro José Britto de Oliveira
+# Copyright (c) 2022-2024 Leandro José Britto de Oliveira
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,14 +20,14 @@
 
 # Common definitions
 
-ifndef include_common_mk
-include_common_mk := 1
+ifndef cpb_include_common_mk
+cpb_include_common_mk := 1
 
-override undefine include_common_mk_self_dir
+override undefine cpb_include_common_mk_self_dir
 
-include_common_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+cpb_include_common_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
-include $(include_common_mk_self_dir)functions.mk
+include $(cpb_include_common_mk_self_dir)functions.mk
 
 # Output directory -------------------------------------------------------------
 O ?= output
@@ -45,4 +45,4 @@ endif
 VERBOSE := $(if $(filter 0,$(V)),@,)
 # ------------------------------------------------------------------------------
 
-endif # ifndef include_common_mk
+endif # ifndef cpb_include_common_mk

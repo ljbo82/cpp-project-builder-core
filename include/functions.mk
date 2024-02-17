@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Leandro José Britto de Oliveira
+# Copyright (c) 2022-2024 Leandro José Britto de Oliveira
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,12 +20,12 @@
 
 # General purpose functions
 
-ifndef include_functions_mk
-include_functions_mk := 1
+ifndef cpb_include_functions_mk
+cpb_include_functions_mk := 1
 
-override undefine include_functions_mk_token_prefix
+override undefine cpb_include_functions_mk_token_prefix
 
-include_functions_mk_token_prefix := __?__
+cpb_include_functions_mk_token_prefix := __?__
 
 
 # Text functions ---------------------------------------------------------------
@@ -36,11 +36,11 @@ include_functions_mk_token_prefix := __?__
 # used to force split of empty tokens (afterwards token prefix shall be
 # removed).
 #
-# Syntax: $(call FN_SPLIT,baseString,delimiter,tokenPrefix=$(include_functions_mk_token_prefix)
+# Syntax: $(call FN_SPLIT,baseString,delimiter,tokenPrefix=$(cpb_include_functions_mk_token_prefix)
 ifdef FN_SPLIT
     $(error [FN_SPLIT] Reserved variable)
 endif
-FN_SPLIT = $(subst $(2), $(if $(3),$(3),$(include_functions_mk_token_prefix)),$(if $(3),$(3),$(include_functions_mk_token_prefix))$(1))
+FN_SPLIT = $(subst $(2), $(if $(3),$(3),$(cpb_include_functions_mk_token_prefix)),$(if $(3),$(3),$(cpb_include_functions_mk_token_prefix))$(1))
 
 # Returns a token on delimited string.
 #
@@ -48,7 +48,7 @@ FN_SPLIT = $(subst $(2), $(if $(3),$(3),$(include_functions_mk_token_prefix)),$(
 ifdef FN_TOKEN
     $(error [FN_TOKEN] Reserved variable)
 endif
-FN_TOKEN = $(subst $(include_functions_mk_token_prefix),,$(word $(3),$(call FN_SPLIT,$(1),$(2))))
+FN_TOKEN = $(subst $(cpb_include_functions_mk_token_prefix),,$(word $(3),$(call FN_SPLIT,$(1),$(2))))
 
 # Removes duplicate words without sorting.
 #
@@ -188,4 +188,4 @@ endif
 FN_CHECK_NO_WHITESPACE=$(if $(call FN_EQ,0,$(words $($(1)))),,$(if $(call FN_EQ,1,$(words $($(1)))),,$(error [$(1)] $(if $(2),$(2),Value cannot have whitespaces: "$($(1))"))))
 # ------------------------------------------------------------------------------
 
-endif # ifndef include_functions_mk
+endif # ifndef cpb_include_functions_mk

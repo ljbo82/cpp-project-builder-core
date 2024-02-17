@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Leandro José Britto de Oliveira
+# Copyright (c) 2022-2024 Leandro José Britto de Oliveira
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,11 +24,11 @@
 #    linux-x86, linux-x64, linux-arm, linux-arm64,
 #    windows-x86, windows-x64, windows-arm, windows-arm64
 
-ifndef include_native_mk
-include_native_mk := 1
+ifndef cpb_include_native_mk
+cpb_include_native_mk := 1
 
-override undefine include_native_mk_os
-override undefine include_native_mk_arch
+override undefine cpb_include_native_mk_os
+override undefine cpb_include_native_mk_arch
 
 ifdef NATIVE_OS
     $(error [NATIVE_OS] Reserved variable)
@@ -43,11 +43,11 @@ endif
 ifeq ($(OS),Windows_NT)
     NATIVE_OS := windows
 else
-    include_native_mk_os := $(shell uname -s)
-    ifneq ($(filter Linux linux,$(include_native_mk_os)),)
+    cpb_include_native_mk_os := $(shell uname -s)
+    ifneq ($(filter Linux linux,$(cpb_include_native_mk_os)),)
         NATIVE_OS := linux
     else
-        ifneq ($(filter Darwin darwin, $(include_native_mk_os)),)
+        ifneq ($(filter Darwin darwin, $(cpb_include_native_mk_os)),)
             NATIVE_OS := osx
         endif
     endif
@@ -55,34 +55,34 @@ endif
 
 ifdef NATIVE_OS
     ifeq ($(NATIVE_OS),windows)
-        include_native_mk_arch := $(shell cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
-        ifeq ($(include_native_mk_arch),AMD64)
+        cpb_include_native_mk_arch := $(shell cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
+        ifeq ($(cpb_include_native_mk_arch),AMD64)
             NATIVE_ARCH := x64
         else
-            ifeq ($(include_native_mk_arch),x86)
+            ifeq ($(cpb_include_native_mk_arch),x86)
                 NATIVE_ARCH := x86
             else
-                ifneq ($(include_native_mk_arch),ARM32)
+                ifneq ($(cpb_include_native_mk_arch),ARM32)
                     NATIVE_ARCH := arm
                 else
-                    ifeq ($(include_native_mk_arch),ARM64)
+                    ifeq ($(cpb_include_native_mk_arch),ARM64)
                         NATIVE_ARCH := arm64
                     endif
                 endif
             endif
         endif
     else
-        include_native_mk_arch := $(shell uname -m)
-        ifeq ($(include_native_mk_arch),x86_64)
+        cpb_include_native_mk_arch := $(shell uname -m)
+        ifeq ($(cpb_include_native_mk_arch),x86_64)
             NATIVE_ARCH := x64
         else
-            ifneq ($(filter %86, $(include_native_mk_arch)),)
+            ifneq ($(filter %86, $(cpb_include_native_mk_arch)),)
                 NATIVE_ARCH := x86
             else
-                ifneq ($(filter arm, $(include_native_mk_arch)),)
+                ifneq ($(filter arm, $(cpb_include_native_mk_arch)),)
                     NATIVE_ARCH := arm
                 else
-                    ifneq ($(filter arm64, $(include_native_mk_arch)),)
+                    ifneq ($(filter arm64, $(cpb_include_native_mk_arch)),)
                         NATIVE_ARCH := arm64
                     endif
                 endif
@@ -97,4 +97,4 @@ ifdef NATIVE_OS
     endif
 endif
 
-endif # ifndef include_native_mk
+endif # ifndef cpb_include_native_mk

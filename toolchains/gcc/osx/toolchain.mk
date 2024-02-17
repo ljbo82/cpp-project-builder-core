@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Leandro José Britto de Oliveira
+# Copyright (c) 2022-2024 Leandro José Britto de Oliveira
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,45 +18,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Windows host standard definitions
+# OSX customizations for GCC toolchain
 
-ifndef hosts_windows_host_mk
-hosts_windows_host_mk := 1
+ifndef cpb_toolchains_gcc_osx_toolchain_mk
+cpb_toolchains_gcc_osx_toolchain_mk := 1
 
-ifndef project_mk
+ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
 
-ifneq ($(filter app lib,$(PROJ_TYPE)),)
-    ifeq ($(HOST),windows-x86)
-        export CROSS_COMPILE ?= i686-w64-mingw32-
-    else ifeq ($(HOST),windows-x64)
-        export CROSS_COMPILE ?= x86_64-w64-mingw32-
+ifeq ($(PROJ_TYPE),app)
+    ifndef ARTIFACT
+        ARTIFACT := $(PROJ_NAME)
     endif
-
-    ifeq ($(PROJ_TYPE),app)
-        ifndef ARTIFACT
-            ARTIFACT := $(PROJ_NAME).exe
-        endif
-    else
-        # $(PROJ_TYPE) is equal lib
-        LIB_TYPE ?= shared
+else ifeq ($(PROJ_TYPE),lib)
+    LIB_TYPE ?= shared
+    ifndef ARTIFACT
         ifeq ($(LIB_TYPE),static)
-            ifndef ARTIFACT
-                ARTIFACT := lib$(LIB_NAME).a
-            endif
-        else ifeq ($(LIB_TYPE),shared)
-            ifndef ARTIFACT
-                ARTIFACT := $(LIB_NAME).dll
-            endif
-
-            LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
-            LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
-
-            DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).lib:lib/$(ARTIFACT).lib
-            DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).def:lib/$(ARTIFACT).def
+            ARTIFACT := lib$(LIB_NAME).a
         endif
-	endif
+        ifeq ($(LIB_TYPE),shared)
+            ARTIFACT := lib$(LIB_NAME).dylib
+        endif
+    endif
 endif
 
-endif #hosts_windows_host_mk
+endif # ifndef cpb_toolchains_gcc_osx_toolchain_mk

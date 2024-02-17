@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Leandro José Britto de Oliveira
+# Copyright (c) 2022-2024 Leandro José Britto de Oliveira
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,14 +20,14 @@
 
 # Doxygen support
 
-ifndef doxygen_mk
-doxygen_mk := 1
+ifndef cpb_doxygen_mk
+cpb_doxygen_mk := 1
 
-override undefine doxygen_mk_self_dir
+override undefine cpb_doxygen_mk_self_dir
 
-doxygen_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
+cpb_doxygen_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
-include $(doxygen_mk_self_dir)include/common.mk
+include $(cpb_doxygen_mk_self_dir)include/common.mk
 
 # Doc src/output directories----------------------------------------------------
 DOC_DIR ?= doc
@@ -53,11 +53,11 @@ ifdef POST_DOC_DEPS
     $(call FN_CHECK_ORIGIN,POST_DOC_DEPS,file)
 endif
 
-.PHONY: --doxygen_mk_pre_doc
---doxygen_mk_pre_doc: $(PRE_DOC_DEPS) ;
+.PHONY: --cpb_doxygen_mk_pre_doc
+--cpb_doxygen_mk_pre_doc: $(PRE_DOC_DEPS) ;
 
-.PHONY: --doxygen_mk_doc
---doxygen_mk_doc: --doxygen_mk_pre_doc
+.PHONY: --cpb_doxygen_mk_doc
+--cpb_doxygen_mk_doc: --cpb_doxygen_mk_pre_doc
     ifeq ($(wildcard $(DOXYFILE)),)
 	    $(error [DOXYFILE] File not found: $(DOXYFILE))
     else
@@ -65,11 +65,11 @@ endif
 	    $(VERBOSE)(cat $(DOXYFILE)$(foreach arg,$(strip OUTPUT_DIRECTORY=$(O_DOC_DIR) $(DOXYARGS)),; echo "$(arg)")) | doxygen -
     endif
 
-.PHONY: --doxygen_mk_post_doc
---doxygen_mk_post_doc: --doxygen_mk_doc $(POST_DOC_DEPS) ;
+.PHONY: --cpb_doxygen_mk_post_doc
+--cpb_doxygen_mk_post_doc: --cpb_doxygen_mk_doc $(POST_DOC_DEPS) ;
 
 .PHONY: doc
-doc: --doxygen_mk_post_doc ;
+doc: --cpb_doxygen_mk_post_doc ;
 # ==============================================================================
 
-endif # ifndef doxygen_mk
+endif # ifndef cpb_doxygen_mk

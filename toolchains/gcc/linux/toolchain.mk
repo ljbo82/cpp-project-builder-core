@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Leandro José Britto de Oliveira
+# Copyright (c) 2022-2024 Leandro José Britto de Oliveira
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,12 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Linux host standard definitions
+# Linux customizations for GCC toolchain
 
-ifndef hosts_linux_host_mk
-hosts_linux_host_mk := 1
+ifndef cpb_toolchains_gcc_linux_toolchain_mk
+cpb_toolchains_gcc_linux_toolchain_mk := 1
 
-ifndef project_mk
+ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
 
@@ -43,4 +43,4 @@ else ifeq ($(PROJ_TYPE),lib)
     endif
 endif
 
-endif # ifndef hosts_linux_host_mk
+endif # ifndef cpb_toolchains_gcc_linux_toolchain_mk
