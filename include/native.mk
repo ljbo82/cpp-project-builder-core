@@ -25,20 +25,29 @@
 #    windows-x86, windows-x64, windows-arm, windows-arm64
 
 ifndef cpb_include_native_mk
-cpb_include_native_mk := 1
+cpb_include_native_mk := $(lastword $(MAKEFILE_LIST))
 
-override undefine cpb_include_native_mk_os
-override undefine cpb_include_native_mk_arch
+# Reserved variables -----------------------------------------------------------
+ifdef cpb_include_native_mk_os
+    $(error [cpb_include_native_mk_os] Reserved variable)
+endif
+
+ifdef cpb_include_native_mk_arch
+    $(error [cpb_include_native_mk_arch] Reserved variable)
+endif
 
 ifdef NATIVE_OS
     $(error [NATIVE_OS] Reserved variable)
 endif
+
 ifdef NATIVE_ARCH
     $(error [NATIVE_ARCH] Reserved variable)
 endif
+
 ifdef NATIVE_HOST
     $(error [NATIVE_HOST] Reserved variable)
 endif
+# ------------------------------------------------------------------------------
 
 ifeq ($(OS),Windows_NT)
     NATIVE_OS := windows
