@@ -27,30 +27,93 @@ ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
 
-override undefine cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir
-override undefine cpb_toolchains_gcc_toolchain_mk_libs_template1
-override undefine cpb_toolchains_gcc_toolchain_mk_libs_has_lib_dir
-override undefine cpb_toolchains_gcc_toolchain_mk_libs_ldflags
-override undefine cpb_toolchains_gcc_toolchain_mk_libs_fn_lib_name
-override undefine cpb_toolchains_gcc_toolchain_mk_libs_fn_lib_dir
-override undefine cpb_toolchains_gcc_toolchain_mk_libs_template
-override undefine cpb_toolchains_gcc_toolchain_mk_libs_fn_template
-override undefine cpb_toolchains_gcc_toolchain_mk_is_cpp_project
-override undefine cpb_toolchains_gcc_toolchain_mk_ld
-override undefine cpb_toolchains_gcc_toolchain_mk_cflags
-override undefine cpb_toolchains_gcc_toolchain_mk_cxxflags
-override undefine cpb_toolchains_gcc_toolchain_mk_asflags
-override undefine cpb_toolchains_gcc_toolchain_mk_ldflags
-override undefine cpb_toolchains_gcc_toolchain_mk_include_flags
-override undefine cpb_toolchains_gcc_toolchain_mk_obj_suffix
-override undefine cpb_toolchains_gcc_toolchain_mk_obj_files
-override undefine cpb_toolchains_gcc_toolchain_mk_dep_files
-override undefine cpb_toolchains_gcc_toolchain_mk_cxx_template
-override undefine cpb_toolchains_gcc_toolchain_mk_as_template
-override undefine cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_dir_entry
-override undefine cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_file_entry
-override undefine cpb_toolchains_gcc_toolchain_mk_dist_deps_template
-override undefine cpb_toolchains_gcc_toolchain_mk_dist_deps
+ifdef cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir
+    $(error [cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_libs_template1
+    $(error [cpb_toolchains_gcc_toolchain_mk_libs_template1] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_libs_has_lib_dir
+    $(error [cpb_toolchains_gcc_toolchain_mk_libs_has_lib_dir] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_libs_ldflags
+    $(error [cpb_toolchains_gcc_toolchain_mk_libs_ldflags] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_libs_template
+    $(error [cpb_toolchains_gcc_toolchain_mk_libs_template] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_libs_fn_template
+    $(error [cpb_toolchains_gcc_toolchain_mk_libs_fn_template] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_is_cpp_project
+    $(error [cpb_toolchains_gcc_toolchain_mk_is_cpp_project] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_ld
+    $(error [cpb_toolchains_gcc_toolchain_mk_ld] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_cflags
+    $(error [cpb_toolchains_gcc_toolchain_mk_cflags] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_cxxflags
+    $(error [cpb_toolchains_gcc_toolchain_mk_cxxflags] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_asflags
+    $(error [cpb_toolchains_gcc_toolchain_mk_asflags] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_ldflags
+    $(error [cpb_toolchains_gcc_toolchain_mk_ldflags] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_include_flags
+    $(error [cpb_toolchains_gcc_toolchain_mk_include_flags] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_obj_suffix
+    $(error [cpb_toolchains_gcc_toolchain_mk_obj_suffix] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_obj_files
+    $(error [cpb_toolchains_gcc_toolchain_mk_obj_files] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_dep_files
+    $(error [cpb_toolchains_gcc_toolchain_mk_dep_files] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_cxx_template
+    $(error [cpb_toolchains_gcc_toolchain_mk_cxx_template] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_as_template
+    $(error [cpb_toolchains_gcc_toolchain_mk_as_template] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_dir_entry
+    $(error [cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_dir_entry] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_file_entry
+    $(error [cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_file_entry] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_dist_deps_template
+    $(error [cpb_toolchains_gcc_toolchain_mk_dist_deps_template] Reserved variable)
+endif
+
+ifdef cpb_toolchains_gcc_toolchain_mk_dist_deps
+    $(error [cpb_toolchains_gcc_toolchain_mk_dist_deps] Reserved variable)
+endif
 
 ifdef CPB_DEPS
     $(error [CPB_DEPS] Reserved variable)
@@ -91,15 +154,12 @@ ifdef LIBS
 endif
 
 export cpb_toolchains_gcc_toolchain_mk_o_libs_dir ?= $(abspath $(O)/libs)
-cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir =$(call FN_REL_DIR,$(CURDIR),$(cpb_toolchains_gcc_toolchain_mk_o_libs_dir))
-
-#### TODO: INSTEAD OF lib_name[:lib_dir[:host]] use lib_name[:lib_dir[:target]]
-####       By declaring a target application can define its way to build the library
+cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir = $(call FN_REL_DIR,$(CURDIR),$(cpb_toolchains_gcc_toolchain_mk_o_libs_dir))
 
 #$(call cpb_toolchains_gcc_toolchain_mk_libs_template1,<lib_name>,[lib_dir],[host])
 define cpb_toolchains_gcc_toolchain_mk_libs_template1
 cpb_toolchains_gcc_toolchain_mk_libs_has_lib_dir := $$(if $$(or $$(cpb_toolchains_gcc_toolchain_mk_libs_has_lib_dir),$(2)),1,)
-cpb_toolchains_gcc_toolchain_mk_libs_ldflags += $(strip -l$(1) $(if $(2),`$(MAKE) --no-print-directory -C $(call FN_REL_DIR,$(CURDIR),$(2)) deps$(if $(3), HOST=$(3),);`,))
+cpb_toolchains_gcc_toolchain_mk_libs_ldflags += $(strip -l$(1) $(if $(2),`$(MAKE) --no-print-directory -C $(call FN_REL_DIR,$(CURDIR),$(2)) deps SKIP_DIR_INSPECTION=1$(if $(3), HOST=$(3),)`,))
 
 $(if $(2),PRE_BUILD_DEPS += $$(cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir)/.$(1),)
 $(if $(2),--cpb-$(1):,)
@@ -108,17 +168,8 @@ $(if $(2),$$(cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir)/.$(1): --cpb-$(1) ;
 
 endef
 
-# $(call cpb_toolchains_gcc_toolchain_mk_libs_fn_lib_name,<lib_entry>)
-cpb_toolchains_gcc_toolchain_mk_libs_fn_lib_name = $(word 1,$(subst :, ,$(1)))
-
-# $(call cpb_toolchains_gcc_toolchain_mk_libs_fn_lib_dir,<lib_entry>)
-cpb_toolchains_gcc_toolchain_mk_libs_fn_lib_dir = $(word 2,$(subst :, ,$(1)))
-
-# $(call cpb_toolchains_gcc_toolchain_mk_libs_fn_lib_host,<lib_entry>)
-cpb_toolchains_gcc_toolchain_mk_libs_fn_lib_host = $(word 3,$(subst :, ,$(1)))
-
 # $(call cpb_toolchains_gcc_toolchain_mk_libs_template,<lib_entry>)
-cpb_toolchains_gcc_toolchain_mk_libs_template = $(call cpb_toolchains_gcc_toolchain_mk_libs_template1,$(call cpb_toolchains_gcc_toolchain_mk_libs_fn_lib_name,$(1)),$(call cpb_toolchains_gcc_toolchain_mk_libs_fn_lib_dir,$(1)),$(call cpb_toolchains_gcc_toolchain_mk_libs_fn_lib_host,$(1)))
+cpb_toolchains_gcc_toolchain_mk_libs_template = $(call cpb_toolchains_gcc_toolchain_mk_libs_template1,$(call FN_TOKEN,$(1),:,1),$(call FN_TOKEN,$(1),:,2),$(call FN_TOKEN,$(1),:,3))
 
 # $(call cpb_toolchains_gcc_toolchain_mk_libs_fn_template,<lib_entry>)
 cpb_toolchains_gcc_toolchain_mk_libs_fn_template = $(eval $(call cpb_toolchains_gcc_toolchain_mk_libs_template,$(1)))
@@ -128,14 +179,12 @@ $(foreach lib,$(LIBS),$(call cpb_toolchains_gcc_toolchain_mk_libs_fn_template,$(
 CPB_DEPS := $(cpb_toolchains_gcc_toolchain_mk_libs_ldflags)
 ifeq ($(cpb_toolchains_gcc_toolchain_mk_libs_has_lib_dir),1)
     INCLUDE_DIRS += $(cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir)/dist/include
-    LDFLAGS := $(LDFLAGS) -L$(cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir)/dist/lib $(CPB_DEPS)
+    override LDFLAGS := $(LDFLAGS) -L$(cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir)/dist/lib $(CPB_DEPS)
 else
-    LDFLAGS := $(LDFLAGS) $(CPB_DEPS)
+    override LDFLAGS := $(LDFLAGS) $(CPB_DEPS)
 endif
-LDFLAGS := $(strip $(LDFLAGS))
+override LDFLAGS := $(strip $(LDFLAGS))
 # ------------------------------------------------------------------------------
-
-ifneq ($(MAKECMDGOALS),deps) # *************************************************
 
 # Compiler management ----------------------------------------------------------
 ifeq ($(origin CFLAGS),command line)
@@ -153,7 +202,7 @@ endif
 ifeq ($(origin ARFLAGS),command line)
     $(error [ARFLAGS] Variable cannot be defined via command line)
 endif
-ARFLAGS := $(subst v,,$(subst r,,$(ARFLAGS)))
+override ARFLAGS := $(subst v,,$(subst r,,$(ARFLAGS)))
 
 ifeq ($(origin LDFLAGS),command line)
     $(error [LDFLAGS] Variable cannot be defined via command line)
@@ -194,8 +243,10 @@ endif
 # LD
 ifneq ($(SRC_FILES),)
     cpb_toolchains_gcc_toolchain_mk_is_cpp_project := $(strip $(filter %.cpp %.cxx %.cc,$(SRC_FILES)))
-    ifeq ($(cpb_toolchains_gcc_toolchain_mk_is_cpp_project),)
-        cpb_toolchains_gcc_toolchain_mk_is_cpp_project := $(strip $(foreach includeDir,$(INCLUDE_DIRS),$(shell find $(includeDir) -type f -name '*.hpp' -or -name '*.hxx' 2> /dev/null)))
+    ifeq ($(SKIP_DIR_INSPECTION),0)
+        ifeq ($(cpb_toolchains_gcc_toolchain_mk_is_cpp_project),)
+            cpb_toolchains_gcc_toolchain_mk_is_cpp_project := $(strip $(foreach includeDir,$(INCLUDE_DIRS),$(shell find $(includeDir) -type f -name '*.hpp' -or -name '*.hxx' 2> /dev/null)))
+        endif
     endif
 
     ifeq ($(cpb_toolchains_gcc_toolchain_mk_is_cpp_project),)
@@ -246,24 +297,14 @@ endif
 
 cpb_toolchains_gcc_toolchain_mk_include_flags := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
 
-CFLAGS   := $(strip -MMD -MP $(cpb_toolchains_gcc_toolchain_mk_include_flags) $(cpb_toolchains_gcc_toolchain_mk_cflags) $(CFLAGS))
-CXXFLAGS := $(strip -MMD -MP $(cpb_toolchains_gcc_toolchain_mk_include_flags) $(cpb_toolchains_gcc_toolchain_mk_cxxflags) $(CXXFLAGS))
-ASFLAGS  := $(strip -MMD -MP $(cpb_toolchains_gcc_toolchain_mk_include_flags) $(cpb_toolchains_gcc_toolchain_mk_asflags) $(ASFLAGS))
-ARFLAGS  := $(strip rcs $(ARFLAGS))
-LDFLAGS  := $(strip $(cpb_toolchains_gcc_toolchain_mk_ldflags) $(LDFLAGS))
+override CFLAGS   := $(call FN_UNIQUE,$(strip -MMD -MP $(cpb_toolchains_gcc_toolchain_mk_include_flags) $(cpb_toolchains_gcc_toolchain_mk_cflags) $(CFLAGS)))
+override CXXFLAGS := $(call FN_UNIQUE,$(strip -MMD -MP $(cpb_toolchains_gcc_toolchain_mk_include_flags) $(cpb_toolchains_gcc_toolchain_mk_cxxflags) $(CXXFLAGS)))
+override ASFLAGS  := $(call FN_UNIQUE,$(strip -MMD -MP $(cpb_toolchains_gcc_toolchain_mk_include_flags) $(cpb_toolchains_gcc_toolchain_mk_asflags) $(ASFLAGS)))
+override ARFLAGS  := $(call FN_UNIQUE,$(strip rcs $(ARFLAGS)))
+override LDFLAGS  := $(call FN_UNIQUE,$(strip $(cpb_toolchains_gcc_toolchain_mk_ldflags) $(LDFLAGS)))
 # ------------------------------------------------------------------------------
 
 # build ========================================================================
-ifdef PRE_BUILD_DEPS
-    $(call FN_CHECK_ORIGIN,PRE_BUILD_DEPS,file)
-endif
-ifdef BUILD_DEPS
-    $(call FN_CHECK_ORIGIN,BUILD_DEPS,file)
-endif
-ifdef POST_BUILD_DEPS
-    $(call FN_CHECK_ORIGIN,POST_BUILD_DEPS,file)
-endif
-
 ifeq ($(PROJ_TYPE),lib)
     # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
     ifneq ($(filter -fPIC,$(CFLAGS) $(CXXFLAGS)),)
@@ -288,6 +329,9 @@ else ifeq ($(PROJ_TYPE),app)
     cpb_toolchains_gcc_toolchain_mk_dep_files := $(cpb_toolchains_gcc_toolchain_mk_obj_files:.o=.d)
 endif
 
+ifneq ($(SRC_FILES),) #*********************************************************
+BUILD_DEPS += --cpb_toolchains_gcc_toolchain_mk_pre_build_check $(O_BUILD_DIR)/$(ARTIFACT)
+
 .PHONY: --cpb_toolchains_gcc_toolchain_mk_pre_build_check
 --cpb_toolchains_gcc_toolchain_mk_pre_build_check:
     ifneq ($(HOST),$(NATIVE_HOST))
@@ -296,27 +340,19 @@ endif
         endif
     endif
 
-ifneq ($(SRC_FILES),)
-    $(O_BUILD_DIR)/$(ARTIFACT): $(PRE_BUILD_DEPS) $(cpb_toolchains_gcc_toolchain_mk_obj_files) $(BUILD_DEPS)
-        ifeq ($(PROJ_TYPE),lib)
-            ifeq ($(LIB_TYPE),shared)
-	            @echo [LD] $@
-	            $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files) $(LDFLAGS))
-            else ifeq ($(LIB_TYPE),static)
-	            @echo [AR] $@
-	            $(VERBOSE)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files))
-            endif
-        else ifeq ($(PROJ_TYPE),app)
+$(O_BUILD_DIR)/$(ARTIFACT): $(cpb_toolchains_gcc_toolchain_mk_obj_files)
+    ifeq ($(PROJ_TYPE),lib)
+        ifeq ($(LIB_TYPE),shared)
 	        @echo [LD] $@
 	        $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files) $(LDFLAGS))
+        else ifeq ($(LIB_TYPE),static)
+	        @echo [AR] $@
+	        $(VERBOSE)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files))
         endif
-
-    .PHONY: build
-    build: --cpb_toolchains_gcc_toolchain_mk_pre_build_check $(O_BUILD_DIR)/$(ARTIFACT) $(POST_BUILD_DEPS) ;
-else
-    .PHONY: build
-    build: $(PRE_BUILD_DEPS) $(BUILD_DEPS) $(POST_BUILD_DEPS) ;
-endif
+    else ifeq ($(PROJ_TYPE),app)
+	    @echo [LD] $@
+	    $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files) $(LDFLAGS))
+    endif
 
 # C sources --------------------------------------------------------------------
 $(O_BUILD_DIR)/%.c$(cpb_toolchains_gcc_toolchain_mk_obj_suffix): %.c
@@ -351,8 +387,8 @@ $(eval $(call cpb_toolchains_gcc_toolchain_mk_as_template,S))
 # ------------------------------------------------------------------------------
 
 -include $(cpb_toolchains_gcc_toolchain_mk_dep_files)
+endif
+# ******************************************************************************
 # ==============================================================================
-
-endif # ifneq ($(MAKECMDGOALS),deps) *******************************************
 
 endif # ifndef cpb_toolchains_gcc_toolchain_mk

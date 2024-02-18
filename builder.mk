@@ -317,8 +317,17 @@ ifdef POST_BUILD_DEPS
     $(call FN_CHECK_ORIGIN,POST_BUILD_DEPS,file)
 endif
 
+.PHONY: --cpb_builder_mk_pre_build
+--cpb_builder_mk_pre_build: $(PRE_BUILD_DEPS) ;
+
+.PHONY: --cpb_builder_mk_build
+--cpb_builder_mk_build: --cpb_builder_mk_pre_build $(BUILD_DEPS) ;
+
+.PHONY: --cpb_builder_mk_post_build
+--cpb_builder_mk_post_build: --cpb_builder_mk_build $(POST_BUILD_DEPS) ;
+
 .PHONY: build
-build: $(PRE_BUILD_DEPS) $(BUILD_DEPS) $(POST_BUILD_DEPS) ;
+build: --cpb_builder_mk_post_build ;
 # ==============================================================================
 
 # dist =========================================================================
