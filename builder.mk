@@ -100,8 +100,10 @@ endif
 # ------------------------------------------------------------------------------
 
 # Only one target per make call ------------------------------------------------
-ifneq ($(words $(MAKECMDGOALS)),1)
-    $(error Only one target can be called per time)
+ifneq ($(words $(MAKECMDGOALS)),0)
+    ifneq ($(words $(MAKECMDGOALS)),1)
+        $(error Only one target can be called per time)
+    endif
 endif
 # ------------------------------------------------------------------------------
 
@@ -271,7 +273,7 @@ all: dist ;
 # ==============================================================================
 
 # print-vars ===================================================================
-DEFAULT_VAR_SET += O V VERBOSE PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS
+DEFAULT_VAR_SET += O PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS TOOLCHAIN TOOLCHAIN_DIRS
 $(call FN_CHECK_NON_EMPTY,DEFAULT_VAR_SET)
 $(call FN_CHECK_ORIGIN,DEFAULT_VAR_SET,file)
 

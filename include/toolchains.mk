@@ -36,10 +36,6 @@ ifdef cpb_include_toolchains_mk_layers
     $(error [cpb_include_toolchains_mk_layers] Reserved variable)
 endif
 
-ifdef cpb_include_toolchains_mk_layer_aux_parser
-    $(error [cpb_include_toolchains_mk_layer_aux_parser] Reserved variable)
-endif
-
 ifdef cpb_include_toolchains_mk_includes
     $(error [cpb_include_toolchains_mk_includes] Reserved variable)
 endif
@@ -57,23 +53,14 @@ else
     endif
 endif
 
+TOOLCHAIN_DIRS := $(strip $(TOOLCHAIN_DIRS) $(dir $(cpb_builder_mk))toolchains)
+
 # Precedence: From most specific to most generic. For example,
 # for 'gcc-linux-arm-v7', accepted layers are:
 #     gcc-linux-arm-v7 > gcc/linux/arm/v7 > gcc/linux/arm > gcc/linux > gcc
-cpb_include_toolchains_mk_layers = $(cpb_include_toolchains_mk_host) $(call FN_REVERSE,$(call FN_FACTORIZE,$(cpb_include_toolchains_mk_host),-,/))
+cpb_include_toolchains_mk_layers = $(cpb_include_toolchains_mk_host) $(call FN_REVERSE,$(call FN_HOST_FACTORIZE,$(cpb_include_toolchains_mk_host),-,/))
 
-# Auxiliar checker for 'toolchain.mk' in a layer directory ---------------------
-#
-# This function will add values to 'cpb_include_toolchains_mk_includes' on
-# each call
-#
-# Syntax $(call cpb_include_toolchains_mk_layer_aux_parser,toolchainDir,layer)
-define cpb_include_toolchains_mk_layer_aux_parser
-$(eval cpb_include_toolchains_mk_includes += $(if $(wildcard $(1)/$(2)/toolchain.mk),$(realpath $(1)/$(2)/toolchain.mk),))
-endef
-# ------------------------------------------------------------------------------
-
-$(foreach toolchainDir,$(TOOLCHAIN_DIRS),$(foreach layer,$(cpb_include_toolchains_mk_layers),$(call cpb_include_toolchains_mk_layer_aux_parser,$(hostDir),$(layer))))
+$(foreach toolchainDir,$(TOOLCHAIN_DIRS),$(foreach layer,$(cpb_include_toolchains_mk_layers),$(eval cpb_include_toolchains_mk_includes += $(if $(wildcard $(toolchainDir)/$(layer)/toolchain.mk),$(realpath $(toolchainDir)/$(layer)/toolchain.mk),))))
 
 cpb_include_toolchains_mk_includes := $(strip $(cpb_include_toolchains_mk_includes))
 
