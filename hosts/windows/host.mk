@@ -20,29 +20,31 @@
 
 # Windows customizations for GCC toolchain
 
-ifndef cpb_toolchains_gcc_windows_toolchain_mk
-cpb_toolchains_gcc_windows_toolchain_mk := $(lastword $(MAKEFILE_LIST))
+ifndef cpb_hosts_windows_host_mk
+cpb_hosts_windows_host_mk := $(lastword $(MAKEFILE_LIST))
 
 ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
 
 ifneq ($(filter app lib,$(PROJ_TYPE)),)
-    ifeq ($(HOST),windows-x86)
-        export CROSS_COMPILE ?= i686-w64-mingw32-
-    else ifeq ($(HOST),windows-x64)
-        export CROSS_COMPILE ?= x86_64-w64-mingw32-
-    endif
-
-    ifeq ($(PROJ_TYPE),lib)
-        ifeq ($(LIB_TYPE),shared)
-            override LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
-            override LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
-
-            DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).lib->lib/$(ARTIFACT).lib
-            DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).def->lib/$(ARTIFACT).def
+    ifeq ($(PROJ_TYPE),app)
+        ifndef ARTIFACT
+            ARTIFACT := $(PROJ_NAME).exe
+        endif
+    else
+        # $(PROJ_TYPE) is equal lib
+        LIB_TYPE ?= shared
+        ifeq ($(LIB_TYPE),static)
+            ifndef ARTIFACT
+                ARTIFACT := lib$(LIB_NAME).a
+            endif
+        else ifeq ($(LIB_TYPE),shared)
+            ifndef ARTIFACT
+                ARTIFACT := $(LIB_NAME).dll
+            endif
         endif
 	endif
 endif
 
-endif #cpb_toolchains_gcc_windows_toolchain_mk
+endif #cpb_hosts_windows_host_mk

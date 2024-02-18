@@ -62,6 +62,8 @@ else
     endif
 endif
 
+HOSTS_DIRS := $(strip $(HOSTS_DIRS) $(dir $(cpb_builder_mk))hosts)
+
 # Precedence: From most specific to most generic. For example,
 # for host 'linux-arm-v7', accepted layers are:
 #     linux-arm-v7 > linux/arm/v7 > linux/arm > linux

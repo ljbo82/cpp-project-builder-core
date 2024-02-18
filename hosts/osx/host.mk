@@ -20,8 +20,8 @@
 
 # OSX customizations for GCC toolchain
 
-ifndef cpb_toolchains_gcc_osx_toolchain_mk
-cpb_toolchains_gcc_osx_toolchain_mk := $(lastword $(MAKEFILE_LIST))
+ifndef cpb_hosts_osx_host_mk
+cpb_hosts_osx_host_mk := $(lastword $(MAKEFILE_LIST))
 
 ifndef cpb_builder_mk
     $(error This file cannot be manually included)
@@ -43,4 +43,4 @@ else ifeq ($(PROJ_TYPE),lib)
     endif
 endif
 
-endif # ifndef cpb_toolchains_gcc_osx_toolchain_mk
+endif # ifndef cpb_hosts_osx_host_mk
