@@ -27,29 +27,7 @@ ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
 
-ifdef cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir
-    $(error [cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_libs_template1
-    $(error [cpb_toolchains_gcc_toolchain_mk_libs_template1] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_libs_has_lib_dir
-    $(error [cpb_toolchains_gcc_toolchain_mk_libs_has_lib_dir] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_libs_ldflags
-    $(error [cpb_toolchains_gcc_toolchain_mk_libs_ldflags] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_libs_template
-    $(error [cpb_toolchains_gcc_toolchain_mk_libs_template] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_libs_fn_template
-    $(error [cpb_toolchains_gcc_toolchain_mk_libs_fn_template] Reserved variable)
-endif
+include $(dir $(cpb_toolchains_gcc_toolchain_mk))libs.mk
 
 ifdef cpb_toolchains_gcc_toolchain_mk_is_cpp_project
     $(error [cpb_toolchains_gcc_toolchain_mk_is_cpp_project] Reserved variable)
@@ -115,11 +93,7 @@ ifdef cpb_toolchains_gcc_toolchain_mk_dist_deps
     $(error [cpb_toolchains_gcc_toolchain_mk_dist_deps] Reserved variable)
 endif
 
-ifdef CPB_DEPS
-    $(error [CPB_DEPS] Reserved variable)
-endif
-
-DEFAULT_VAR_SET += CPB_DEPS LIBS STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS
+DEFAULT_VAR_SET += LIBS STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS
 
 # Strips release build ---------------------------------------------------------
 # NOTE: A host layer may have set STRIP_RELEASE
@@ -140,50 +114,6 @@ $(call FN_CHECK_WORDS,OPTIMIZE_RELEASE,0 1)
 ifneq ($(OPTIMIZE_RELEASE),0)
     RELEASE_OPTIMIZATION_LEVEL ?= 2
 endif
-# ------------------------------------------------------------------------------
-
-# deps =========================================================================
-.PHONY: deps
-deps:
-	@printf -- "$(strip $(CPB_DEPS))"
-# ==============================================================================
-
-# Libs -------------------------------------------------------------------------
-ifdef LIBS
-    $(call FN_CHECK_ORIGIN,LIBS,file)
-endif
-
-export cpb_toolchains_gcc_toolchain_mk_o_libs_dir ?= $(abspath $(O)/libs)
-cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir = $(call FN_REL_DIR,$(CURDIR),$(cpb_toolchains_gcc_toolchain_mk_o_libs_dir))
-
-#$(call cpb_toolchains_gcc_toolchain_mk_libs_template1,<lib_name>,[lib_dir],[host])
-define cpb_toolchains_gcc_toolchain_mk_libs_template1
-cpb_toolchains_gcc_toolchain_mk_libs_has_lib_dir := $$(if $$(or $$(cpb_toolchains_gcc_toolchain_mk_libs_has_lib_dir),$(2)),1,)
-cpb_toolchains_gcc_toolchain_mk_libs_ldflags += $(strip -l$(1) $(if $(2),`$(MAKE) --no-print-directory -C $(call FN_REL_DIR,$(CURDIR),$(2)) deps SKIP_DIR_INSPECTION=1$(if $(3), HOST=$(3),)`,))
-
-$(if $(2),PRE_BUILD_DEPS += $$(cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir)/.$(1),)
-$(if $(2),--cpb-$(1):,)
-$(if $(2),	$$(VERBOSE)$$(MAKE) -C $(call FN_REL_DIR,$(CURDIR),$(2)) O=$$(call FN_REL_DIR,$(2),$$(cpb_toolchains_gcc_toolchain_mk_o_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=.$(1)$(if $(3), HOST=$(3),),)
-$(if $(2),$$(cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir)/.$(1): --cpb-$(1) ;,)
-
-endef
-
-# $(call cpb_toolchains_gcc_toolchain_mk_libs_template,<lib_entry>)
-cpb_toolchains_gcc_toolchain_mk_libs_template = $(call cpb_toolchains_gcc_toolchain_mk_libs_template1,$(call FN_TOKEN,$(1),:,1),$(call FN_TOKEN,$(1),:,2),$(call FN_TOKEN,$(1),:,3))
-
-# $(call cpb_toolchains_gcc_toolchain_mk_libs_fn_template,<lib_entry>)
-cpb_toolchains_gcc_toolchain_mk_libs_fn_template = $(eval $(call cpb_toolchains_gcc_toolchain_mk_libs_template,$(1)))
-
-$(foreach lib,$(LIBS),$(call cpb_toolchains_gcc_toolchain_mk_libs_fn_template,$(lib)))
-
-CPB_DEPS := $(cpb_toolchains_gcc_toolchain_mk_libs_ldflags)
-ifeq ($(cpb_toolchains_gcc_toolchain_mk_libs_has_lib_dir),1)
-    INCLUDE_DIRS += $(cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir)/dist/include
-    override LDFLAGS := $(LDFLAGS) -L$(cpb_toolchains_gcc_toolchain_mk_o_libs_rel_dir)/dist/lib $(CPB_DEPS)
-else
-    override LDFLAGS := $(LDFLAGS) $(CPB_DEPS)
-endif
-override LDFLAGS := $(strip $(LDFLAGS))
 # ------------------------------------------------------------------------------
 
 # Compiler management ----------------------------------------------------------
