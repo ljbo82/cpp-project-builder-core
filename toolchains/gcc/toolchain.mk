@@ -27,7 +27,7 @@ ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
 
-include $(dir $(cpb_toolchains_gcc_toolchain_mk))libs.mk
+include $(dir $(cpb_toolchains_gcc_toolchain_mk))deps.mk
 
 ifdef cpb_toolchains_gcc_toolchain_mk_is_cpp_project
     $(error [cpb_toolchains_gcc_toolchain_mk_is_cpp_project] Reserved variable)
