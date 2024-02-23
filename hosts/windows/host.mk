@@ -20,12 +20,12 @@
 
 # Windows customizations for GCC toolchain
 
-ifndef cpb_hosts_windows_host_mk
-cpb_hosts_windows_host_mk := $(lastword $(MAKEFILE_LIST))
-
 ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
+
+ifndef cpb_hosts_windows_host_mk
+cpb_hosts_windows_host_mk := $(lastword $(MAKEFILE_LIST))
 
 ifneq ($(filter app lib,$(PROJ_TYPE)),)
     ifeq ($(PROJ_TYPE),app)

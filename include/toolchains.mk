@@ -20,25 +20,17 @@
 
 # Host management
 
-ifndef cpb_include_toolchains_mk
-cpb_include_toolchains_mk := $(lastword $(MAKEFILE_LIST))
-
 ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
 
+ifndef cpb_include_toolchains_mk
+cpb_include_toolchains_mk := $(lastword $(MAKEFILE_LIST))
+
 # Reserved variables -----------------------------------------------------------
-ifdef cpb_include_toolchains_mk_host
-    $(error [cpb_include_toolchains_mk_host] Reserved variable)
-endif
-
-ifdef cpb_include_toolchains_mk_layers
-    $(error [cpb_include_toolchains_mk_layers] Reserved variable)
-endif
-
-ifdef cpb_include_toolchains_mk_includes
-    $(error [cpb_include_toolchains_mk_includes] Reserved variable)
-endif
+$(call FN_CHECK_RESERVED,cpb_include_toolchains_mk_host)
+$(call FN_CHECK_RESERVED,cpb_include_toolchains_mk_layers)
+$(call FN_CHECK_RESERVED,cpb_include_toolchains_mk_includes)
 # ------------------------------------------------------------------------------
 
 TOOLCHAIN ?= gcc

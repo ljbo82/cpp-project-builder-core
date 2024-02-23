@@ -27,26 +27,14 @@
 ifndef cpb_include_native_mk
 cpb_include_native_mk := $(lastword $(MAKEFILE_LIST))
 
+include $(dir $(cpb_include_native_mk))functions.mk
+
 # Reserved variables -----------------------------------------------------------
-ifdef cpb_include_native_mk_os
-    $(error [cpb_include_native_mk_os] Reserved variable)
-endif
-
-ifdef cpb_include_native_mk_arch
-    $(error [cpb_include_native_mk_arch] Reserved variable)
-endif
-
-ifdef NATIVE_OS
-    $(error [NATIVE_OS] Reserved variable)
-endif
-
-ifdef NATIVE_ARCH
-    $(error [NATIVE_ARCH] Reserved variable)
-endif
-
-ifdef NATIVE_HOST
-    $(error [NATIVE_HOST] Reserved variable)
-endif
+$(call FN_CHECK_RESERVED,cpb_include_native_mk_os)
+$(call FN_CHECK_RESERVED,cpb_include_native_mk_arch)
+$(call FN_CHECK_RESERVED,NATIVE_OS)
+$(call FN_CHECK_RESERVED,NATIVE_ARCH)
+$(call FN_CHECK_RESERVED,NATIVE_HOST)
 # ------------------------------------------------------------------------------
 
 ifeq ($(OS),Windows_NT)

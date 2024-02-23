@@ -23,13 +23,7 @@
 ifndef cpb_include_common_mk
 cpb_include_common_mk := $(lastword $(MAKEFILE_LIST))
 
-ifdef cpb_include_common_mk_self_dir
-    $(error [cpb_include_common_mk_self_dir] Reserved variable)
-endif
-
-cpb_include_common_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
-
-include $(cpb_include_common_mk_self_dir)functions.mk
+include $(dir $(cpb_include_common_mk))functions.mk
 
 # Output directory -------------------------------------------------------------
 O ?= output
@@ -40,10 +34,8 @@ $(call FN_CHECK_NO_WHITESPACE,O)
 # Enable/Disable verbose mode --------------------------------------------------
 V ?= 0
 $(call FN_CHECK_NON_EMPTY,V)
-$(call FN_CHECK_WORDS,V,0 1)
-ifdef VERBOSE
-    $(error [VERBOSE] Reserved variable)
-endif
+$(call FN_CHECK_OPTIONS,V,0 1)
+$(call FN_CHECK_RESERVED,VERBOSE)
 VERBOSE := $(if $(filter 0,$(V)),@,)
 # ------------------------------------------------------------------------------
 

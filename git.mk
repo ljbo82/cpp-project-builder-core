@@ -21,19 +21,17 @@
 # Git repository support
 
 ifndef cpb_git_mk
-cpb_git_mk := 1
+cpb_git_mk := $(lastword $(MAKEFILE_LIST))
 
-override undefine cpb_git_mk_self_dir
-
-cpb_git_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
-
-include $(cpb_git_mk_self_dir)include/functions.mk
+include $(dir $(cpb_git_mk))include/functions.mk
 
 GIT_REPO_DIR ?= .
 $(call FN_CHECK_NON_EMPTY,GIT_REPO_DIR)
 $(call FN_CHECK_NO_WHITESPACE,GIT_REPO_DIR)
 
+$(call FN_CHECK_RESERVED,cpb_git_mk_repo_available)
 cpb_git_mk_repo_available := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1 && echo y)
+
 ifneq ($(cpb_git_mk_repo_available),)
     ifdef GIT_COMMIT
         $(error [GIT_COMMIT] Reserved variable)
@@ -71,9 +69,7 @@ ifneq ($(cpb_git_mk_repo_available),)
     endif
 endif
 
-ifdef GIT_VERSION
-    $(error [GIT_VERSION] Reserved variable)
-endif
+$(call FN_CHECK_RESERVED,GIT_VERSION)
 ifneq ($(GIT_TAG),)
     GIT_VERSION := $(GIT_TAG)
 else ifneq ($(GIT_COMMIT_SHORT),)
@@ -85,7 +81,5 @@ ifneq ($(GIT_VERSION),)
         GIT_VERSION := $(GIT_VERSION)-dirty
     endif
 endif
-
-undefine cpb_git_mk_repo_available
 
 endif # ifndef cpb_git_mk

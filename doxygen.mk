@@ -21,21 +21,15 @@
 # Doxygen support
 
 ifndef cpb_doxygen_mk
-cpb_doxygen_mk := 1
+cpb_doxygen_mk := $(lastword $(MAKEFILE_LIST))
 
-override undefine cpb_doxygen_mk_self_dir
-
-cpb_doxygen_mk_self_dir := $(dir $(lastword $(MAKEFILE_LIST)))
-
-include $(cpb_doxygen_mk_self_dir)include/common.mk
+include $(dir $(cpb_doxygen_mk))include/common.mk
 
 # Doc src/output directories----------------------------------------------------
 DOC_DIR ?= doc
 $(call FN_CHECK_NON_EMPTY,DOC_DIR)
 $(call FN_CHECK_NO_WHITESPACE,DOC_DIR)
-ifdef O_DOC_DIR
-    $(error [O_DOC_DIR] Reserved variable)
-endif
+$(call FN_CHECK_RESERVED,O_DOC_DIR)
 O_DOC_DIR := $(O)/doc
 # ------------------------------------------------------------------------------
 

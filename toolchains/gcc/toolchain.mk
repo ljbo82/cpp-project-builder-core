@@ -20,78 +20,31 @@
 
 # GCC toolchain
 
-ifndef cpb_toolchains_gcc_toolchain_mk
-cpb_toolchains_gcc_toolchain_mk := $(lastword $(MAKEFILE_LIST))
-
 ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
 
+ifndef cpb_toolchains_gcc_toolchain_mk
+cpb_toolchains_gcc_toolchain_mk := $(lastword $(MAKEFILE_LIST))
+
 include $(dir $(cpb_toolchains_gcc_toolchain_mk))deps.mk
 
-ifdef cpb_toolchains_gcc_toolchain_mk_is_cpp_project
-    $(error [cpb_toolchains_gcc_toolchain_mk_is_cpp_project] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_ld
-    $(error [cpb_toolchains_gcc_toolchain_mk_ld] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_cflags
-    $(error [cpb_toolchains_gcc_toolchain_mk_cflags] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_cxxflags
-    $(error [cpb_toolchains_gcc_toolchain_mk_cxxflags] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_asflags
-    $(error [cpb_toolchains_gcc_toolchain_mk_asflags] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_ldflags
-    $(error [cpb_toolchains_gcc_toolchain_mk_ldflags] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_include_flags
-    $(error [cpb_toolchains_gcc_toolchain_mk_include_flags] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_obj_suffix
-    $(error [cpb_toolchains_gcc_toolchain_mk_obj_suffix] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_obj_files
-    $(error [cpb_toolchains_gcc_toolchain_mk_obj_files] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_dep_files
-    $(error [cpb_toolchains_gcc_toolchain_mk_dep_files] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_cxx_template
-    $(error [cpb_toolchains_gcc_toolchain_mk_cxx_template] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_as_template
-    $(error [cpb_toolchains_gcc_toolchain_mk_as_template] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_dir_entry
-    $(error [cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_dir_entry] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_file_entry
-    $(error [cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_file_entry] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_dist_deps_template
-    $(error [cpb_toolchains_gcc_toolchain_mk_dist_deps_template] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_toolchain_mk_dist_deps
-    $(error [cpb_toolchains_gcc_toolchain_mk_dist_deps] Reserved variable)
-endif
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_is_cpp_project)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_ld)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_cflags)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_cxxflags)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_asflags)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_ldflags)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_include_flags)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_obj_suffix)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_obj_files)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_dep_files)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_cxx_template)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_as_template)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_dir_entry)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_file_entry)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_dist_deps_template)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_dist_deps)
 
 DEFAULT_VAR_SET += LIBS STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS
 
@@ -101,7 +54,7 @@ STRIP_RELEASE ?= 1
 $(call FN_CHECK_ORIGIN,STRIP_RELEASE,file)
 $(call FN_CHECK_NON_EMPTY,STRIP_RELEASE)
 $(call FN_CHECK_NO_WHITESPACE,STRIP_RELEASE)
-$(call FN_CHECK_WORDS,STRIP_RELEASE,0 1)
+$(call FN_CHECK_OPTIONS,STRIP_RELEASE,0 1)
 # ------------------------------------------------------------------------------
 
 # Optimizes release build ------------------------------------------------------
@@ -110,7 +63,7 @@ OPTIMIZE_RELEASE ?= 1
 $(call FN_CHECK_ORIGIN,OPTIMIZE_RELEASE,file)
 $(call FN_CHECK_NON_EMPTY,OPTIMIZE_RELEASE)
 $(call FN_CHECK_NO_WHITESPACE,OPTIMIZE_RELEASE)
-$(call FN_CHECK_WORDS,OPTIMIZE_RELEASE,0 1)
+$(call FN_CHECK_OPTIONS,OPTIMIZE_RELEASE,0 1)
 ifneq ($(OPTIMIZE_RELEASE),0)
     RELEASE_OPTIMIZATION_LEVEL ?= 2
 endif

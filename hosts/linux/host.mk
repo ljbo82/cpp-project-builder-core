@@ -20,12 +20,12 @@
 
 # Linux customizations for GCC toolchain
 
-ifndef cpb_hosts_linux_host_mk
-cpb_hosts_linux_host_mk := $(lastword $(MAKEFILE_LIST))
-
 ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
+
+ifndef cpb_hosts_linux_host_mk
+cpb_hosts_linux_host_mk := $(lastword $(MAKEFILE_LIST))
 
 ifeq ($(PROJ_TYPE),app)
     ifndef ARTIFACT

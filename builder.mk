@@ -23,74 +23,30 @@
 ifndef cpb_builder_mk
 cpb_builder_mk := $(lastword $(MAKEFILE_LIST))
 
+include $(dir $(cpb_builder_mk))include/common.mk
+include $(dir $(cpb_builder_mk))include/native.mk
+
 # Reserved variables -----------------------------------------------------------
-ifdef cpb_builder_mk_self_dir
-    $(error [cpb_builder_mk_self_dir] Reserved variable)
-endif
-
-ifdef cpb_builder_mk_min_make_version
-    $(error [cpb_builder_mk_min_make_version] Reserved variable)
-endif
-
-ifdef cpb_builder_mk_make_version
-    $(error [cpb_builder_mk_make_version] Reserved variable)
-endif
-
-ifdef cpb_builder_mk_make_version_cmp
-    $(error [cpb_builder_mk_make_version_cmp] Reserved variable)
-endif
-
-ifdef cpb_builder_mk_src_file_filter
-    $(error [cpb_builder_mk_src_file_filter] Reserved variable)
-endif
-
-ifdef cpb_builder_mk_invalid_src_files
-    $(error [cpb_builder_mk_invalid_src_files] Reserved variable)
-endif
-
-ifdef cpb_builder_mk_dist_dirs
-    $(error [cpb_builder_mk_dist_dirs] Reserved variable)
-endif
-
-ifdef cpb_builder_mk_dist_files
-    $(error [cpb_builder_mk_dist_files] Reserved variable)
-endif
-
-ifdef cpb_builder_mk_fn_dist_adjust_dir_entry
-    $(error [cpb_builder_mk_fn_dist_adjust_dir_entry] Reserved variable)
-endif
-
-ifdef cpb_builder_mk_fn_dist_adjust_file_entry
-    $(error [cpb_builder_mk_fn_dist_adjust_file_entry] Reserved variable)
-endif
-
-ifdef cpb_builder_mk_dist_deps_template
-    $(error [cpb_builder_mk_dist_deps_template] Reserved variable)
-endif
-
-ifdef O_BUILD_DIR
-    $(error [O_BUILD_DIR] Reserved variable)
-endif
-
-ifdef O_DIST_DIR
-    $(error [O_DIST_DIR] Reserved variable)
-endif
-
-ifdef DEFAULT_VAR_SET
-    $(error [DEFAULT_VAR_SET] Reserved variable)
-endif
+$(call FN_CHECK_RESERVED,cpb_builder_mk_min_make_version)
+$(call FN_CHECK_RESERVED,cpb_builder_mk_make_version)
+$(call FN_CHECK_RESERVED,cpb_builder_mk_make_version_cmp)
+$(call FN_CHECK_RESERVED,cpb_builder_mk_src_file_filter)
+$(call FN_CHECK_RESERVED,cpb_builder_mk_invalid_src_files)
+$(call FN_CHECK_RESERVED,cpb_builder_mk_dist_dirs)
+$(call FN_CHECK_RESERVED,cpb_builder_mk_dist_files)
+$(call FN_CHECK_RESERVED,cpb_builder_mk_fn_dist_adjust_dir_entry)
+$(call FN_CHECK_RESERVED,cpb_builder_mk_fn_dist_adjust_file_entry)
+$(call FN_CHECK_RESERVED,cpb_builder_mk_dist_deps_template)
+$(call FN_CHECK_RESERVED,O_BUILD_DIR)
+$(call FN_CHECK_RESERVED,O_DIST_DIR)
+$(call FN_CHECK_RESERVED,DEFAULT_VAR_SET)
 # ------------------------------------------------------------------------------
-
-cpb_builder_mk_self_dir := $(dir $(cpb_builder_mk))
-
-include $(cpb_builder_mk_self_dir)include/common.mk
-include $(cpb_builder_mk_self_dir)include/native.mk
 
 # Checks if GNU Make is supported ----------------------------------------------
 cpb_builder_mk_min_make_version := 4.0
 cpb_builder_mk_make_version := $(word 3,$(shell $(MAKE) --version | grep "GNU Make"))
 cpb_builder_mk_make_version_cmp := $(call FN_SEMVER_CMP,$(cpb_builder_mk_make_version),$(cpb_builder_mk_min_make_version))
-$(call FN_CHECK_WORDS,cpb_builder_mk_make_version_cmp,0 1,Incompatible GNU Make version: $(if $(cpb_builder_mk_make_version),$(cpb_builder_mk_make_version),unknown) (min version is $(cpb_builder_mk_min_make_version)))
+$(call FN_CHECK_OPTIONS,cpb_builder_mk_make_version_cmp,0 1,Incompatible GNU Make version: $(if $(cpb_builder_mk_make_version),$(cpb_builder_mk_make_version),unknown) (min version is $(cpb_builder_mk_min_make_version)))
 # ------------------------------------------------------------------------------
 
 # Checks for whitespace in CWD -------------------------------------------------
@@ -126,7 +82,7 @@ endif
 $(call FN_CHECK_NON_EMPTY,PROJ_TYPE)
 $(call FN_CHECK_ORIGIN,PROJ_TYPE,file)
 $(call FN_CHECK_NO_WHITESPACE,PROJ_TYPE)
-$(call FN_CHECK_WORDS,PROJ_TYPE,app lib)
+$(call FN_CHECK_OPTIONS,PROJ_TYPE,app lib)
 # ------------------------------------------------------------------------------
 
 # LIB_NAME (Only for PROJ_TYPE == lib) -----------------------------------------
@@ -139,7 +95,7 @@ endif
 DEBUG ?= 0
 $(call FN_CHECK_NON_EMPTY,DEBUG)
 $(call FN_CHECK_NO_WHITESPACE,DEBUG)
-$(call FN_CHECK_WORDS,DEBUG,0 1)
+$(call FN_CHECK_OPTIONS,DEBUG,0 1)
 # ------------------------------------------------------------------------------
 
 # Build sub-directory ----------------------------------------------------------
@@ -186,14 +142,14 @@ endif
 # ------------------------------------------------------------------------------
 
 # Process host layers ----------------------------------------------------------
-include $(cpb_builder_mk_self_dir)include/hosts.mk
+include $(dir $(cpb_builder_mk))include/hosts.mk
 # ------------------------------------------------------------------------------
 
 # LIB_TYPE ---------------------------------------------------------------------
 # NOTE: A host layer may have set LIB_TYPE
 LIB_TYPE ?= static
 $(call FN_CHECK_NON_EMPTY,LIB_TYPE)
-$(call FN_CHECK_WORDS,LIB_TYPE,shared static)
+$(call FN_CHECK_OPTIONS,LIB_TYPE,shared static)
 # ------------------------------------------------------------------------------
 
 # ARTIFACT ---------------------------------------------------------------------
@@ -206,7 +162,7 @@ $(call FN_CHECK_NO_WHITESPACE,ARTIFACT)
 # Skips directory inspection to get file lists ---------------------------------
 SKIP_DIR_INSPECTION ?= 0
 $(call FN_CHECK_NON_EMPTY,SKIP_DIR_INSPECTION)
-$(call FN_CHECK_WORDS,SKIP_DIR_INSPECTION,0 1)
+$(call FN_CHECK_OPTIONS,SKIP_DIR_INSPECTION,0 1)
 # ------------------------------------------------------------------------------
 
 # Identify source files --------------------------------------------------------
@@ -260,7 +216,7 @@ endif
 # ------------------------------------------------------------------------------
 
 # Process toolchain layers -----------------------------------------------------
-include $(cpb_builder_mk_self_dir)include/toolchains.mk
+include $(dir $(cpb_builder_mk))include/toolchains.mk
 # ------------------------------------------------------------------------------
 
 .NOTPARALLEL:

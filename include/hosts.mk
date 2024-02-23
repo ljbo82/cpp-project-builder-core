@@ -20,29 +20,18 @@
 
 # Host layers management
 
-ifndef cpb_include_hosts_mk
-cpb_include_hosts_mk := $(lastword $(MAKEFILE_LIST))
-
 ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
 
+ifndef cpb_include_hosts_mk
+cpb_include_hosts_mk := $(lastword $(MAKEFILE_LIST))
+
 # Reserved variables -----------------------------------------------------------
-ifdef cpb_include_hosts_mk_layers
-    $(error [cpb_include_hosts_mk_layers] Reserved variable)
-endif
-
-ifdef cpb_include_hosts_mk_layer_aux_parser
-    $(error [cpb_include_hosts_mk_layer_aux_parser] Reserved variable)
-endif
-
-ifdef cpb_include_hosts_mk_includes
-    $(error [cpb_include_hosts_mk_includes] Reserved variable)
-endif
-
-ifdef cpb_include_hosts_mk_src_dirs
-    $(error [cpb_include_hosts_mk_src_dirs] Reserved variable)
-endif
+$(call FN_CHECK_RESERVED,cpb_include_hosts_mk_layers)
+$(call FN_CHECK_RESERVED,cpb_include_hosts_mk_layer_aux_parser)
+$(call FN_CHECK_RESERVED,cpb_include_hosts_mk_includes)
+$(call FN_CHECK_RESERVED,cpb_include_hosts_mk_src_dirs)
 # ------------------------------------------------------------------------------
 
 ifndef HOST

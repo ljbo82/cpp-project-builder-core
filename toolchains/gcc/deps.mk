@@ -20,12 +20,12 @@
 
 # Library dependency management
 
-ifndef cpb_toolchains_gcc_deps_mk
-cpb_toolchains_gcc_deps_mk := $(lastword $(MAKEFILE_LIST))
-
 ifndef cpb_toolchains_gcc_toolchain_mk
     $(error This file cannot be manually included)
 endif
+
+ifndef cpb_toolchains_gcc_deps_mk
+cpb_toolchains_gcc_deps_mk := $(lastword $(MAKEFILE_LIST))
 
 # ------------------------------------------------------------------------------
 ifdef cpb_toolchains_gcc_deps_mk_o_abs_libs_dir
@@ -37,21 +37,10 @@ endif
 export cpb_toolchains_gcc_deps_mk_o_abs_libs_dir ?= $(abspath $(O)/libs)
 # ------------------------------------------------------------------------------
 
-ifdef cpb_toolchains_gcc_deps_mk_o_libs_dir
-    $(error [cpb_toolchains_gcc_deps_mk_o_libs_dir] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_deps_mk_lib_template
-    $(error [cpb_toolchains_gcc_deps_mk_lib_template] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_deps_mk_ldflags
-    $(error [cpb_toolchains_gcc_deps_mk_ldflags] Reserved variable)
-endif
-
-ifdef cpb_toolchains_gcc_deps_mk_has_lib_to_build
-    $(error [cpb_toolchains_gcc_deps_mk_has_lib_to_build] Reserved variable)
-endif
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_deps_mk_o_libs_dir)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_deps_mk_lib_template)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_deps_mk_ldflags)
+$(call FN_CHECK_RESERVED,cpb_toolchains_gcc_deps_mk_has_lib_to_build)
 
 ifdef LIBS
     $(call FN_CHECK_ORIGIN,LIBS,file)
