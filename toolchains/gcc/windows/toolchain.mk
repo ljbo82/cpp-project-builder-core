@@ -36,11 +36,13 @@ ifneq ($(filter app lib,$(PROJ_TYPE)),)
 
     ifeq ($(PROJ_TYPE),lib)
         ifeq ($(LIB_TYPE),shared)
-            override LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
-            override LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
+            ifneq ($(SRC_FILES),)
+                override LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
+                override LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
 
-            DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).lib:lib/$(ARTIFACT).lib
-            DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).def:lib/$(ARTIFACT).def
+                DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).lib:lib/$(ARTIFACT).lib
+                DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).def:lib/$(ARTIFACT).def
+            endif
         endif
 	endif
 endif
