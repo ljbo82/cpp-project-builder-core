@@ -33,6 +33,7 @@ $(call FN_CHECK_RESERVED,cpb_include_common_mk_make_version_cmp)
 CPB_VERSION := 1.0.0
 ifdef CPB_MIN_VERSION
     $(call FN_CHECK_ORIGIN,CPB_MIN_VERSION,file)
+    $(call FN_CHECK_NO_WHITESPACE,CPB_MIN_VERSION)
     $(if $(call FN_SEMVER_CMP,$(CPB_VERSION),$(CPB_MIN_VERSION)),,$(error [CPB_MIN_VERSION] Current version is not compatible: $(CPB_VERSION) (version should be $(CPB_MIN_VERSION)+)))
 endif
 
