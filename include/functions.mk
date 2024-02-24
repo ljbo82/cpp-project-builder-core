@@ -79,10 +79,11 @@ FN_HOST_FACTORIZE = $(foreach token,$(subst $(if $(2),$(2),-), ,$(1)),$(eval FN_
 #  0: first == second
 #  1: first > second
 # -1: first < second
+#  ?: Invalid values were given
 #
 # Syntax: $(call FN_NUMBER_CMP,first?=0,second?=0)
 $(call FN_CHECK_RESERVED,FN_NUMBER_CMP)
-FN_NUMBER_CMP = $(if $(call FN_EQ,$(if $(1),$(1),0),$(if $(2),$(2),0)),0,$(shell if [ $(if $(1),$(1),0) -gt $(if $(2),$(2),0) ]; then echo 1; else echo -1; fi))
+FN_NUMBER_CMP = $(shell if [ $(if $(1),$(1),0) -eq $(if $(1),$(1),0) ] 2> /dev/null && [ $(if $(2),$(2),0) -eq $(if $(2),$(2),0) ] 2> /dev/null; then if [ $(if $(1),$(1),0) -eq $(if $(2),$(2),0) ]; then echo 0; elif [ $(if $(1),$(1),0) -gt $(if $(2),$(2),0) ]; then echo 1; else echo -1; fi else echo "?"; fi)
 # ==============================================================================
 
 # ==[Semantic version functions] ===============================================
@@ -91,46 +92,48 @@ FN_NUMBER_CMP = $(if $(call FN_EQ,$(if $(1),$(1),0),$(if $(2),$(2),0)),0,$(shell
 #
 # Syntax: $(call FN_SEMVER_CHECK,semanticVersion)
 $(call FN_CHECK_RESERVED,FN_SEMVER_CHECK)
-FN_SEMVER_CHECK = $(if $(filter-out 1 2 3,$(words $(call FN_SPLIT,$(1),.))),,$(1))
+$(call FN_CHECK_RESERVED,FN_SEMVER_val)
+FN_SEMVER_CHECK = $(shell echo $(1) | grep -E '^[0-9]+(.[0-9]+){,2}$$')
 
 # Returns the major component for given version.
 #
 # Syntax: $(call FN_SEMVER_MAJOR,semanticVersion)
 $(call FN_CHECK_RESERVED,FN_SEMVER_MAJOR)
-FN_SEMVER_MAJOR = $(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,1)
+FN_SEMVER_MAJOR = $(eval FN_SEMVER_val=$(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,1))$(if $(FN_SEMVER_val),$(FN_SEMVER_val),0)
 
 # Returns the minor component for given version.
 #
 # Syntax: $(call FN_SEMVER_MINOR,semanticVersion)
 $(call FN_CHECK_RESERVED,FN_SEMVER_MINOR)
-FN_SEMVER_MINOR = $(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,2)
+FN_SEMVER_MINOR = $(eval FN_SEMVER_val=$(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,2))$(if $(FN_SEMVER_val),$(FN_SEMVER_val),0)
 
 # Returns the patch component for given version.
 #
 # Syntax: $(call FN_SEMVER_PATCH,semanticVersion)
 $(call FN_CHECK_RESERVED,FN_SEMVER_PATCH)
-FN_SEMVER_PATCH = $(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,3)
+FN_SEMVER_PATCH = $(eval FN_SEMVER_val=$(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,3))$(if $(FN_SEMVER_val),$(FN_SEMVER_val),0)
 
-# Compares two semantic versions. Possible echoed values are:
+# Compares two semantic versions. If tested version is compatible with
+# minimum one, echoes tested version. Otherwise echoes an empty string
 #
-# NOTE: patch component is ignored!
-#
-#  0: first == second
-# -2: Incompatible versions (firstVer.major < secondVer.major)
-#  2: Incompatible versions (firstVer.major > secondVer.major)
-# -1: firstVer.major == secondVer.major AND firstVer.minor < secondVer.minor
-#  1: firstVer.major == secondVer.major AND firstVer.minor > secondVer.minor
-#
-# Syntax: $(call FN_SEMVER_CMP,firstVer,secondVer)
+# Syntax: $(call FN_SEMVER_CMP,testVer,MinVer)
 $(call FN_CHECK_RESERVED,FN_SEMVER_CMP)
-$(call FN_CHECK_RESERVED,FN_SEMVER_CMP_MAJOR)
-$(call FN_CHECK_RESERVED,FN_SEMVER_CMP_MINOR)
+$(call FN_CHECK_RESERVED,FN_SEMVER_CMP_major)
+$(call FN_CHECK_RESERVED,FN_SEMVER_CMP_minor)
+$(call FN_CHECK_RESERVED,FN_SEMVER_CMP_patch)
 FN_SEMVER_CMP = $(strip \
-$(eval FN_SEMVER_CMP_MAJOR := $(call FN_NUMBER_CMP,$(call FN_SEMVER_MAJOR,$(1)),$(call FN_SEMVER_MAJOR,$(2))))\
-$(eval FN_SEMVER_CMP_MINOR := $(call FN_NUMBER_CMP,$(call FN_SEMVER_MINOR,$(1)),$(call FN_SEMVER_MINOR,$(2))))\
-$(if $(call FN_EQ,$(FN_SEMVER_CMP_MAJOR),-1),-2,$(if $(call FN_EQ,$(FN_SEMVER_CMP_MAJOR),1),2,$(FN_SEMVER_CMP_MINOR)))\
-$(eval undefine FN_SEMVER_CMP_MAJOR)\
-$(eval undefine FN_SEMVER_CMP_MINOR)\
+    $(eval FN_SEMVER_CMP_major := $(call FN_NUMBER_CMP,$(call FN_SEMVER_MAJOR,$(1)),$(call FN_SEMVER_MAJOR,$(2))))\
+    $(eval FN_SEMVER_CMP_minor := $(call FN_NUMBER_CMP,$(call FN_SEMVER_MINOR,$(1)),$(call FN_SEMVER_MINOR,$(2))))\
+    $(eval FN_SEMVER_CMP_patch := $(call FN_NUMBER_CMP,$(call FN_SEMVER_PATCH,$(1)),$(call FN_SEMVER_PATCH,$(2))))\
+    $(if $(call FN_EQ,$(FN_SEMVER_CMP_major),-1),,\
+        $(if $(call FN_EQ,$(FN_SEMVER_CMP_major),1),,\
+            $(if $(call FN_EQ,$(FN_SEMVER_CMP_minor),-1),,\
+                $(if $(call FN_EQ,$(FN_SEMVER_CMP_minor),1),$(1),\
+                    $(if $(call FN_EQ,$(FN_SEMVER_CMP_patch),-1),,$(1))\
+                )\
+            )\
+        )\
+    )\
 )
 # ==============================================================================
 
@@ -142,6 +145,7 @@ $(call FN_CHECK_RESERVED,FN_FIND_FILES)
 FN_FIND_FILES = $(shell cd $(1) 2> /dev/null && find . -type f $(2) | sed 's:./::')
 
 # Returns the relative path for going from 'fromDir' to 'toDir'.
+#
 # Syntax: $(call FN_REL_DIR,fromDir,toDir)
 $(call FN_CHECK_RESERVED,FN_REL_DIR)
 FN_REL_DIR = $(shell realpath -m --relative-to=$(1) $(2))
@@ -155,6 +159,12 @@ FN_IS_INSIDE_DIR = $(filter $(abspath $(1)) $(abspath $(1)/%),$(abspath $(2)))
 # ==============================================================================
 
 # == [Makefile utils] ==========================================================
+# Executes a shell command and returns execution output.
+#
+# Syntax $(call FN_SHELL,cmd,errorMessage?=)
+$(call FN_CHECK_RESERVED,FN_SHELL)
+FN_SHELL = $(shell $(1))$(if $(call FN_EQ,$(.SHELLSTATUS),0),,$(error $(if $(2),$(2),[FN_SHELL] Execution error)))
+
 # Checks if the origin of a variable matches with an expected value. If matching
 # fails, throws an error.
 #

@@ -27,9 +27,6 @@ include $(dir $(cpb_builder_mk))include/common.mk
 include $(dir $(cpb_builder_mk))include/native.mk
 
 # Reserved variables -----------------------------------------------------------
-$(call FN_CHECK_RESERVED,cpb_builder_mk_min_make_version)
-$(call FN_CHECK_RESERVED,cpb_builder_mk_make_version)
-$(call FN_CHECK_RESERVED,cpb_builder_mk_make_version_cmp)
 $(call FN_CHECK_RESERVED,cpb_builder_mk_src_file_filter)
 $(call FN_CHECK_RESERVED,cpb_builder_mk_invalid_src_files)
 $(call FN_CHECK_RESERVED,cpb_builder_mk_dist_dirs)
@@ -40,13 +37,6 @@ $(call FN_CHECK_RESERVED,cpb_builder_mk_dist_deps_template)
 $(call FN_CHECK_RESERVED,O_BUILD_DIR)
 $(call FN_CHECK_RESERVED,O_DIST_DIR)
 $(call FN_CHECK_RESERVED,DEFAULT_VAR_SET)
-# ------------------------------------------------------------------------------
-
-# Checks if GNU Make is supported ----------------------------------------------
-cpb_builder_mk_min_make_version := 4.0
-cpb_builder_mk_make_version := $(word 3,$(shell $(MAKE) --version | grep "GNU Make"))
-cpb_builder_mk_make_version_cmp := $(call FN_SEMVER_CMP,$(cpb_builder_mk_make_version),$(cpb_builder_mk_min_make_version))
-$(call FN_CHECK_OPTIONS,cpb_builder_mk_make_version_cmp,0 1,Incompatible GNU Make version: $(if $(cpb_builder_mk_make_version),$(cpb_builder_mk_make_version),unknown) (min version is $(cpb_builder_mk_min_make_version)))
 # ------------------------------------------------------------------------------
 
 # Checks for whitespace in CWD -------------------------------------------------

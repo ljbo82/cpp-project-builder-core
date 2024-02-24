@@ -25,6 +25,24 @@ cpb_include_common_mk := $(lastword $(MAKEFILE_LIST))
 
 include $(dir $(cpb_include_common_mk))functions.mk
 
+$(call FN_CHECK_RESERVED,CPB_VERSION)
+$(call FN_CHECK_RESERVED,cpb_include_common_mk_min_make_version)
+$(call FN_CHECK_RESERVED,cpb_include_common_mk_make_version)
+$(call FN_CHECK_RESERVED,cpb_include_common_mk_make_version_cmp)
+
+CPB_VERSION := 1.0.0
+ifdef CPB_MIN_VERSION
+    $(call FN_CHECK_ORIGIN,CPB_MIN_VERSION,file)
+    $(if $(call FN_SEMVER_CMP,$(CPB_VERSION),$(CPB_MIN_VERSION)),,$(error [CPB_MIN_VERSION] Current version is not compatible: $(CPB_VERSION) (version should be $(CPB_MIN_VERSION)+)))
+endif
+
+# Checks if GNU Make is supported ----------------------------------------------
+cpb_include_common_mk_min_make_version := 4.2
+cpb_include_common_mk_make_version := $(word 3,$(shell $(MAKE) --version | grep "GNU Make"))
+cpb_include_common_mk_make_version_cmp := $(call FN_SEMVER_CMP,$(cpb_include_common_mk_make_version),$(cpb_include_common_mk_min_make_version))
+$(if $(cpb_include_common_mk_make_version_cmp),,$(error Incompatible GNU Make version: $(if $(cpb_include_common_mk_make_version),$(cpb_include_common_mk_make_version),unknown) (version should be $(cpb_include_common_mk_min_make_version)+)))
+# ------------------------------------------------------------------------------
+
 # Output directory -------------------------------------------------------------
 O ?= output
 $(call FN_CHECK_NON_EMPTY,O)
