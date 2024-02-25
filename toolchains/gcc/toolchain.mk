@@ -27,7 +27,7 @@ endif
 ifndef cpb_toolchains_gcc_toolchain_mk
 cpb_toolchains_gcc_toolchain_mk := $(lastword $(MAKEFILE_LIST))
 
-include $(dir $(cpb_toolchains_gcc_toolchain_mk))deps.mk
+include $(dir $(cpb_toolchains_gcc_toolchain_mk))libs.mk
 
 $(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_is_cpp_project)
 $(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_ld)
@@ -180,11 +180,11 @@ endif
 
 cpb_toolchains_gcc_toolchain_mk_include_flags := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
 
-override CFLAGS   := $(call FN_UNIQUE,$(strip -MMD -MP $(cpb_toolchains_gcc_toolchain_mk_include_flags) $(cpb_toolchains_gcc_toolchain_mk_cflags) $(CFLAGS)))
-override CXXFLAGS := $(call FN_UNIQUE,$(strip -MMD -MP $(cpb_toolchains_gcc_toolchain_mk_include_flags) $(cpb_toolchains_gcc_toolchain_mk_cxxflags) $(CXXFLAGS)))
-override ASFLAGS  := $(call FN_UNIQUE,$(strip -MMD -MP $(cpb_toolchains_gcc_toolchain_mk_include_flags) $(cpb_toolchains_gcc_toolchain_mk_asflags) $(ASFLAGS)))
-override ARFLAGS  := $(call FN_UNIQUE,$(strip rcs $(ARFLAGS)))
-override LDFLAGS  := $(call FN_UNIQUE,$(strip $(cpb_toolchains_gcc_toolchain_mk_ldflags) $(LDFLAGS)))
+override CFLAGS   := $(strip $(call FN_UNIQUE,-MMD -MP $(cpb_toolchains_gcc_toolchain_mk_include_flags) $(cpb_toolchains_gcc_toolchain_mk_cflags) $(CFLAGS)))
+override CXXFLAGS := $(strip $(call FN_UNIQUE,-MMD -MP $(cpb_toolchains_gcc_toolchain_mk_include_flags) $(cpb_toolchains_gcc_toolchain_mk_cxxflags) $(CXXFLAGS)))
+override ASFLAGS  := $(strip $(call FN_UNIQUE,-MMD -MP $(cpb_toolchains_gcc_toolchain_mk_include_flags) $(cpb_toolchains_gcc_toolchain_mk_asflags) $(ASFLAGS)))
+override ARFLAGS  := $(strip $(call FN_UNIQUE,rcs $(ARFLAGS)))
+override LDFLAGS  := $(strip $(call FN_UNIQUE,$(cpb_toolchains_gcc_toolchain_mk_ldflags) $(LDFLAGS)) $(cpb_toolchains_gcc_libs_mk_ldflags))
 # ------------------------------------------------------------------------------
 
 # build ========================================================================
