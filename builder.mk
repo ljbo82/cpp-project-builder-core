@@ -329,7 +329,7 @@ define cpb_builder_mk_dist_deps_template
 cpb_builder_mk_dist_deps += $(2)
 
 $(2): $(1)
-	$(call CPB_PRINT,[DIST] $$@)
+	$(call CPB_LOG,[DIST] $$@)
 	@mkdir -p $$(dir $$@)
 	$(VERBOSE)/bin/cp $$< $$@
 endef

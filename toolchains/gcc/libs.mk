@@ -59,7 +59,7 @@ LIB_MAKEFILE_$(1) ?= $(3)
 $$(call FN_CHECK_ORIGIN,LIB_MAKEFILE_$(1),file)
 
 ifneq ($$(LIB_MAKEFILE_$(1)),)
-    LIB_MKFLAGS_$(1) := -e $$(LIB_MAKEFILE_$(1)) $$(LIB_MKFLAGS_$(1))
+    LIB_MKFLAGS_$(1) := -f $$(LIB_MAKEFILE_$(1)) $$(LIB_MKFLAGS_$(1))
 endif
 
 LIB_MKDIR_$(1) ?= $(2)
@@ -79,15 +79,17 @@ ifneq ($$(or $$(LIB_MKDIR_$(1)),$$(LIB_MAKEFILE_$(1))),)
 cpb_toolchains_gcc_libs_mk_has_lib_to_build := 1
 cpb_toolchains_gcc_libs_mk_ldflags := $$(cpb_toolchains_gcc_libs_mk_ldflags) $$$$($$(MAKE) --no-print-directory $$(strip $$(LIB_MKFLAGS_$(1)) SKIP_DIR_INSPECTION=1) -- --show-libs)
 
-LIB_MKFLAGS_$(1) := $$(LIB_MKFLAGS_$(1)) O=$$(call FN_REL_DIR,$$(LIB_MKDIR_$(1)),$$(cpb_toolchains_gcc_libs_mk_o_abs_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=.$(1)
-PRE_BUILD_DEPS += $$(cpb_toolchains_gcc_libs_mk_o_libs_dir)/.$(1)
+LIB_MKFLAGS_$(1) := $$(LIB_MKFLAGS_$(1)) O=$$(call FN_REL_DIR,$$(LIB_MKDIR_$(1)),$$(cpb_toolchains_gcc_libs_mk_o_abs_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=.$(1).dist
+PRE_BUILD_DEPS += $$(cpb_toolchains_gcc_libs_mk_o_libs_dir)/.$(1).dist
 
 # ==============================================================================
 .PHONY: --cpb-lib-$(1)
 --cpb-lib-$(1):
-	$$(VERBOSE)$$(MAKE) $$(LIB_MKFLAGS_$(1))
+	$(call CPB_COLOR_LOG,96;1,[LIB] $(4))
+	$$(VERBOSE)$$(MAKE) --no-print-directory $$(LIB_MKFLAGS_$(1))
+	$(call CPB_COLOR_LOG,92;1,Leaving directory $(2))
 
-$$(cpb_toolchains_gcc_libs_mk_o_libs_dir)/.$(1): --cpb-lib-$(1) ;
+$$(cpb_toolchains_gcc_libs_mk_o_libs_dir)/.$(1).dist: --cpb-lib-$(1) ;
 # ==============================================================================
 # ------------------------------------------------------------------------------
 endif
