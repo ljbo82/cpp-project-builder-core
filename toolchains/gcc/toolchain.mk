@@ -128,7 +128,7 @@ ifneq ($(SRC_FILES),)
     cpb_toolchains_gcc_toolchain_mk_is_cpp_project := $(strip $(filter %.cpp %.cxx %.cc,$(SRC_FILES)))
     ifeq ($(SKIP_DIR_INSPECTION),0)
         ifeq ($(cpb_toolchains_gcc_toolchain_mk_is_cpp_project),)
-            cpb_toolchains_gcc_toolchain_mk_is_cpp_project := $(strip $(foreach includeDir,$(INCLUDE_DIRS),$(shell find $(includeDir) -type f -name '*.hpp' -or -name '*.hxx' 2> /dev/null)))
+            cpb_toolchains_gcc_toolchain_mk_is_cpp_project := $(strip $(foreach includeDir,$(INCLUDE_DIRS),$(if $(wildcard $(includeDir)),$(call FN_SHELL,find $(includeDir) -type f -name '*.hpp' -or -name '*.hxx' 2> /dev/null),)))
         endif
     endif
 
@@ -226,20 +226,20 @@ BUILD_DEPS += --cpb_toolchains_gcc_toolchain_mk_pre_build_check $(O_BUILD_DIR)/$
 $(O_BUILD_DIR)/$(ARTIFACT): $(cpb_toolchains_gcc_toolchain_mk_obj_files)
     ifeq ($(PROJ_TYPE),lib)
         ifeq ($(LIB_TYPE),shared)
-	        @echo [LD] $@
+	        $(call CPB_PRINT,[LD] $@)
 	        $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files) $(LDFLAGS))
         else ifeq ($(LIB_TYPE),static)
-	        @echo [AR] $@
+	        $(call CPB_PRINT,[AR] $@)
 	        $(VERBOSE)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files))
         endif
     else ifeq ($(PROJ_TYPE),app)
-	    @echo [LD] $@
+	    $(call CPB_PRINT,[LD] $@)
 	    $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files) $(LDFLAGS))
     endif
 
 # C sources --------------------------------------------------------------------
 $(O_BUILD_DIR)/%.c$(cpb_toolchains_gcc_toolchain_mk_obj_suffix): %.c
-	@echo [CC] $@
+	$(call CPB_PRINT,[CC] $@)
 	@mkdir -p $(dir $@)
 	$(VERBOSE)$(CROSS_COMPILE)$(CC) $(strip $(CFLAGS) -c $< -o $@)
 # ------------------------------------------------------------------------------
@@ -247,7 +247,7 @@ $(O_BUILD_DIR)/%.c$(cpb_toolchains_gcc_toolchain_mk_obj_suffix): %.c
 # C++ sources ------------------------------------------------------------------
 define cpb_toolchains_gcc_toolchain_mk_cxx_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_toolchains_gcc_toolchain_mk_obj_suffix): %.$(1)
-	@echo [CXX] $$@
+	$(call CPB_PRINT,[CXX] $$@)
 	@mkdir -p $$(dir $$@)
 	$(VERBOSE)$(CROSS_COMPILE)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
 endef
@@ -260,7 +260,7 @@ $(eval $(call cpb_toolchains_gcc_toolchain_mk_cxx_template,cc))
 # Assembly sources -------------------------------------------------------------
 define cpb_toolchains_gcc_toolchain_mk_as_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_toolchains_gcc_toolchain_mk_obj_suffix): %.$(1)
-	@echo [AS] $$@
+	$(call CPB_PRINT,[AS] $$@)
 	@mkdir -p $$(dir $$@)
 	$(VERBOSE)$(CROSS_COMPILE)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
 endef

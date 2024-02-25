@@ -40,8 +40,8 @@ $(call FN_CHECK_RESERVED,DEFAULT_VAR_SET)
 # ------------------------------------------------------------------------------
 
 # Checks for whitespace in CWD -------------------------------------------------
-ifneq ($(words $(shell pwd)),1)
-    $(error Current directory ($(shell pwd)) contains one or more whitespaces)
+ifneq ($(words $(CURDIR)),1)
+    $(error Current directory ('$(CURDIR)') contains one or more whitespaces)
 endif
 # ------------------------------------------------------------------------------
 
@@ -177,7 +177,7 @@ $(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,
 cpb_builder_mk_src_file_filter := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
 
 ifeq ($(SKIP_DIR_INSPECTION),0)
-    SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(shell find $(srcDir) -type f $(cpb_builder_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES))
+    SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(call FN_SHELL,find $(srcDir) -type f $(cpb_builder_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES))
 endif
 
 cpb_builder_mk_invalid_src_files := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
@@ -329,7 +329,7 @@ define cpb_builder_mk_dist_deps_template
 cpb_builder_mk_dist_deps += $(2)
 
 $(2): $(1)
-	@echo [DIST] $$@
+	$(call CPB_PRINT,[DIST] $$@)
 	@mkdir -p $$(dir $$@)
 	$(VERBOSE)/bin/cp $$< $$@
 endef

@@ -30,37 +30,29 @@ $(call FN_CHECK_NON_EMPTY,GIT_REPO_DIR)
 $(call FN_CHECK_NO_WHITESPACE,GIT_REPO_DIR)
 
 $(call FN_CHECK_RESERVED,cpb_git_mk_repo_available)
-cpb_git_mk_repo_available := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1 && echo y)
+cpb_git_mk_repo_available := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1 && echo y)
 
 ifneq ($(cpb_git_mk_repo_available),)
-    ifdef GIT_COMMIT
-        $(error [GIT_COMMIT] Reserved variable)
-    endif
-    GIT_COMMIT := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD > /dev/null 2>&1 && echo y)
+    $(call FN_CHECK_RESERVED,GIT_COMMIT)
+    GIT_COMMIT := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD > /dev/null 2>&1 && echo y)
     ifneq ($(GIT_COMMIT),)
-        GIT_COMMIT := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD)
+        GIT_COMMIT := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD)
 
-        ifdef GIT_COMMIT_SHORT
-            $(error [GIT_COMMIT_SHORT] Reserved variable)
-        endif
-        GIT_COMMIT_SHORT := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse --short HEAD)
+        $(call FN_CHECK_RESERVED,GIT_COMMIT_SHORT)
+        GIT_COMMIT_SHORT := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse --short HEAD)
 
-        ifdef GIT_STATUS
-            $(error [GIT_STATUS] Reserved variable)
-        endif
-        GIT_STATUS := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status -s)
+        $(call FN_CHECK_RESERVED,GIT_STATUS)
+        GIT_STATUS := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status -s)
         ifeq ($(GIT_STATUS),)
             GIT_STATUS := clean
         else
             GIT_STATUS := dirty
         endif
 
-        ifdef GIT_TAG
-            $(error [GIT_TAG] Reserved variable)
-        endif
-        GIT_TAG := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git describe --tags > /dev/null 2>&1 && echo y)
+        $(call FN_CHECK_RESERVED,GIT_TAG)
+        GIT_TAG := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git describe --tags > /dev/null 2>&1 && echo y)
         ifneq ($(GIT_TAG),)
-            GIT_TAG := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git describe --tags)
+            GIT_TAG := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git describe --tags)
         else
             undefine GIT_TAG
         endif

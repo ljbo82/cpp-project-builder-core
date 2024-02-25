@@ -50,7 +50,7 @@ cpb_toolchains_gcc_deps_mk_o_libs_dir := $(call FN_REL_DIR,$(CURDIR),$(cpb_toolc
 
 # $(call cpb_toolchains_gcc_deps_mk_lib_template,libName,libSrcDir,libMakefile,libFullEntry)
 define cpb_toolchains_gcc_deps_mk_lib_template
-# ------------------------------------------------------------------------------
+# ******************************************************************************
 $$(if $(1),,$$(error [LIBS] Invalid entry: $(4)))
 $$(if $$(and $(2),$(LIB_MKDIR_$(1))),$$(error [LIB_MKDIR_$(1)] Value redefinition),)
 $$(if $$(and $(3),$(LIB_MAKEFILE_$(1))),$$(error [LIB_MAKEFILE_$(1)] Value redefinition),)
@@ -69,11 +69,15 @@ ifneq ($$(LIB_MKDIR_$(1)),)
     LIB_MKFLAGS_$(1) := -C $$(LIB_MKDIR_$(1)) $$(LIB_MKFLAGS_$(1))
 endif
 
+ifneq ($$(filter -l$(1),$$(cpb_toolchains_gcc_deps_mk_ldflags)),)
+    $$(error [LIBS] Duplicate library definition: $(1))
+endif
 cpb_toolchains_gcc_deps_mk_ldflags += -l$(1)
 
 ifneq ($$(or $$(LIB_MKDIR_$(1)),$$(LIB_MAKEFILE_$(1))),)
+# ------------------------------------------------------------------------------
 cpb_toolchains_gcc_deps_mk_has_lib_to_build := 1
-cpb_toolchains_gcc_deps_mk_ldflags += $$(shell $(MAKE) --no-print-directory $$(strip $$(LIB_MKFLAGS_$(1)) SKIP_DIR_INSPECTION=1) -- --show-deps)
+cpb_toolchains_gcc_deps_mk_ldflags := $$(cpb_toolchains_gcc_deps_mk_ldflags) $$$$($$(MAKE) --no-print-directory $$(strip $$(LIB_MKFLAGS_$(1)) SKIP_DIR_INSPECTION=1) -- --show-deps)
 
 LIB_MKFLAGS_$(1) := $$(LIB_MKFLAGS_$(1)) O=$$(call FN_REL_DIR,$$(LIB_MKDIR_$(1)),$$(cpb_toolchains_gcc_deps_mk_o_abs_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=.$(1)
 PRE_BUILD_DEPS += $$(cpb_toolchains_gcc_deps_mk_o_libs_dir)/.$(1)
@@ -85,13 +89,13 @@ PRE_BUILD_DEPS += $$(cpb_toolchains_gcc_deps_mk_o_libs_dir)/.$(1)
 
 $$(cpb_toolchains_gcc_deps_mk_o_libs_dir)/.$(1): --cpb-lib-$(1) ;
 # ==============================================================================
-endif
 # ------------------------------------------------------------------------------
+endif
+# ******************************************************************************
 endef
 
 $(foreach lib,$(LIBS),$(eval $(call cpb_toolchains_gcc_deps_mk_lib_template,$(call FN_TOKEN,$(lib),:,1),$(call FN_TOKEN,$(lib),:,2),$(call FN_TOKEN,$(lib),:,3),$(lib))))
 
-cpb_toolchains_gcc_deps_mk_ldflags := $(call FN_UNIQUE,$(cpb_toolchains_gcc_deps_mk_ldflags))
 ifeq ($(cpb_toolchains_gcc_deps_mk_has_lib_to_build),1)
     INCLUDE_DIRS += $(cpb_toolchains_gcc_deps_mk_o_libs_dir)/dist/include
     override LDFLAGS := $(LDFLAGS) -L$(cpb_toolchains_gcc_deps_mk_o_libs_dir)/dist/lib $(cpb_toolchains_gcc_deps_mk_ldflags)

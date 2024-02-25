@@ -40,7 +40,7 @@ $(call FN_CHECK_RESERVED,NATIVE_HOST)
 ifeq ($(OS),Windows_NT)
     NATIVE_OS := windows
 else
-    cpb_include_native_mk_os := $(shell uname -s)
+    cpb_include_native_mk_os := $(call FN_SHELL,uname -s)
     ifneq ($(filter Linux linux,$(cpb_include_native_mk_os)),)
         NATIVE_OS := linux
     else
@@ -52,7 +52,7 @@ endif
 
 ifdef NATIVE_OS
     ifeq ($(NATIVE_OS),windows)
-        cpb_include_native_mk_arch := $(shell cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
+        cpb_include_native_mk_arch := $(call FN_SHELL,cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
         ifeq ($(cpb_include_native_mk_arch),AMD64)
             NATIVE_ARCH := x64
         else
@@ -69,7 +69,7 @@ ifdef NATIVE_OS
             endif
         endif
     else
-        cpb_include_native_mk_arch := $(shell uname -m)
+        cpb_include_native_mk_arch := $(call FN_SHELL,uname -m)
         ifeq ($(cpb_include_native_mk_arch),x86_64)
             NATIVE_ARCH := x64
         else

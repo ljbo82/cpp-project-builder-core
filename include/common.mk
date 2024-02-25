@@ -29,9 +29,11 @@ $(call FN_CHECK_RESERVED,CPB_VERSION)
 $(call FN_CHECK_RESERVED,cpb_include_common_mk_min_make_version)
 $(call FN_CHECK_RESERVED,cpb_include_common_mk_make_version)
 $(call FN_CHECK_RESERVED,cpb_include_common_mk_make_version_cmp)
+$(call FN_CHECK_RESERVED,cpb_include_common_mk_has_colors)
 
 CPB_VERSION := 1.0.0
 ifdef CPB_MIN_VERSION
+    $(call FN_CHECK_NON_EMPTY,CPB_MIN_VERSION)
     $(call FN_CHECK_ORIGIN,CPB_MIN_VERSION,file)
     $(call FN_CHECK_NO_WHITESPACE,CPB_MIN_VERSION)
     $(if $(call FN_SEMVER_CMP,$(CPB_VERSION),$(CPB_MIN_VERSION)),,$(error [CPB_MIN_VERSION] Current version is not compatible: $(CPB_VERSION) (version should be $(CPB_MIN_VERSION)+)))
@@ -39,7 +41,7 @@ endif
 
 # Checks if GNU Make is supported ----------------------------------------------
 cpb_include_common_mk_min_make_version := 4.2
-cpb_include_common_mk_make_version := $(word 3,$(shell $(MAKE) --version | grep "GNU Make"))
+cpb_include_common_mk_make_version := $(word 3,$(call FN_SHELL,$(MAKE) --version | grep "GNU Make"))
 cpb_include_common_mk_make_version_cmp := $(call FN_SEMVER_CMP,$(cpb_include_common_mk_make_version),$(cpb_include_common_mk_min_make_version))
 $(if $(cpb_include_common_mk_make_version_cmp),,$(error Incompatible GNU Make version: $(if $(cpb_include_common_mk_make_version),$(cpb_include_common_mk_make_version),unknown) (version should be $(cpb_include_common_mk_min_make_version)+)))
 # ------------------------------------------------------------------------------
@@ -56,6 +58,24 @@ $(call FN_CHECK_NON_EMPTY,V)
 $(call FN_CHECK_OPTIONS,V,0 1)
 $(call FN_CHECK_RESERVED,VERBOSE)
 VERBOSE := $(if $(filter 0,$(V)),@,)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+cpb_include_common_mk_has_colors := 0
+ifeq ($(V),1)
+    cpb_include_common_mk_has_colors := $(shell tput colors 2> /dev/null)
+    ifneq ($(cpb_include_common_mk_has_colors),)
+        ifneq ($(cpb_include_common_mk_has_colors),0)
+            cpb_include_common_mk_has_colors := 1
+        endif
+    endif
+endif
+
+ifeq ($(cpb_include_common_mk_has_colors),1)
+    CPB_PRINT = @printf $(strip "\033[96m$(1)\033[0m\n" $(2))
+else
+    CPB_PRINT = @printf $(strip "$(1)\n" $(2))
+endif
 # ------------------------------------------------------------------------------
 
 endif # ifndef cpb_include_common_mk

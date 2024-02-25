@@ -83,7 +83,7 @@ FN_HOST_FACTORIZE = $(foreach token,$(subst $(if $(2),$(2),-), ,$(1)),$(eval FN_
 #
 # Syntax: $(call FN_NUMBER_CMP,first?=0,second?=0)
 $(call FN_CHECK_RESERVED,FN_NUMBER_CMP)
-FN_NUMBER_CMP = $(shell if [ $(if $(1),$(1),0) -eq $(if $(1),$(1),0) ] 2> /dev/null && [ $(if $(2),$(2),0) -eq $(if $(2),$(2),0) ] 2> /dev/null; then if [ $(if $(1),$(1),0) -eq $(if $(2),$(2),0) ]; then echo 0; elif [ $(if $(1),$(1),0) -gt $(if $(2),$(2),0) ]; then echo 1; else echo -1; fi else echo "?"; fi)
+FN_NUMBER_CMP = $(call FN_SHELL,if [ $(if $(1),$(1),0) -eq $(if $(1),$(1),0) ] 2> /dev/null && [ $(if $(2),$(2),0) -eq $(if $(2),$(2),0) ] 2> /dev/null; then if [ $(if $(1),$(1),0) -eq $(if $(2),$(2),0) ]; then echo 0; elif [ $(if $(1),$(1),0) -gt $(if $(2),$(2),0) ]; then echo 1; else echo -1; fi else echo "?"; fi)
 # ==============================================================================
 
 # ==[Semantic version functions] ===============================================
@@ -93,7 +93,9 @@ FN_NUMBER_CMP = $(shell if [ $(if $(1),$(1),0) -eq $(if $(1),$(1),0) ] 2> /dev/n
 # Syntax: $(call FN_SEMVER_CHECK,semanticVersion)
 $(call FN_CHECK_RESERVED,FN_SEMVER_CHECK)
 $(call FN_CHECK_RESERVED,FN_SEMVER_val)
-FN_SEMVER_CHECK = $(shell echo $(1) | grep -E '^[0-9]+(.[0-9]+){,2}$$')
+$(call FN_CHECK_RESERVED,FN_SEMVER_CHECK_comma)
+FN_SEMVER_CHECK_comma :=,
+FN_SEMVER_CHECK = $(call FN_SHELL,echo $(1) | grep -E '^[0-9]+(.[0-9]+){$(FN_SEMVER_CHECK_comma)2}$$')
 
 # Returns the major component for given version.
 #
@@ -142,13 +144,13 @@ FN_SEMVER_CMP = $(strip \
 #
 # Syntax: $(call FN_FIND_FILES,directory,findFlags)
 $(call FN_CHECK_RESERVED,FN_FIND_FILES)
-FN_FIND_FILES = $(shell cd $(1) 2> /dev/null && find . -type f $(2) | sed 's:./::')
+FN_FIND_FILES = $(call FN_SHELL,cd $(1) 2> /dev/null && find . -type f $(2) | sed 's:./::')
 
 # Returns the relative path for going from 'fromDir' to 'toDir'.
 #
 # Syntax: $(call FN_REL_DIR,fromDir,toDir)
 $(call FN_CHECK_RESERVED,FN_REL_DIR)
-FN_REL_DIR = $(shell realpath -m --relative-to=$(1) $(2))
+FN_REL_DIR = $(call FN_SHELL,realpath -m --relative-to=$(1) $(2))
 
 # Checks if a path is inside a directory (on success, returns the path,
 # otherwise returns an empty value).
