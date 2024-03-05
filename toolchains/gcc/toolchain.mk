@@ -70,26 +70,7 @@ endif
 # ------------------------------------------------------------------------------
 
 # Compiler management ----------------------------------------------------------
-ifeq ($(origin CFLAGS),command line)
-    $(error [CFLAGS] Variable cannot be defined via command line)
-endif
-
-ifeq ($(origin CXXFLAGS),command line)
-    $(error [CXXFLAGS] Variable cannot be defined via command line)
-endif
-
-ifeq ($(origin ASFLAGS),command line)
-    $(error [ASFLAGS] Variable cannot be defined via command line)
-endif
-
-ifeq ($(origin ARFLAGS),command line)
-    $(error [ARFLAGS] Variable cannot be defined via command line)
-endif
 override ARFLAGS := $(subst v,,$(subst r,,$(ARFLAGS)))
-
-ifeq ($(origin LDFLAGS),command line)
-    $(error [LDFLAGS] Variable cannot be defined via command line)
-endif
 
 # AS
 AS ?= as
@@ -149,6 +130,13 @@ ifeq ($(origin LD),default)
 else
     $(call FN_CHECK_NON_EMPTY,LD)
 endif
+
+# Avoid problems when both AS,CC,CXX,AR,LD and CROSS_COMPILE are set
+override AS := $(subst $(CROSS_COMPILE),,$(AS))
+override CC := $(subst $(CROSS_COMPILE),,$(CC))
+override CXX := $(subst $(CROSS_COMPILE),,$(CXX))
+override AR := $(subst $(CROSS_COMPILE),,$(AR))
+override LD := $(subst $(CROSS_COMPILE),,$(LD))
 
 cpb_toolchains_gcc_toolchain_mk_cflags += -Wall
 cpb_toolchains_gcc_toolchain_mk_cxxflags += -Wall
