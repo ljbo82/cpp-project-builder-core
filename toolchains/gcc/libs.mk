@@ -85,9 +85,9 @@ PRE_BUILD_DEPS += $$(cpb_toolchains_gcc_libs_mk_o_libs_dir)/.$(1).dist
 # ==============================================================================
 .PHONY: --cpb-lib-$(1)
 --cpb-lib-$(1):
-	$(call CPB_COLOR_LOG,96;1,[LIB] $(4))
+	$(call CPB_COLOR_LOG,96,[LIB] $(4))
 	$$(VERBOSE)$$(MAKE) --no-print-directory $$(LIB_MKFLAGS_$(1))
-	$(call CPB_COLOR_LOG,92;1,Leaving directory $(2))
+	$(call CPB_COLOR_LOG,92,Leaving directory $(2))
 
 $$(cpb_toolchains_gcc_libs_mk_o_libs_dir)/.$(1).dist: --cpb-lib-$(1) ;
 # ==============================================================================
