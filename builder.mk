@@ -36,7 +36,6 @@ $(call FN_CHECK_RESERVED,cpb_builder_mk_fn_dist_adjust_file_entry)
 $(call FN_CHECK_RESERVED,cpb_builder_mk_dist_deps_template)
 $(call FN_CHECK_RESERVED,O_BUILD_DIR)
 $(call FN_CHECK_RESERVED,O_DIST_DIR)
-$(call FN_CHECK_RESERVED,DEFAULT_VAR_SET)
 # ------------------------------------------------------------------------------
 
 # Checks for whitespace in CWD -------------------------------------------------
@@ -219,15 +218,12 @@ all: dist ;
 # ==============================================================================
 
 # print-vars ===================================================================
-DEFAULT_VAR_SET += O PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS TOOLCHAIN TOOLCHAIN_DIRS
-$(call FN_CHECK_NON_EMPTY,DEFAULT_VAR_SET)
-$(call FN_CHECK_ORIGIN,DEFAULT_VAR_SET,file)
-
+VARS += O PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS TOOLCHAIN TOOLCHAIN_DIRS
 VARS ?= $(sort $(DEFAULT_VAR_SET))
+$(call FN_CHECK_NON_EMPTY,VARS)
 
 .PHONY: print-vars
 print-vars:
-	$(call FN_CHECK_NON_EMPTY,VARS)
 	$(foreach varName,$(VARS),$(info $(varName) = $($(varName))))
 	@printf ''
 # ==============================================================================
@@ -329,7 +325,7 @@ define cpb_builder_mk_dist_deps_template
 cpb_builder_mk_dist_deps += $(2)
 
 $(2): $(1)
-	$(call CPB_LOG,[DIST] $$@)
+	@echo $$(call FN_LOG_INFO,[DIST] $$@)
 	@mkdir -p $$(dir $$@)
 	$(VERBOSE)/bin/cp $$< $$@
 endef

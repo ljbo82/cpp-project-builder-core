@@ -29,10 +29,6 @@ $(call FN_CHECK_RESERVED,CPB_VERSION)
 $(call FN_CHECK_RESERVED,cpb_include_common_mk_min_make_version)
 $(call FN_CHECK_RESERVED,cpb_include_common_mk_make_version)
 $(call FN_CHECK_RESERVED,cpb_include_common_mk_make_version_cmp)
-$(call FN_CHECK_RESERVED,cpb_include_common_mk_term_support_colors)
-$(call FN_CHECK_RESERVED,cpb_include_common_mk_log_color)
-$(call FN_CHECK_RESERVED,CPB_COLOR_LOG)
-$(call FN_CHECK_RESERVED,CPB_LOG)
 
 CPB_VERSION := 1.0.0
 ifdef CPB_MIN_VERSION
@@ -61,41 +57,6 @@ $(call FN_CHECK_NON_EMPTY,V)
 $(call FN_CHECK_OPTIONS,V,0 1)
 $(call FN_CHECK_RESERVED,VERBOSE)
 VERBOSE := $(if $(filter 0,$(V)),@,)
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-cpb_include_common_mk_term_support_colors := $(shell tput colors 2> /dev/null)
-ifneq ($(cpb_include_common_mk_term_support_colors),)
-    ifneq ($(cpb_include_common_mk_term_support_colors),0)
-        cpb_include_common_mk_term_support_colors := 1
-    else
-        cpb_include_common_mk_term_support_colors :=
-    endif
-endif
-
-cpb_include_common_mk_log_color := 0
-ifeq ($(V),1)
-    ifeq ($(cpb_include_common_mk_term_support_colors),1)
-        cpb_include_common_mk_log_color := 1
-    endif
-endif
-
-# Printf command to show color log messages in recipes
-#
-# NOTE: Real color support relies on terminal support. If there is no support
-#       Colors are ignored.
-#
-# Syntax: $(call CPB_COLOR_LOG,ansiColor?=,msgFmt,msgFmtArgs?=)
-CPB_COLOR_LOG = @printf "$(if $(and $(cpb_include_common_mk_term_support_colors),$(1)),\033[$(1)m,)$(2)$(if $(and $(cpb_include_common_mk_term_support_colors),$(1)),\033[0m,)\n"$(if $(3), "$(3)",)
-
-# Printf command to show log messages in recipes
-#
-# Syntax: $(call CPB_LOG,msgFmt,msgFmtArgs?=)
-ifneq ($(cpb_include_common_mk_log_color),0)
-    CPB_LOG = $(call CPB_COLOR_LOG,96,$(1),$(2))
-else
-    CPB_LOG = $(call CPB_COLOR_LOG,,$(1),$(2))
-endif
 # ------------------------------------------------------------------------------
 
 endif # ifndef cpb_include_common_mk

@@ -46,7 +46,7 @@ $(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_file_ent
 $(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_dist_deps_template)
 $(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_dist_deps)
 
-DEFAULT_VAR_SET += LIBS STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS
+VARS += LIBS STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS
 
 # Strips release build ---------------------------------------------------------
 # NOTE: A host layer may have set STRIP_RELEASE
@@ -131,13 +131,6 @@ else
     $(call FN_CHECK_NON_EMPTY,LD)
 endif
 
-# Avoid problems when both AS,CC,CXX,AR,LD and CROSS_COMPILE are set
-override AS := $(subst $(CROSS_COMPILE),,$(AS))
-override CC := $(subst $(CROSS_COMPILE),,$(CC))
-override CXX := $(subst $(CROSS_COMPILE),,$(CXX))
-override AR := $(subst $(CROSS_COMPILE),,$(AR))
-override LD := $(subst $(CROSS_COMPILE),,$(LD))
-
 cpb_toolchains_gcc_toolchain_mk_cflags += -Wall
 cpb_toolchains_gcc_toolchain_mk_cxxflags += -Wall
 
@@ -214,20 +207,20 @@ BUILD_DEPS += --cpb_toolchains_gcc_toolchain_mk_pre_build_check $(O_BUILD_DIR)/$
 $(O_BUILD_DIR)/$(ARTIFACT): $(cpb_toolchains_gcc_toolchain_mk_obj_files)
     ifeq ($(PROJ_TYPE),lib)
         ifeq ($(LIB_TYPE),shared)
-	        $(call CPB_LOG,[LD] $@)
+	        @echo $(call FN_LOG_INFO,[LD] $@)
 	        $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files) $(LDFLAGS))
         else ifeq ($(LIB_TYPE),static)
-	        $(call CPB_LOG,[AR] $@)
+	        @echo $(call FN_LOG_INFO,[AR] $@)
 	        $(VERBOSE)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files))
         endif
     else ifeq ($(PROJ_TYPE),app)
-	    $(call CPB_LOG,[LD] $@)
+	    @echo $(call FN_LOG_INFO,[LD] $@)
 	    $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files) $(LDFLAGS))
     endif
 
 # C sources --------------------------------------------------------------------
 $(O_BUILD_DIR)/%.c$(cpb_toolchains_gcc_toolchain_mk_obj_suffix): %.c
-	$(call CPB_LOG,[CC] $@)
+	@echo $(call FN_LOG_INFO,[CC] $@)
 	@mkdir -p $(dir $@)
 	$(VERBOSE)$(CROSS_COMPILE)$(CC) $(strip $(CFLAGS) -c $< -o $@)
 # ------------------------------------------------------------------------------
@@ -235,7 +228,7 @@ $(O_BUILD_DIR)/%.c$(cpb_toolchains_gcc_toolchain_mk_obj_suffix): %.c
 # C++ sources ------------------------------------------------------------------
 define cpb_toolchains_gcc_toolchain_mk_cxx_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_toolchains_gcc_toolchain_mk_obj_suffix): %.$(1)
-	$(call CPB_LOG,[CXX] $$@)
+	@echo $$(call FN_LOG_INFO,[CXX] $$@)
 	@mkdir -p $$(dir $$@)
 	$(VERBOSE)$(CROSS_COMPILE)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
 endef
@@ -248,7 +241,7 @@ $(eval $(call cpb_toolchains_gcc_toolchain_mk_cxx_template,cc))
 # Assembly sources -------------------------------------------------------------
 define cpb_toolchains_gcc_toolchain_mk_as_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_toolchains_gcc_toolchain_mk_obj_suffix): %.$(1)
-	$(call CPB_LOG,[AS] $$@)
+	@echo $$(call FN_LOG_INFO,[AS] $$@)
 	@mkdir -p $$(dir $$@)
 	$(VERBOSE)$(CROSS_COMPILE)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
 endef
