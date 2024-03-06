@@ -325,7 +325,7 @@ define cpb_builder_mk_dist_deps_template
 cpb_builder_mk_dist_deps += $(2)
 
 $(2): $(1)
-	@echo $$(call FN_LOG_INFO,[DIST] $$@)
+	$$(call FN_LOG_INFO,$$(V),[DIST] $$@)
 	@mkdir -p $$(dir $$@)
 	$(VERBOSE)/bin/cp $$< $$@
 endef

@@ -196,4 +196,45 @@ $(call FN_CHECK_RESERVED,FN_CHECK_NO_WHITESPACE)
 FN_CHECK_NO_WHITESPACE=$(if $(call FN_EQ,0,$(words $($(1)))),,$(if $(call FN_EQ,1,$(words $($(1)))),,$(error $(if $(2),$(2),[$(1)] Value cannot have whitespaces: "$($(1))"))))
 # ==============================================================================
 
+# == [Colored output] ==========================================================
+$(call FN_CHECK_RESERVED,cpb_include_functions_mk_term_support_colors)
+$(call FN_CHECK_RESERVED,FN_COLORED_TEXT)
+$(call FN_CHECK_RESERVED,FN_LOG)
+$(call FN_CHECK_RESERVED,FN_LOG_INFO)
+
+cpb_include_functions_mk_term_support_colors := $(shell tput colors 2> /dev/null)
+ifneq ($(cpb_include_functions_mk_term_support_colors),)
+    ifneq ($(cpb_include_functions_mk_term_support_colors),0)
+        cpb_include_functions_mk_term_support_colors := 1
+    else
+        cpb_include_functions_mk_term_support_colors :=
+    endif
+endif
+
+# Generate a colored string.
+#
+# NOTE: Real color support relies on terminal support. If there is no support
+#       colors are ignored.
+#
+# Syntax: $(call FN_COLORED_TEXT,ansiColor?=,msg)
+FN_COLORED_TEXT = $(if $(and $(cpb_include_functions_mk_term_support_colors),$(1)),\033[$(1)m,)$(2)$(if $(and $(cpb_include_functions_mk_term_support_colors),$(1)),\033[0m,)
+
+
+# Generates an echo command for a log message.
+#
+# NOTE: Real color support relies on terminal support. If there is no support
+#       colors are ignored.
+#
+# Syntax: $(call FN_LOG,color?=,msg)
+FN_LOG = @printf "$(if $(1),\n,)$(call FN_COLORED_TEXT,$(1),$(2))\n"
+
+# Generates an echo command for INFO log message
+#
+# NOTE: Real color support relies on terminal support. If there is no support
+#       colors are ignored.
+#
+# Syntax: $(call FN_LOG_INFO,verbose?=0,msg)
+FN_LOG_INFO = $(call FN_LOG,$(if $(call FN_EQ,$(if $(1),$(1),0),0),,96),$(2))
+# ==============================================================================
+
 endif # ifndef cpb_include_functions_mk

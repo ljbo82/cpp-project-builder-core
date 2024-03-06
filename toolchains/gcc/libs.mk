@@ -85,9 +85,10 @@ PRE_BUILD_DEPS += $$(cpb_toolchains_gcc_libs_mk_o_libs_dir)/.$(1).dist
 # ==============================================================================
 .PHONY: --cpb-lib-$(1)
 --cpb-lib-$(1):
-	@echo $(call FN_COLOR_LOG,96,[LIB] $(4))
-	$$(VERBOSE)$$(MAKE) --no-print-directory $$(LIB_MKFLAGS_$(1))
-	@echo $(call FN_COLOR_LOG,92,Leaving directory $(2))
+    ifneq ($$(V),0)
+	    $$(call FN_LOG_INFO,1,[LIB] $(4))
+    endif
+	$$(VERBOSE)$$(MAKE) $$(LIB_MKFLAGS_$(1))
 
 $$(cpb_toolchains_gcc_libs_mk_o_libs_dir)/.$(1).dist: --cpb-lib-$(1) ;
 # ==============================================================================
