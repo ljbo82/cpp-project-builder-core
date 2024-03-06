@@ -85,9 +85,7 @@ PRE_BUILD_DEPS += $$(cpb_toolchains_gcc_libs_mk_o_libs_dir)/.$(1).dist
 # ==============================================================================
 .PHONY: --cpb-lib-$(1)
 --cpb-lib-$(1):
-    ifneq ($$(V),0)
-	    $$(call FN_LOG_INFO,1,[LIB] $(4))
-    endif
+	$$(call FN_LOG_INFO,$$(V),[LIB] $(4))
 	$$(VERBOSE)$$(MAKE) $$(LIB_MKFLAGS_$(1))
 
 $$(cpb_toolchains_gcc_libs_mk_o_libs_dir)/.$(1).dist: --cpb-lib-$(1) ;
