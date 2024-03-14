@@ -2,7 +2,7 @@
 
 cpp-project-builder-core provides a build system based on makefiles containing standard recipes to build C/C++/Assembly multiplatform projects using a GCC-based compiler.
 
-This repository contains the only the build system. For further details (e.g. documentation, demos, etc.), check project's [official documentation](tbd).
+[This repository](https://github.com/ljbo82/cpp-project-builder-core) contains the only the build system. For further details (e.g. documentation, demos, etc.), check project's [official website](tbd).
 
 ## Summary
 
