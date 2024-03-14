@@ -79,6 +79,6 @@ ifneq ($(cpb_include_hosts_mk_includes),)
     include $(cpb_include_hosts_mk_includes)
 endif
 
-SRC_DIRS += $(cpb_include_hosts_mk_src_dirs)
+SRC_DIRS := $(cpb_include_hosts_mk_src_dirs) $(SRC_DIRS)
 
 endif # ifndef cpb_include_hosts_mk
