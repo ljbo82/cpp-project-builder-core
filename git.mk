@@ -28,6 +28,7 @@ include $(dir $(cpb_git_mk))include/common.mk
 GIT_REPO_DIR ?= .
 $(call FN_CHECK_NON_EMPTY,GIT_REPO_DIR)
 $(call FN_CHECK_NO_WHITESPACE,GIT_REPO_DIR)
+$(call FN_CHECK_ORIGIN,GIT_REPO_DIR,file)
 
 $(call FN_CHECK_RESERVED,cpb_git_mk_repo_available)
 cpb_git_mk_repo_available := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1 && echo y)

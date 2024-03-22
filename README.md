@@ -2,12 +2,12 @@
 
 cpp-project-builder-core provides a build system based on makefiles containing standard recipes to build C/C++/Assembly multiplatform projects using a GCC-based compiler.
 
-[This repository](https://github.com/ljbo82/cpp-project-builder-core) contains the only the build system. For further details (e.g. documentation, demos, etc.), check project's [official website](tbd).
+[This repository](https://github.com/ljbo82/cpp-project-builder-core) contains the only the build system  (i.e. there is no documentation, demos, etc). In order to get all this extra stuff, check the [main repository](http://ljbo82.github.io/cpp-project-builder).
 
 ## Summary
 
 * [License](#license)
-* [Usage](#usage)
+* [Basic usage](#basic-usage)
 * [Makefiles](#makefiles)
 
 ## License
@@ -26,7 +26,6 @@ cpp-project-builder provides a build system intended to be used by C/C++/Assembl
 >
 > * From this point onwards, the project root directory will be referred to as `<PROJ_ROOT>` and this is the directory where project's `Makefile` is located.
 
-
 The build system can be either shared by multiple projects or emebedded directly into your project.
 
 The basic usage is comprised by the following steps:
@@ -43,11 +42,11 @@ The basic usage is comprised by the following steps:
 
    * Source files should be placed into `<PROJ_ROOT>/src`.
 
-   * Global headers should be placed into  `<PROJ_ROOT>/include`.
+   * If you are developing a library, the public headers should be placed into  `<PROJ_ROOT>/include`.
 
-   > Source and include files can be placed anywhere inside `<PROJ_ROOT>`, but if you use custom directories, you have to declare them in your make file. See [documentation](tbd) for details.
+   > Source and public header files can be placed anywhere inside `<PROJ_ROOT>`, but if you use custom directories, you have to declare them explicitly in your make file. See [documentation](http://ljbo82.github.io/cpp-project-builder) for details.
 
-3. Create a `Makefile` inside `<PROJ_ROOT>` containing [variables](tbd) defining how your project shall be built (a minimal Makefile has to provide, at least, the variables `PROJ_NAME` and `PROJ_TYPE`).
+3. Create a `Makefile` inside `<PROJ_ROOT>` containing [variables](http://ljbo82.github.io/cpp-project-builder/variables) defining how your project shall be built (a minimal Makefile has to provide, at least, the variables [`PROJ_NAME`](http://ljbo82.github.io/cpp-project-builder/variables#PROJ_NAME) and [`PROJ_TYPE`](http://ljbo82.github.io/cpp-project-builder/variables#PROJ_TYPE)).
 
 4. At the end of your `<PROJ_ROOT>/Makefile`, include the file `builder.mk` provided by the build system:
 
@@ -68,9 +67,9 @@ Now your project is ready to be built.
 
 Just call `make` (from `<PROJ_ROOT>` directory, or use `make -C <PROJ_ROOT>` from any other directory) in order to build your project.
 
-For further details about the build system (e.g. how to customize build process, supporting multiple platforms, etc.), check the [documentation](tbd).
+For further details about the build system (e.g. how to customize build process, supporting multiple platforms, variable reference, etc.), check the [documentation](http://ljbo82.github.io/cpp-project-builder).
 
-For more examples, check the [demos](https://github.com/ljbo82/cpp-project-builder-demos).
+For more examples, check the [demos](https://github.com/ljbo82/cpp-project-builder/demos).
 
 ## Makefiles
 
@@ -84,16 +83,16 @@ This is the main makefile provided by the build system. It contains standard rec
 
 Include this file at the end of your `<PROJ_ROOT>/Makefile`.
 
-See [documentation](tbd) for details.
+See [documentation](http://ljbo82.github.io/cpp-project-builder) for details.
 
 ### doxygen.mk
 
 This file provides standard targets to generate source documentation using [doxygen](https://www.doxygen.nl/index.html).
 
-See [documentation](tbd) for details.
+See [documentation](http://ljbo82.github.io/cpp-project-builder/doxygen) for details.
 
 ### git.mk
 
 This file inspects `<PROJ_ROOT>` directory and exposes git repository information (current commit, tag, status, etc) through certain variables.
 
-See [documentation](tbd) for details.
+See [documentation](http://ljbo82.github.io/cpp-project-builder/git) for details.
