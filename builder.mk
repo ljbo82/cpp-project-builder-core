@@ -97,6 +97,8 @@ endif
 # Default include & source directories -----------------------------------------
 ifdef SRC_DIRS
     $(call FN_CHECK_ORIGIN,SRC_DIRS,file)
+else ifdef SRC_FILES
+    $(call FN_CHECK_ORIGIN,SRC_FILES,file)
 else
     ifneq ($(wildcard src),)
         SRC_DIRS := src
@@ -148,10 +150,6 @@ ifdef SKIPPED_SRC_FILES
     $(call FN_CHECK_ORIGIN,SKIPPED_SRC_FILES,file)
 endif
 
-ifdef SRC_FILES
-    $(call FN_CHECK_ORIGIN,SRC_FILES,file)
-endif
-
 SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
 
 # Checks if any SRC_DIR is outside CURDIR
@@ -191,8 +189,6 @@ endif
 # Process toolchain layers -----------------------------------------------------
 include $(dir $(cpb_builder_mk))include/toolchains.mk
 # ------------------------------------------------------------------------------
-
-.NOTPARALLEL:
 
 # all (default) ================================================================
 .DEFAULT_GOAL := all
