@@ -34,15 +34,6 @@ $(call FN_CHECK_RESERVED,cpb_include_hosts_mk_includes)
 $(call FN_CHECK_RESERVED,cpb_include_hosts_mk_src_dirs)
 # ------------------------------------------------------------------------------
 
-ifndef HOST
-    ifdef NATIVE_HOST
-        HOST := $(NATIVE_HOST)
-    endif
-endif
-
-$(call FN_CHECK_NON_EMPTY,HOST)
-$(call FN_CHECK_NO_WHITESPACE,HOST)
-
 ifdef HOSTS_DIRS
     $(call FN_CHECK_ORIGIN,HOSTS_DIRS,file)
 else

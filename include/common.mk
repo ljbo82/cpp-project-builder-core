@@ -24,6 +24,7 @@ ifndef cpb_include_common_mk
 cpb_include_common_mk := $(lastword $(MAKEFILE_LIST))
 
 include $(dir $(cpb_include_common_mk))functions.mk
+include $(dir $(cpb_builder_mk))include/native.mk
 
 $(call FN_CHECK_RESERVED,CPB_VERSION)
 $(call FN_CHECK_RESERVED,cpb_include_common_mk_min_make_version)
@@ -45,8 +46,38 @@ cpb_include_common_mk_make_version_cmp := $(call FN_SEMVER_CMP,$(cpb_include_com
 $(if $(cpb_include_common_mk_make_version_cmp),,$(error Incompatible GNU Make version: $(if $(cpb_include_common_mk_make_version),$(cpb_include_common_mk_make_version),unknown) (version should be $(cpb_include_common_mk_min_make_version)+)))
 # ------------------------------------------------------------------------------
 
+# Only one target per make call ------------------------------------------------
+ifneq ($(words $(MAKECMDGOALS)),0)
+    ifneq ($(words $(MAKECMDGOALS)),1)
+        $(error Only one target can be called per time)
+    endif
+endif
+# ------------------------------------------------------------------------------
+
+# Debug / release --------------------------------------------------------------
+DEBUG ?= 0
+$(call FN_CHECK_NON_EMPTY,DEBUG)
+$(call FN_CHECK_NO_WHITESPACE,DEBUG)
+$(call FN_CHECK_OPTIONS,DEBUG,0 1)
+# ------------------------------------------------------------------------------
+
+# HOST -------------------------------------------------------------------------
+ifndef HOST
+    ifdef NATIVE_HOST
+        HOST := $(NATIVE_HOST)
+    endif
+endif
+
+$(call FN_CHECK_NON_EMPTY,HOST)
+$(call FN_CHECK_NO_WHITESPACE,HOST)
+# ------------------------------------------------------------------------------
+
 # Output directory -------------------------------------------------------------
-O ?= output
+ifeq ($(MAKECMDGOALS),clean)
+    O ?= output
+else
+    O ?= output/$(HOST)/$(if $(call FN_EQ,$(DEBUG),0),release,debug)
+endif
 $(call FN_CHECK_NON_EMPTY,O)
 $(call FN_CHECK_NO_WHITESPACE,O)
 # ------------------------------------------------------------------------------

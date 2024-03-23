@@ -24,7 +24,6 @@ ifndef cpb_builder_mk
 cpb_builder_mk := $(lastword $(MAKEFILE_LIST))
 
 include $(dir $(cpb_builder_mk))include/common.mk
-include $(dir $(cpb_builder_mk))include/native.mk
 
 # Reserved variables -----------------------------------------------------------
 $(call FN_CHECK_RESERVED,cpb_builder_mk_src_file_filter)
@@ -41,14 +40,6 @@ $(call FN_CHECK_RESERVED,O_DIST_DIR)
 # Checks for whitespace in CWD -------------------------------------------------
 ifneq ($(words $(CURDIR)),1)
     $(error Current directory ('$(CURDIR)') contains one or more whitespaces)
-endif
-# ------------------------------------------------------------------------------
-
-# Only one target per make call ------------------------------------------------
-ifneq ($(words $(MAKECMDGOALS)),0)
-    ifneq ($(words $(MAKECMDGOALS)),1)
-        $(error Only one target can be called per time)
-    endif
 endif
 # ------------------------------------------------------------------------------
 
@@ -78,13 +69,6 @@ $(call FN_CHECK_OPTIONS,PROJ_TYPE,app lib)
 ifeq ($(PROJ_TYPE),lib)
     LIB_NAME ?= $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
 endif
-# ------------------------------------------------------------------------------
-
-# Debug / release --------------------------------------------------------------
-DEBUG ?= 0
-$(call FN_CHECK_NON_EMPTY,DEBUG)
-$(call FN_CHECK_NO_WHITESPACE,DEBUG)
-$(call FN_CHECK_OPTIONS,DEBUG,0 1)
 # ------------------------------------------------------------------------------
 
 # Build sub-directory ----------------------------------------------------------
