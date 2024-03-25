@@ -31,19 +31,19 @@ $(call FN_CHECK_NO_WHITESPACE,GIT_REPO_DIR)
 $(call FN_CHECK_ORIGIN,GIT_REPO_DIR,file)
 
 $(call FN_CHECK_RESERVED,cpb_git_mk_repo_available)
-cpb_git_mk_repo_available := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1 && echo y)
+cpb_git_mk_repo_available := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1 && echo y)
 
 ifneq ($(cpb_git_mk_repo_available),)
     $(call FN_CHECK_RESERVED,GIT_COMMIT)
-    GIT_COMMIT := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD > /dev/null 2>&1 && echo y)
+    GIT_COMMIT := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD > /dev/null 2>&1 && echo y)
     ifneq ($(GIT_COMMIT),)
-        GIT_COMMIT := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD)
+        GIT_COMMIT := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD)
 
         $(call FN_CHECK_RESERVED,GIT_COMMIT_SHORT)
-        GIT_COMMIT_SHORT := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse --short HEAD)
+        GIT_COMMIT_SHORT := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse --short HEAD)
 
         $(call FN_CHECK_RESERVED,GIT_STATUS)
-        GIT_STATUS := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status -s)
+        GIT_STATUS := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status -s)
         ifeq ($(GIT_STATUS),)
             GIT_STATUS := clean
         else
@@ -51,9 +51,9 @@ ifneq ($(cpb_git_mk_repo_available),)
         endif
 
         $(call FN_CHECK_RESERVED,GIT_TAG)
-        GIT_TAG := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git describe --tags > /dev/null 2>&1 && echo y)
+        GIT_TAG := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git describe --tags > /dev/null 2>&1 && echo y)
         ifneq ($(GIT_TAG),)
-            GIT_TAG := $(call FN_SHELL,cd $(GIT_REPO_DIR) > /dev/null 2>&1; git describe --tags)
+            GIT_TAG := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git describe --tags)
         else
             undefine GIT_TAG
         endif
