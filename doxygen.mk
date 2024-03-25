@@ -67,4 +67,7 @@ endif
 doc: --cpb_doxygen_mk_post_doc ;
 # ==============================================================================
 
+# Exports default variable set for print-vars
+VARS += DOC_DIR DOXYFILE PRE_DOC_DEPS POST_DOC_DEPS
+
 endif # ifndef cpb_doxygen_mk

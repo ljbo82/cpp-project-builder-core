@@ -199,7 +199,7 @@ all: dist ;
 
 # print-vars ===================================================================
 VARS += O PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS TOOLCHAIN TOOLCHAIN_DIRS
-VARS ?= $(sort $(DEFAULT_VAR_SET))
+override VARS := $(sort $(VARS))
 $(call FN_CHECK_NON_EMPTY,VARS)
 
 .PHONY: print-vars
@@ -208,26 +208,16 @@ print-vars:
 	@printf ''
 # ==============================================================================
 
-# clean ========================================================================
-ifdef PRE_CLEAN_DEPS
-    $(call FN_CHECK_ORIGIN,PRE_CLEAN_DEPS,file)
-endif
-ifdef POST_CLEAN_DEPS
-    $(call FN_CHECK_ORIGIN,POST_CLEAN_DEPS,file)
-endif
-
-.PHONY: --cpb_builder_mk_pre_clean
---cpb_builder_mk_pre_clean: $(PRE_CLEAN_DEPS) ;
-
-.PHONY: --cpb_builder_mk_clean
---cpb_builder_mk_clean: --cpb_builder_mk_pre_clean
-	$(VERBOSE)rm -rf $(O_BASE)
-
-.PHONY: --cpb_builder_mk_post_clean
---cpb_builder_mk_post_clean: --cpb_builder_mk_clean $(POST_CLEAN_DEPS) ;
-
+# clean & clean-all ============================================================
 .PHONY: clean
-clean: --cpb_builder_mk_post_clean ;
+clean:
+	$(VERBOSE)rm -rf $(O)
+	$(VERBOSE)rmdir --ignore-fail-on-non-empty $(O_BASE)/*
+	$(VERBOSE)rmdir --ignore-fail-on-non-empty $(O_BASE)
+
+.PHONY: clean-all
+clean-all:
+	$(VERBOSE) rm -rf $(O_BASE)
 # ==============================================================================
 
 # build ========================================================================

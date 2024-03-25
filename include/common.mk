@@ -24,7 +24,7 @@ ifndef cpb_include_common_mk
 cpb_include_common_mk := $(lastword $(MAKEFILE_LIST))
 
 include $(dir $(cpb_include_common_mk))functions.mk
-include $(dir $(cpb_builder_mk))include/native.mk
+include $(dir $(cpb_include_common_mk))native.mk
 
 $(call FN_CHECK_RESERVED,CPB_VERSION)
 $(call FN_CHECK_RESERVED,cpb_include_common_mk_min_make_version)
@@ -81,6 +81,10 @@ ifdef O
 else
     O_BASE := output
     O := $(O_BASE)/$(HOST)/$(if $(call FN_EQ,$(DEBUG),0),release,debug)
+endif
+
+ifeq ($(realpath $(O)),$(CURDIR))
+    $(error [O] Project root cannot be used as output directory)
 endif
 # ------------------------------------------------------------------------------
 

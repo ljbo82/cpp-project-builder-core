@@ -75,4 +75,7 @@ ifneq ($(GIT_VERSION),)
     endif
 endif
 
+# Exports default variable set for print-vars
+VARS += GIT_REPO_DIR GIT_COMMIT GIT_COMMIT_SHORT GIT_STATUS GIT_TAG GIT_VERSION
+
 endif # ifndef cpb_git_mk
