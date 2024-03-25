@@ -73,13 +73,15 @@ $(call FN_CHECK_NO_WHITESPACE,HOST)
 # ------------------------------------------------------------------------------
 
 # Output directory -------------------------------------------------------------
-ifeq ($(MAKECMDGOALS),clean)
-    O ?= output
+$(call FN_CHECK_RESERVED,O_BASE)
+ifdef O
+    $(call FN_CHECK_NON_EMPTY,O)
+    $(call FN_CHECK_NO_WHITESPACE,O)
+    O_BASE := $(O)
 else
-    O ?= output/$(HOST)/$(if $(call FN_EQ,$(DEBUG),0),release,debug)
+    O_BASE := output
+    O := $(O_BASE)/$(HOST)/$(if $(call FN_EQ,$(DEBUG),0),release,debug)
 endif
-$(call FN_CHECK_NON_EMPTY,O)
-$(call FN_CHECK_NO_WHITESPACE,O)
 # ------------------------------------------------------------------------------
 
 # Enable/Disable verbose mode --------------------------------------------------

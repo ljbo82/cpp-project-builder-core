@@ -221,7 +221,7 @@ endif
 
 .PHONY: --cpb_builder_mk_clean
 --cpb_builder_mk_clean: --cpb_builder_mk_pre_clean
-	$(VERBOSE)rm -rf $(O)
+	$(VERBOSE)rm -rf $(O_BASE)
 
 .PHONY: --cpb_builder_mk_post_clean
 --cpb_builder_mk_post_clean: --cpb_builder_mk_clean $(POST_CLEAN_DEPS) ;

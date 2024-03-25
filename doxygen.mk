@@ -26,11 +26,12 @@ cpb_doxygen_mk := $(lastword $(MAKEFILE_LIST))
 include $(dir $(cpb_doxygen_mk))include/common.mk
 
 # Doc src/output directories----------------------------------------------------
-DOC_DIR ?= doc
-$(call FN_CHECK_NON_EMPTY,DOC_DIR)
-$(call FN_CHECK_NO_WHITESPACE,DOC_DIR)
-$(call FN_CHECK_RESERVED,O_DOC_DIR)
-O_DOC_DIR := $(O)/doc
+ifdef DOC_DIR
+    $(call FN_CHECK_NON_EMPTY,DOC_DIR)
+    $(call FN_CHECK_NO_WHITESPACE,DOC_DIR)
+else
+    DOC_DIR ?= $(O_BASE)/doc
+endif
 # ------------------------------------------------------------------------------
 
 # Doxyfile definition ----------------------------------------------------------
@@ -55,8 +56,8 @@ endif
     ifeq ($(wildcard $(DOXYFILE)),)
 	    $(error [DOXYFILE] File not found: $(DOXYFILE))
     else
-	    @mkdir -p $(O_DOC_DIR)
-	    $(VERBOSE)(cat $(DOXYFILE)$(foreach arg,$(strip OUTPUT_DIRECTORY=$(O_DOC_DIR) $(DOXYARGS)),; echo "$(arg)")) | doxygen -
+	    @mkdir -p $(DOC_DIR)
+	    $(VERBOSE)(cat $(DOXYFILE)$(foreach arg,$(strip OUTPUT_DIRECTORY=$(DOC_DIR) $(DOXYARGS)),; echo "$(arg)")) | doxygen -
     endif
 
 .PHONY: --cpb_doxygen_mk_post_doc
