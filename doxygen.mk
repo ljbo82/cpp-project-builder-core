@@ -23,6 +23,7 @@
 ifndef cpb_doxygen_mk
 cpb_doxygen_mk := $(lastword $(MAKEFILE_LIST))
 
+include $(dir $(cpb_doxygen_mk))functions.mk
 include $(dir $(cpb_doxygen_mk))include/common.mk
 
 # Doc src/output directories----------------------------------------------------

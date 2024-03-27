@@ -23,6 +23,7 @@
 ifndef cpb_builder_mk
 cpb_builder_mk := $(lastword $(MAKEFILE_LIST))
 
+include $(dir $(cpb_builder_mk))functions.mk
 include $(dir $(cpb_builder_mk))include/common.mk
 
 # Reserved variables -----------------------------------------------------------
@@ -198,7 +199,7 @@ all: dist ;
 # ==============================================================================
 
 # print-vars ===================================================================
-VARS += O O_BASE PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS NATIVE_OS NATIVE_ARCH NATIVE_HOST HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS TOOLCHAIN TOOLCHAIN_DIRS
+VARS += O O_BASE PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS TOOLCHAIN TOOLCHAIN_DIRS
 override VARS := $(sort $(VARS))
 $(call FN_CHECK_NON_EMPTY,VARS)
 
@@ -212,8 +213,8 @@ print-vars:
 .PHONY: clean
 clean:
 	$(VERBOSE)rm -rf $(O)
-	$(VERBOSE)rmdir --ignore-fail-on-non-empty $(O_BASE)/*
-	$(VERBOSE)rmdir --ignore-fail-on-non-empty $(O_BASE)
+	$(VERBOSE)[ -d $(O_BASE) ] && rmdir --ignore-fail-on-non-empty $(O_BASE)/* || true
+	$(VERBOSE)[ -d $(O_BASE) ] && rmdir --ignore-fail-on-non-empty $(O_BASE) || true
 
 .PHONY: clean-all
 clean-all:
@@ -297,7 +298,7 @@ cpb_builder_mk_dist_deps += $(2)
 $(2): $(1)
 	$$(call FN_LOG_INFO,$$(V),[DIST] $$@)
 	@mkdir -p $$(dir $$@)
-	$(VERBOSE)/bin/cp $$< $$@
+	$(VERBOSE)ln -f $$< $$@
 endef
 
 $(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(eval $(call cpb_builder_mk_dist_deps_template,$(call FN_TOKEN,$(distFileEntry),:,1),$(call FN_TOKEN,$(distFileEntry),:,2))))

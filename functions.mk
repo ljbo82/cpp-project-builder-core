@@ -18,19 +18,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# General purpose functions
+# Helper functions
 
-ifndef cpb_include_functions_mk
-cpb_include_functions_mk := $(lastword $(MAKEFILE_LIST))
+ifndef cpb_functions_mk
+cpb_functions_mk := $(lastword $(MAKEFILE_LIST))
 
 # Checks if a reserved variable is defined elsewhere
 #
 # Syntax: $(call FN_CHECK_RESERVED,varName,errorMessage=?)
 $(call FN_CHECK_RESERVED,FN_CHECK_RESERVED)
 FN_CHECK_RESERVED = $(if $($(1)),$(error $(if $(2),$(2),[$(1)] Reserved variable)))
-
-$(call FN_CHECK_RESERVED,cpb_include_functions_mk_token_prefix)
-cpb_include_functions_mk_token_prefix := __?__
 
 # = [Text functions] ===========================================================
 # Splits a string into tokens.
@@ -39,15 +36,17 @@ cpb_include_functions_mk_token_prefix := __?__
 # used to force split of empty tokens (afterwards token prefix shall be
 # removed).
 #
-# Syntax: $(call FN_SPLIT,baseString,delimiter,tokenPrefix?=$(cpb_include_functions_mk_token_prefix)
+# Syntax: $(call FN_SPLIT,baseString,delimiter,tokenPrefix?=$(FN_SPLIT_prefix)
 $(call FN_CHECK_RESERVED,FN_SPLIT)
-FN_SPLIT = $(subst $(2), $(if $(3),$(3),$(cpb_include_functions_mk_token_prefix)),$(if $(3),$(3),$(cpb_include_functions_mk_token_prefix))$(1))
+$(call FN_CHECK_RESERVED,FN_SPLIT_prefix)
+FN_SPLIT_prefix := __?__
+FN_SPLIT = $(subst $(2), $(if $(3),$(3),$(FN_SPLIT_prefix)),$(if $(3),$(3),$(FN_SPLIT_prefix))$(1))
 
 # Returns a token on delimited string.
 #
 # Syntax: $(call FN_TOKEN,baseString,delimiter,index)
 $(call FN_CHECK_RESERVED,FN_TOKEN)
-FN_TOKEN = $(subst $(cpb_include_functions_mk_token_prefix),,$(word $(3),$(call FN_SPLIT,$(1),$(2))))
+FN_TOKEN = $(subst $(FN_SPLIT_prefix),,$(word $(3),$(call FN_SPLIT,$(1),$(2))))
 
 # Removes duplicate words without sorting.
 #
@@ -197,17 +196,17 @@ FN_CHECK_NO_WHITESPACE=$(if $(call FN_EQ,0,$(words $($(1)))),,$(if $(call FN_EQ,
 # ==============================================================================
 
 # == [Colored output] ==========================================================
-$(call FN_CHECK_RESERVED,cpb_include_functions_mk_term_support_colors)
+$(call FN_CHECK_RESERVED,cpb_functions_mk_term_support_colors)
 $(call FN_CHECK_RESERVED,FN_COLORED_TEXT)
 $(call FN_CHECK_RESERVED,FN_LOG)
 $(call FN_CHECK_RESERVED,FN_LOG_INFO)
 
-cpb_include_functions_mk_term_support_colors := $(shell tput colors 2> /dev/null)
-ifneq ($(cpb_include_functions_mk_term_support_colors),)
-    ifneq ($(cpb_include_functions_mk_term_support_colors),0)
-        cpb_include_functions_mk_term_support_colors := 1
+cpb_functions_mk_term_support_colors := $(shell tput colors 2> /dev/null)
+ifneq ($(cpb_functions_mk_term_support_colors),)
+    ifneq ($(cpb_functions_mk_term_support_colors),0)
+        cpb_functions_mk_term_support_colors := 1
     else
-        cpb_include_functions_mk_term_support_colors :=
+        cpb_functions_mk_term_support_colors :=
     endif
 endif
 
@@ -217,7 +216,7 @@ endif
 #       colors are ignored.
 #
 # Syntax: $(call FN_COLORED_TEXT,ansiColor?=,msg)
-FN_COLORED_TEXT = $(if $(and $(cpb_include_functions_mk_term_support_colors),$(1)),\033[$(1)m,)$(2)$(if $(and $(cpb_include_functions_mk_term_support_colors),$(1)),\033[0m,)
+FN_COLORED_TEXT = $(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[$(1)m,)$(2)$(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[0m,)
 
 
 # Generates an echo command for a log message.
@@ -237,4 +236,4 @@ FN_LOG = @printf "$(if $(1),\n,)$(call FN_COLORED_TEXT,$(1),$(2))\n"
 FN_LOG_INFO = $(call FN_LOG,$(if $(call FN_EQ,$(if $(1),$(1),0),0),,96),$(2))
 # ==============================================================================
 
-endif # ifndef cpb_include_functions_mk
+endif # ifndef cpb_functions_mk

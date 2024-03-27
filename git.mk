@@ -23,6 +23,7 @@
 ifndef cpb_git_mk
 cpb_git_mk := $(lastword $(MAKEFILE_LIST))
 
+include $(dir $(cpb_git_mk))functions.mk
 include $(dir $(cpb_git_mk))include/common.mk
 
 GIT_REPO_DIR ?= .

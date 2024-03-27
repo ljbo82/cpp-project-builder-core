@@ -24,14 +24,14 @@
 #    linux-x86, linux-x64, linux-arm, linux-arm64,
 #    windows-x86, windows-x64, windows-arm, windows-arm64
 
-ifndef cpb_include_native_mk
-cpb_include_native_mk := $(lastword $(MAKEFILE_LIST))
+ifndef cpb_native_mk
+cpb_native_mk := $(lastword $(MAKEFILE_LIST))
 
-include $(dir $(cpb_include_native_mk))functions.mk
+include $(dir $(cpb_native_mk))functions.mk
 
 # Reserved variables -----------------------------------------------------------
-$(call FN_CHECK_RESERVED,cpb_include_native_mk_os)
-$(call FN_CHECK_RESERVED,cpb_include_native_mk_arch)
+$(call FN_CHECK_RESERVED,cpb_native_mk_os)
+$(call FN_CHECK_RESERVED,cpb_native_mk_arch)
 $(call FN_CHECK_RESERVED,NATIVE_OS)
 $(call FN_CHECK_RESERVED,NATIVE_ARCH)
 $(call FN_CHECK_RESERVED,NATIVE_HOST)
@@ -40,11 +40,11 @@ $(call FN_CHECK_RESERVED,NATIVE_HOST)
 ifeq ($(OS),Windows_NT)
     NATIVE_OS := windows
 else
-    cpb_include_native_mk_os := $(call FN_SHELL,uname -s)
-    ifneq ($(filter Linux linux,$(cpb_include_native_mk_os)),)
+    cpb_native_mk_os := $(call FN_SHELL,uname -s)
+    ifneq ($(filter Linux linux,$(cpb_native_mk_os)),)
         NATIVE_OS := linux
     else
-        ifneq ($(filter Darwin darwin, $(cpb_include_native_mk_os)),)
+        ifneq ($(filter Darwin darwin, $(cpb_native_mk_os)),)
             NATIVE_OS := osx
         endif
     endif
@@ -52,34 +52,34 @@ endif
 
 ifdef NATIVE_OS
     ifeq ($(NATIVE_OS),windows)
-        cpb_include_native_mk_arch := $(call FN_SHELL,cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
-        ifeq ($(cpb_include_native_mk_arch),AMD64)
+        cpb_native_mk_arch := $(call FN_SHELL,cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
+        ifeq ($(cpb_native_mk_arch),AMD64)
             NATIVE_ARCH := x64
         else
-            ifeq ($(cpb_include_native_mk_arch),x86)
+            ifeq ($(cpb_native_mk_arch),x86)
                 NATIVE_ARCH := x86
             else
-                ifneq ($(cpb_include_native_mk_arch),ARM32)
+                ifneq ($(cpb_native_mk_arch),ARM32)
                     NATIVE_ARCH := arm
                 else
-                    ifeq ($(cpb_include_native_mk_arch),ARM64)
+                    ifeq ($(cpb_native_mk_arch),ARM64)
                         NATIVE_ARCH := arm64
                     endif
                 endif
             endif
         endif
     else
-        cpb_include_native_mk_arch := $(call FN_SHELL,uname -m)
-        ifeq ($(cpb_include_native_mk_arch),x86_64)
+        cpb_native_mk_arch := $(call FN_SHELL,uname -m)
+        ifeq ($(cpb_native_mk_arch),x86_64)
             NATIVE_ARCH := x64
         else
-            ifneq ($(filter %86, $(cpb_include_native_mk_arch)),)
+            ifneq ($(filter %86, $(cpb_native_mk_arch)),)
                 NATIVE_ARCH := x86
             else
-                ifneq ($(filter arm, $(cpb_include_native_mk_arch)),)
+                ifneq ($(filter arm, $(cpb_native_mk_arch)),)
                     NATIVE_ARCH := arm
                 else
-                    ifneq ($(filter arm64, $(cpb_include_native_mk_arch)),)
+                    ifneq ($(filter arm64, $(cpb_native_mk_arch)),)
                         NATIVE_ARCH := arm64
                     endif
                 endif
@@ -94,4 +94,6 @@ ifdef NATIVE_OS
     endif
 endif
 
-endif # ifndef cpb_include_native_mk
+VARS += NATIVE_OS NATIVE_ARCH NATIVE_HOST
+
+endif # ifndef cpb_native_mk

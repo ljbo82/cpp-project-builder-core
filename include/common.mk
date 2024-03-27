@@ -18,20 +18,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Common definitions for standalone makefiles
+# Common definitions
+
+ifndef cpb_functions_mk
+    $(error This file cannot be manually included)
+endif
 
 ifndef cpb_include_common_mk
 cpb_include_common_mk := $(lastword $(MAKEFILE_LIST))
-
-include $(dir $(cpb_include_common_mk))functions.mk
-include $(dir $(cpb_include_common_mk))native.mk
 
 $(call FN_CHECK_RESERVED,CPB_VERSION)
 $(call FN_CHECK_RESERVED,cpb_include_common_mk_min_make_version)
 $(call FN_CHECK_RESERVED,cpb_include_common_mk_make_version)
 $(call FN_CHECK_RESERVED,cpb_include_common_mk_make_version_cmp)
 
-CPB_VERSION := 1.0.0
+CPB_VERSION := 0.1.0
 ifdef CPB_MIN_VERSION
     $(call FN_CHECK_NON_EMPTY,CPB_MIN_VERSION)
     $(call FN_CHECK_ORIGIN,CPB_MIN_VERSION,file)
@@ -39,7 +40,7 @@ ifdef CPB_MIN_VERSION
     $(if $(call FN_SEMVER_CMP,$(CPB_VERSION),$(CPB_MIN_VERSION)),,$(error [CPB_MIN_VERSION] Current version is not compatible: $(CPB_VERSION) (version should be $(CPB_MIN_VERSION)+)))
 endif
 
-# Checks if GNU Make is supported ----------------------------------------------
+# Checks if GNU Make version is supported ----------------------------------------------
 cpb_include_common_mk_min_make_version := 4.2
 cpb_include_common_mk_make_version := $(word 3,$(call FN_SHELL,$(MAKE) --version | grep "GNU Make"))
 cpb_include_common_mk_make_version_cmp := $(call FN_SEMVER_CMP,$(cpb_include_common_mk_make_version),$(cpb_include_common_mk_min_make_version))
@@ -63,6 +64,7 @@ $(call FN_CHECK_OPTIONS,DEBUG,0 1)
 
 # HOST -------------------------------------------------------------------------
 ifndef HOST
+    include $(dir $(cpb_include_common_mk))../native.mk
     ifdef NATIVE_HOST
         HOST := $(NATIVE_HOST)
     endif
