@@ -50,7 +50,7 @@ TOOLCHAIN_DIRS := $(strip $(TOOLCHAIN_DIRS) $(dir $(cpb_builder_mk))toolchains)
 # Precedence: From most specific to most generic. For example,
 # for 'gcc-linux-arm-v7', accepted layers are:
 #     gcc-linux-arm-v7 > gcc/linux/arm/v7 > gcc/linux/arm > gcc/linux > gcc
-cpb_include_toolchains_mk_layers = $(cpb_include_toolchains_mk_host) $(call FN_REVERSE,$(call FN_HOST_FACTORIZE,$(cpb_include_toolchains_mk_host),-,/))
+cpb_include_toolchains_mk_layers = $(cpb_include_toolchains_mk_host) $(call FN_REVERSE,$(call FN_HOST_FACTORIZE,$(cpb_include_toolchains_mk_host)))
 
 $(foreach toolchainDir,$(TOOLCHAIN_DIRS),$(foreach layer,$(cpb_include_toolchains_mk_layers),$(eval cpb_include_toolchains_mk_includes += $(if $(wildcard $(toolchainDir)/$(layer)/toolchain.mk),$(realpath $(toolchainDir)/$(layer)/toolchain.mk),))))
 

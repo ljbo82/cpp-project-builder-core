@@ -47,7 +47,7 @@ HOSTS_DIRS := $(strip $(HOSTS_DIRS) $(dir $(cpb_builder_mk))hosts)
 # Precedence: From most specific to most generic. For example,
 # for host 'linux-arm-v7', accepted layers are:
 #     linux-arm-v7 > linux/arm/v7 > linux/arm > linux
-cpb_include_hosts_mk_layers = $(HOST) $(call FN_REVERSE,$(call FN_HOST_FACTORIZE,$(HOST),-,/))
+cpb_include_hosts_mk_layers = $(HOST) $(call FN_REVERSE,$(call FN_HOST_FACTORIZE,$(HOST)))
 
 # Auxiliar checker for 'host.mk' and 'src' directory in a layer directory ----
 #

@@ -27,6 +27,8 @@ endif
 ifndef cpb_include_common_mk
 cpb_include_common_mk := $(lastword $(MAKEFILE_LIST))
 
+include $(dir $(cpb_include_common_mk))../native.mk
+
 $(call FN_CHECK_RESERVED,CPB_VERSION)
 $(call FN_CHECK_RESERVED,cpb_include_common_mk_min_make_version)
 $(call FN_CHECK_RESERVED,cpb_include_common_mk_make_version)
@@ -64,7 +66,6 @@ $(call FN_CHECK_OPTIONS,DEBUG,0 1)
 
 # HOST -------------------------------------------------------------------------
 ifndef HOST
-    include $(dir $(cpb_include_common_mk))../native.mk
     ifdef NATIVE_HOST
         HOST := $(NATIVE_HOST)
     endif
