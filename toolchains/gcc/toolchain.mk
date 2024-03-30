@@ -46,26 +46,27 @@ $(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_fn_dist_adjust_file_ent
 $(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_dist_deps_template)
 $(call FN_CHECK_RESERVED,cpb_toolchains_gcc_toolchain_mk_dist_deps)
 
-VARS += LIBS STRIP_RELEASE OPTIMIZE_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS
+VARS += LIBS STRIP_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS
 
 # Strips release build ---------------------------------------------------------
 # NOTE: A host layer may have set STRIP_RELEASE
-STRIP_RELEASE ?= 1
-$(call FN_CHECK_ORIGIN,STRIP_RELEASE,file)
-$(call FN_CHECK_NON_EMPTY,STRIP_RELEASE)
-$(call FN_CHECK_NO_WHITESPACE,STRIP_RELEASE)
-$(call FN_CHECK_OPTIONS,STRIP_RELEASE,0 1)
+ifeq ($(DEBUG),0)
+    STRIP_RELEASE ?= 1
+    $(call FN_CHECK_ORIGIN,STRIP_RELEASE,file)
+    $(call FN_CHECK_NON_EMPTY,STRIP_RELEASE)
+    $(call FN_CHECK_NO_WHITESPACE,STRIP_RELEASE)
+    $(call FN_CHECK_OPTIONS,STRIP_RELEASE,0 1)
+endif
 # ------------------------------------------------------------------------------
 
 # Optimizes release build ------------------------------------------------------
-# NOTE: A host layer may have set OPTIMIZE_RELEASE and RELEASE_OPTIMIZATION_LEVEL
-OPTIMIZE_RELEASE ?= 1
-$(call FN_CHECK_ORIGIN,OPTIMIZE_RELEASE,file)
-$(call FN_CHECK_NON_EMPTY,OPTIMIZE_RELEASE)
-$(call FN_CHECK_NO_WHITESPACE,OPTIMIZE_RELEASE)
-$(call FN_CHECK_OPTIONS,OPTIMIZE_RELEASE,0 1)
-ifneq ($(OPTIMIZE_RELEASE),0)
+# NOTE: A host layer may have set RELEASE_OPTIMIZATION_LEVEL
+ifeq ($(DEBUG),0)
     RELEASE_OPTIMIZATION_LEVEL ?= 2
+    $(call FN_CHECK_ORIGIN,RELEASE_OPTIMIZATION_LEVEL,file)
+    $(call FN_CHECK_NON_EMPTY,RELEASE_OPTIMIZATION_LEVEL)
+    $(call FN_CHECK_NO_WHITESPACE,RELEASE_OPTIMIZATION_LEVEL)
+    $(call FN_CHECK_OPTIONS,RELEASE_OPTIMIZATION_LEVEL,0 1 2 3 s fast g z)
 endif
 # ------------------------------------------------------------------------------
 
@@ -139,7 +140,7 @@ ifneq ($(DEBUG),0)
     cpb_toolchains_gcc_toolchain_mk_cxxflags += -g3
     cpb_toolchains_gcc_toolchain_mk_asflags += -g3
 else
-    ifneq ($(OPTIMIZE_RELEASE),0)
+    ifneq ($(RELEASE_OPTIMIZATION_LEVEL),)
         cpb_toolchains_gcc_toolchain_mk_cflags += -O$(RELEASE_OPTIMIZATION_LEVEL)
         cpb_toolchains_gcc_toolchain_mk_cxxflags += -O$(RELEASE_OPTIMIZATION_LEVEL)
     endif

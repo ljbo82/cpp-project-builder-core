@@ -69,6 +69,9 @@ $(call FN_CHECK_OPTIONS,PROJ_TYPE,app lib)
 # LIB_NAME (Only for PROJ_TYPE == lib) -----------------------------------------
 ifeq ($(PROJ_TYPE),lib)
     LIB_NAME ?= $(PROJ_NAME)$(call FN_SEMVER_MAJOR,$(PROJ_VERSION))
+    $(call FN_CHECK_NON_EMPTY,LIB_NAME)
+    $(call FN_CHECK_ORIGIN,LIB_NAME,file)
+    $(call FN_CHECK_NO_WHITESPACE,LIB_NAME)
 endif
 # ------------------------------------------------------------------------------
 
@@ -210,15 +213,36 @@ print-vars:
 # ==============================================================================
 
 # clean & clean-all ============================================================
-.PHONY: clean
-clean:
+# clean ------------------------------------------------------------------------
+.PHONY: --cpb_builder_mk_pre_clean
+--cpb_builder_mk_pre_clean: $(PRE_CLEAN_DEPS) ;
+
+.PHONY: --cpb_builder_mk_clean
+--cpb_builder_mk_clean: --cpb_builder_mk_pre_clean
 	$(V_PREFIX)rm -rf $(O)
 	$(V_PREFIX)[ -d $(O_BASE) ] && rmdir --ignore-fail-on-non-empty $(O_BASE)/* || true
 	$(V_PREFIX)[ -d $(O_BASE) ] && rmdir --ignore-fail-on-non-empty $(O_BASE) || true
 
-.PHONY: clean-all
-clean-all:
+.PHONY: --cpb_builder_mk_post_clean
+--cpb_builder_mk_post_clean: --cpb_builder_mk_clean $(POST_CLEAN_DEPS) ;
+
+.PHONY: clean
+clean: --cpb_builder_mk_post_clean ;
+# ------------------------------------------------------------------------------
+# clean-all ------------------------------------------------------------------------
+.PHONY: --cpb_builder_mk_pre_clean_all
+--cpb_builder_mk_pre_clean_all: $(PRE_CLEAN_ALL_DEPS) ;
+
+.PHONY: --cpb_builder_mk_clean_all
+--cpb_builder_mk_clean_all: --cpb_builder_mk_pre_clean_all
 	$(V_PREFIX) rm -rf $(O_BASE)
+
+.PHONY: --cpb_builder_mk_post_clean_all
+--cpb_builder_mk_post_clean_all: --cpb_builder_mk_clean_all $(POST_CLEAN_ALL_DEPS) ;
+
+.PHONY: clean-all
+clean-all: --cpb_builder_mk_post_clean_all ;
+# ------------------------------------------------------------------------------
 # ==============================================================================
 
 # build ========================================================================
@@ -266,15 +290,15 @@ ifneq ($(SRC_FILES),)
         cpb_builder_mk_dist_files := $(O_BUILD_DIR)/$(ARTIFACT):lib/$(ARTIFACT)
     endif
 endif
-cpb_builder_mk_dist_files := $(cpb_builder_mk_dist_files) $(DIST_FILES)
+cpb_builder_mk_dist_files := $(DIST_FILES) $(cpb_builder_mk_dist_files)
 
 # Each entry (either DIST_DIR or DIST_FILE) has the syntax: src:destPathInDistDir
 
-# Autixiliary function to adjust a distribution directory entry in DIST_DIRS.
+# Auxiliary function to adjust a distribution directory entry in DIST_DIRS.
 # Syntax: $(call cpb_builder_mk_fn_dist_adjust_dir_entry,distDirEntry)
 cpb_builder_mk_fn_dist_adjust_dir_entry = $(if $(call FN_TOKEN,$(1),:,2),$(1),$(1):$(1))
 
-# Autixiliary function to adjust a distribution file entry in DIST_FILES.
+# Auxiliary function to adjust a distribution file entry in DIST_FILES.
 # Syntax: $(call cpb_builder_mk_fn_dist_adjust_file_entry,distFileEntry)
 cpb_builder_mk_fn_dist_adjust_file_entry = $(if $(call FN_TOKEN,$(1),:,2),$(1),$(1):$(notdir $(1)))
 
