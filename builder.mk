@@ -212,13 +212,13 @@ print-vars:
 # clean & clean-all ============================================================
 .PHONY: clean
 clean:
-	$(VERBOSE)rm -rf $(O)
-	$(VERBOSE)[ -d $(O_BASE) ] && rmdir --ignore-fail-on-non-empty $(O_BASE)/* || true
-	$(VERBOSE)[ -d $(O_BASE) ] && rmdir --ignore-fail-on-non-empty $(O_BASE) || true
+	$(V_PREFIX)rm -rf $(O)
+	$(V_PREFIX)[ -d $(O_BASE) ] && rmdir --ignore-fail-on-non-empty $(O_BASE)/* || true
+	$(V_PREFIX)[ -d $(O_BASE) ] && rmdir --ignore-fail-on-non-empty $(O_BASE) || true
 
 .PHONY: clean-all
 clean-all:
-	$(VERBOSE) rm -rf $(O_BASE)
+	$(V_PREFIX) rm -rf $(O_BASE)
 # ==============================================================================
 
 # build ========================================================================
@@ -298,7 +298,7 @@ cpb_builder_mk_dist_deps += $(2)
 $(2): $(1)
 	$$(call FN_LOG_INFO,$$(V),[DIST] $$@)
 	@mkdir -p $$(dir $$@)
-	$(VERBOSE)ln -f $$< $$@
+	$(V_PREFIX)ln -f $$< $$@
 endef
 
 $(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(eval $(call cpb_builder_mk_dist_deps_template,$(call FN_TOKEN,$(distFileEntry),:,1),$(call FN_TOKEN,$(distFileEntry),:,2))))

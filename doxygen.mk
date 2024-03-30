@@ -19,7 +19,6 @@
 # SOFTWARE.
 
 # Doxygen support
-
 ifndef cpb_doxygen_mk
 cpb_doxygen_mk := $(lastword $(MAKEFILE_LIST))
 
@@ -30,6 +29,7 @@ include $(dir $(cpb_doxygen_mk))include/common.mk
 ifdef DOC_DIR
     $(call FN_CHECK_NON_EMPTY,DOC_DIR)
     $(call FN_CHECK_NO_WHITESPACE,DOC_DIR)
+    $(call FN_CHECK_ORIGIN,DOC_DIR,file)
 else
     DOC_DIR ?= $(O_BASE)/doc
 endif
@@ -39,6 +39,7 @@ endif
 DOXYFILE ?= Doxyfile
 $(call FN_CHECK_NON_EMPTY,DOXYFILE)
 $(call FN_CHECK_NO_WHITESPACE,DOXYFILE)
+$(call FN_CHECK_ORIGIN,DOXYFILE,file)
 # ------------------------------------------------------------------------------
 
 # doc ==========================================================================
@@ -47,6 +48,9 @@ ifdef PRE_DOC_DEPS
 endif
 ifdef POST_DOC_DEPS
     $(call FN_CHECK_ORIGIN,POST_DOC_DEPS,file)
+endif
+ifdef DOXYARGS
+    $(call FN_CHECK_ORIGIN,DOXYARGS,file)
 endif
 
 .PHONY: --cpb_doxygen_mk_pre_doc
@@ -58,7 +62,7 @@ endif
 	    $(error [DOXYFILE] File not found: $(DOXYFILE))
     else
 	    @mkdir -p $(DOC_DIR)
-	    $(VERBOSE)(cat $(DOXYFILE)$(foreach arg,$(strip OUTPUT_DIRECTORY=$(DOC_DIR) $(DOXYARGS)),; echo "$(arg)")) | doxygen -
+	    $(V_PREFIX)(cat $(DOXYFILE)$(foreach arg,$(strip OUTPUT_DIRECTORY=$(DOC_DIR) $(DOXYARGS)),; echo "$(arg)")) | doxygen -
     endif
 
 .PHONY: --cpb_doxygen_mk_post_doc
@@ -69,6 +73,6 @@ doc: --cpb_doxygen_mk_post_doc ;
 # ==============================================================================
 
 # Exports default variable set for print-vars
-VARS += DOC_DIR DOXYFILE PRE_DOC_DEPS POST_DOC_DEPS
+VARS += DOC_DIR DOXYFILE DOXYARGS PRE_DOC_DEPS POST_DOC_DEPS
 
 endif # ifndef cpb_doxygen_mk

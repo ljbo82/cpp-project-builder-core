@@ -208,21 +208,21 @@ $(O_BUILD_DIR)/$(ARTIFACT): $(cpb_toolchains_gcc_toolchain_mk_obj_files)
     ifeq ($(PROJ_TYPE),lib)
         ifeq ($(LIB_TYPE),shared)
 	        $(call FN_LOG_INFO,$(V),[LD] $@)
-	        $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files) $(LDFLAGS))
+	        $(V_PREFIX)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files) $(LDFLAGS))
         else ifeq ($(LIB_TYPE),static)
 	        $(call FN_LOG_INFO,$(V),[AR] $@)
-	        $(VERBOSE)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files))
+	        $(V_PREFIX)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files))
         endif
     else ifeq ($(PROJ_TYPE),app)
 	    $(call FN_LOG_INFO,$(V),[LD] $@)
-	    $(VERBOSE)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files) $(LDFLAGS))
+	    $(V_PREFIX)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_toolchains_gcc_toolchain_mk_obj_files) $(LDFLAGS))
     endif
 
 # C sources --------------------------------------------------------------------
 $(O_BUILD_DIR)/%.c$(cpb_toolchains_gcc_toolchain_mk_obj_suffix): %.c
 	$(call FN_LOG_INFO,$(V),[CC] $@)
 	@mkdir -p $(dir $@)
-	$(VERBOSE)$(CROSS_COMPILE)$(CC) $(strip $(CFLAGS) -c $< -o $@)
+	$(V_PREFIX)$(CROSS_COMPILE)$(CC) $(strip $(CFLAGS) -c $< -o $@)
 # ------------------------------------------------------------------------------
 
 # C++ sources ------------------------------------------------------------------
@@ -230,7 +230,7 @@ define cpb_toolchains_gcc_toolchain_mk_cxx_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_toolchains_gcc_toolchain_mk_obj_suffix): %.$(1)
 	$$(call FN_LOG_INFO,$$(V),[CXX] $$@)
 	@mkdir -p $$(dir $$@)
-	$(VERBOSE)$(CROSS_COMPILE)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
+	$(V_PREFIX)$(CROSS_COMPILE)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
 endef
 
 $(eval $(call cpb_toolchains_gcc_toolchain_mk_cxx_template,cpp))
@@ -243,7 +243,7 @@ define cpb_toolchains_gcc_toolchain_mk_as_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_toolchains_gcc_toolchain_mk_obj_suffix): %.$(1)
 	$$(call FN_LOG_INFO,$$(V),[AS] $$@)
 	@mkdir -p $$(dir $$@)
-	$(VERBOSE)$(CROSS_COMPILE)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
+	$(V_PREFIX)$(CROSS_COMPILE)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
 endef
 
 $(eval $(call cpb_toolchains_gcc_toolchain_mk_as_template,s))

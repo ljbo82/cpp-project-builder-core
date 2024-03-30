@@ -95,8 +95,8 @@ endif
 V ?= 0
 $(call FN_CHECK_NON_EMPTY,V)
 $(call FN_CHECK_OPTIONS,V,0 1)
-$(call FN_CHECK_RESERVED,VERBOSE)
-VERBOSE := $(if $(filter 0,$(V)),@,)
+$(call FN_CHECK_RESERVED,V_PREFIX)
+V_PREFIX := $(if $(filter 0,$(V)),@,)
 # ------------------------------------------------------------------------------
 
 endif # ifndef cpb_include_common_mk
