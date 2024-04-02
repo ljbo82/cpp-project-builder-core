@@ -24,8 +24,8 @@ ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
 
-ifndef cpb_toolchains_gcc_windows_toolchain_mk
-cpb_toolchains_gcc_windows_toolchain_mk := $(lastword $(MAKEFILE_LIST))
+ifndef cpb_toolchains_windows_toolchain_mk
+cpb_toolchains_windows_toolchain_mk := $(lastword $(MAKEFILE_LIST))
 
 ifneq ($(filter app lib,$(PROJ_TYPE)),)
     ifeq ($(HOST),windows-x86)
@@ -47,4 +47,4 @@ ifneq ($(filter app lib,$(PROJ_TYPE)),)
 	endif
 endif
 
-endif #cpb_toolchains_gcc_windows_toolchain_mk
+endif #cpb_toolchains_windows_toolchain_mk

@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Host management
+# Toolchain management
 
 ifndef cpb_builder_mk
     $(error This file cannot be manually included)
@@ -28,14 +28,9 @@ ifndef cpb_include_toolchains_mk
 cpb_include_toolchains_mk := $(lastword $(MAKEFILE_LIST))
 
 # Reserved variables -----------------------------------------------------------
-$(call FN_CHECK_RESERVED,cpb_include_toolchains_mk_host)
 $(call FN_CHECK_RESERVED,cpb_include_toolchains_mk_layers)
 $(call FN_CHECK_RESERVED,cpb_include_toolchains_mk_includes)
 # ------------------------------------------------------------------------------
-
-TOOLCHAIN ?= gcc
-
-cpb_include_toolchains_mk_host := $(TOOLCHAIN)-$(HOST)
 
 ifdef TOOLCHAIN_DIRS
     $(call FN_CHECK_ORIGIN,TOOLCHAIN_DIRS,file)
@@ -48,9 +43,9 @@ endif
 TOOLCHAIN_DIRS := $(strip $(TOOLCHAIN_DIRS) $(dir $(cpb_builder_mk))toolchains)
 
 # Precedence: From most specific to most generic. For example,
-# for 'gcc-linux-arm-v7', accepted layers are:
-#     gcc-linux-arm-v7 > gcc/linux/arm/v7 > gcc/linux/arm > gcc/linux > gcc
-cpb_include_toolchains_mk_layers = $(cpb_include_toolchains_mk_host) $(call FN_REVERSE,$(call FN_HOST_FACTORIZE,$(cpb_include_toolchains_mk_host)))
+# for 'linux-arm-v7', accepted layers are:
+#     linux-arm-v7 > linux/arm/v7 > linux/arm > linux > . (root of $(TOOLCHAIN_DIRS))
+cpb_include_toolchains_mk_layers = $(HOST) $(call FN_REVERSE,$(call FN_HOST_FACTORIZE,$(HOST))) .
 
 $(foreach toolchainDir,$(TOOLCHAIN_DIRS),$(foreach layer,$(cpb_include_toolchains_mk_layers),$(eval cpb_include_toolchains_mk_includes += $(if $(wildcard $(toolchainDir)/$(layer)/toolchain.mk),$(realpath $(toolchainDir)/$(layer)/toolchain.mk),))))
 

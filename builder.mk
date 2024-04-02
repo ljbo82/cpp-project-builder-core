@@ -50,20 +50,18 @@ $(call FN_CHECK_ORIGIN,PROJ_NAME,file)
 $(call FN_CHECK_NO_WHITESPACE,PROJ_NAME)
 # ------------------------------------------------------------------------------
 
-# Project version --------------------------------------------------------------
-PROJ_VERSION ?= 0.1.0
-$(call FN_CHECK_NON_EMPTY,PROJ_VERSION)
-$(call FN_CHECK_ORIGIN,PROJ_VERSION,file)
-ifeq ($(call FN_SEMVER_CHECK,$(PROJ_VERSION)),)
-    $(error [PROJ_VERSION] Invalid semantic version: $(PROJ_VERSION))
-endif
-# ------------------------------------------------------------------------------
-
 # Project type -----------------------------------------------------------------
 $(call FN_CHECK_NON_EMPTY,PROJ_TYPE)
 $(call FN_CHECK_ORIGIN,PROJ_TYPE,file)
 $(call FN_CHECK_NO_WHITESPACE,PROJ_TYPE)
 $(call FN_CHECK_OPTIONS,PROJ_TYPE,app lib)
+# ------------------------------------------------------------------------------
+
+# Project version --------------------------------------------------------------
+PROJ_VERSION ?= 0.1.0
+$(call FN_CHECK_NON_EMPTY,PROJ_VERSION)
+$(call FN_CHECK_ORIGIN,PROJ_VERSION,file)
+PROJ_VERSION := $(call FN_SEMVER_CHECK,$(PROJ_VERSION))
 # ------------------------------------------------------------------------------
 
 # LIB_NAME (Only for PROJ_TYPE == lib) -----------------------------------------
@@ -138,12 +136,6 @@ $(call FN_CHECK_NON_EMPTY,ARTIFACT)
 $(call FN_CHECK_NO_WHITESPACE,ARTIFACT)
 # ------------------------------------------------------------------------------
 
-# Skips directory inspection to get file lists ---------------------------------
-SKIP_DIR_INSPECTION ?= 0
-$(call FN_CHECK_NON_EMPTY,SKIP_DIR_INSPECTION)
-$(call FN_CHECK_OPTIONS,SKIP_DIR_INSPECTION,0 1)
-# ------------------------------------------------------------------------------
-
 # Identify source files --------------------------------------------------------
 # NOTE: A host layer could have added source directories.
 ifdef SKIPPED_SRC_DIRS
@@ -154,18 +146,32 @@ ifdef SKIPPED_SRC_FILES
     $(call FN_CHECK_ORIGIN,SKIPPED_SRC_FILES,file)
 endif
 
-SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
-
-# Checks if any SRC_DIR is outside CURDIR
-$(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Invalid directory: $(srcDir))))
-
-cpb_builder_mk_src_file_filter := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
-
-ifeq ($(SKIP_DIR_INSPECTION),0)
-    SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(call FN_SHELL,find $(srcDir) -type f $(cpb_builder_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES))
+# Checks if a entry was added to included and skipped at the same time
+ifneq ($(filter $(SKIPPED_SRC_DIRS),$(SRC_DIRS)),)
+    $(error [SRC_DIRS][SKIPPED_SRC_DIRS] Value(s) present on both variables: $(filter $(SKIPPED_SRC_DIRS),$(SRC_DIRS)))
 endif
 
+# Checks if a entry was added to included and skipped at the same time
+ifneq ($(filter $(SKIPPED_SRC_FILES),$(SRC_FILES)),)
+    $(error [SRC_FILES][SKIPPED_SRC_FILES] Value(s) present on both variables: $(filter $(SKIPPED_SRC_FILES),$(SRC_FILES)))
+endif
+
+SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
+
+# NOTE: A second filter-out is required due to files contained in SRC_DIRS
+SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(SRC_FILES))
+
+$(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Directory outside project root directory: '$(srcDir)')))
+$(foreach srcFile,$(SRC_FILES),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(dir $(srcFile))),,$(error [SRC_FILES] File outside project root directory: '$(srcFile)')))
+
+# Checks if any SRC_DIR or SRC_FILE is outside CURDIR
+cpb_builder_mk_src_file_filter := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
+
+# Second filter-out
+SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(call FN_SHELL,find $(srcDir) -type f $(cpb_builder_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES))
+
 cpb_builder_mk_invalid_src_files := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
+
 ifneq ($(cpb_builder_mk_invalid_src_files),)
     $(error [SRC_FILES] Unsupported source file(s): $(cpb_builder_mk_invalid_src_files))
 endif
@@ -202,7 +208,7 @@ all: dist ;
 # ==============================================================================
 
 # print-vars ===================================================================
-VARS += O O_BASE PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS TOOLCHAIN TOOLCHAIN_DIRS
+VARS += O O_BASE PROJ_NAME PROJ_VERSION PROJ_TYPE LIB_NAME DEBUG BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS HOST HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS TOOLCHAIN_DIRS
 override VARS := $(sort $(VARS))
 $(call FN_CHECK_NON_EMPTY,VARS)
 
@@ -306,9 +312,7 @@ cpb_builder_mk_dist_dirs := $(foreach distDirEntry,$(cpb_builder_mk_dist_dirs),$
 
 DIST_DIRS := $(cpb_builder_mk_dist_dirs)
 
-ifeq ($(SKIP_DIR_INSPECTION),0)
-    cpb_builder_mk_dist_files := $(cpb_builder_mk_dist_files) $(foreach distDirEntry,$(cpb_builder_mk_dist_dirs),$(foreach distFile,$(call FN_FIND_FILES,$(call FN_TOKEN,$(distDirEntry),:,1)),$(call FN_TOKEN,$(distDirEntry),:,1)/$(distFile):$(if $(call FN_TOKEN,$(distDirEntry),:,2),$(call FN_TOKEN,$(distDirEntry),:,2)/,)$(distFile)))
-endif
+cpb_builder_mk_dist_files := $(cpb_builder_mk_dist_files) $(foreach distDirEntry,$(cpb_builder_mk_dist_dirs),$(foreach distFile,$(call FN_FIND_FILES,$(call FN_TOKEN,$(distDirEntry),:,1)),$(call FN_TOKEN,$(distDirEntry),:,1)/$(distFile):$(if $(call FN_TOKEN,$(distDirEntry),:,2),$(call FN_TOKEN,$(distDirEntry),:,2)/,)$(distFile)))
 cpb_builder_mk_dist_files := $(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(call cpb_builder_mk_fn_dist_adjust_file_entry,$(distFileEntry)))
 cpb_builder_mk_dist_files := $(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(call FN_TOKEN,$(distFileEntry),:,1):$(O_DIST_DIR)/$(call FN_TOKEN,$(distFileEntry),:,2))
 

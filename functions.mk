@@ -53,7 +53,7 @@ $(call FN_CHECK_RESERVED,FN_SEMVER_CHECK)
 $(call FN_CHECK_RESERVED,FN_SEMVER_val)
 $(call FN_CHECK_RESERVED,FN_SEMVER_CHECK_comma)
 FN_SEMVER_CHECK_comma :=,
-FN_SEMVER_CHECK = $(call FN_SHELL,echo $(1) | grep -E '^[0-9]+(.[0-9]+){$(FN_SEMVER_CHECK_comma)2}$$')
+FN_SEMVER_CHECK = $(call FN_SHELL,echo $(1) | grep -E '^[0-9]+(.[0-9]+){$(FN_SEMVER_CHECK_comma)2}$$',$(if $(2),$(2),[FN_SEMVER_CHECK] Invalid semantic version: $(1)))
 
 $(call FN_CHECK_RESERVED,FN_SEMVER_MAJOR)
 FN_SEMVER_MAJOR = $(eval FN_SEMVER_val=$(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,1))$(if $(FN_SEMVER_val),$(FN_SEMVER_val),0)
