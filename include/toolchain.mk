@@ -24,27 +24,27 @@ ifndef cpb_builder_mk
     $(error This file cannot be manually included)
 endif
 
-ifndef cpb_toolchains_toolchain_mk
-cpb_toolchains_toolchain_mk := $(lastword $(MAKEFILE_LIST))
+ifndef cpb_include_toolchain_mk
+cpb_include_toolchain_mk := $(lastword $(MAKEFILE_LIST))
 
-include $(dir $(cpb_toolchains_toolchain_mk))libs.mk
+include $(dir $(cpb_include_toolchain_mk))libs.mk
 
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_is_cpp_project)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_ld)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_cflags)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_cxxflags)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_asflags)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_ldflags)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_include_flags)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_obj_suffix)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_obj_files)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_dep_files)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_cxx_template)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_as_template)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_fn_dist_adjust_dir_entry)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_fn_dist_adjust_file_entry)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_dist_deps_template)
-$(call FN_CHECK_RESERVED,cpb_toolchains_toolchain_mk_dist_deps)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_is_cpp_project)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_ld)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_cflags)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_cxxflags)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_asflags)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_ldflags)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_include_flags)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_obj_suffix)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_obj_files)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_dep_files)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_cxx_template)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_as_template)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_fn_dist_adjust_dir_entry)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_fn_dist_adjust_file_entry)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_dist_deps_template)
+$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_dist_deps)
 
 VARS += LIBS STRIP_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS LIBS_FLAGS
 
@@ -107,151 +107,151 @@ endif
 
 # LD
 ifneq ($(SRC_FILES),)
-    cpb_toolchains_toolchain_mk_is_cpp_project := $(strip $(filter %.cpp %.cxx %.cc,$(SRC_FILES)))
-    ifeq ($(cpb_toolchains_toolchain_mk_is_cpp_project),)
-        cpb_toolchains_toolchain_mk_is_cpp_project := $(strip $(foreach includeDir,$(INCLUDE_DIRS),$(if $(wildcard $(includeDir)),$(call FN_SHELL,find $(includeDir) -type f -name '*.hpp' -or -name '*.hxx' 2> /dev/null),)))
+    cpb_include_toolchain_mk_is_cpp_project := $(strip $(filter %.cpp %.cxx %.cc,$(SRC_FILES)))
+    ifeq ($(cpb_include_toolchain_mk_is_cpp_project),)
+        cpb_include_toolchain_mk_is_cpp_project := $(strip $(foreach includeDir,$(INCLUDE_DIRS),$(if $(wildcard $(includeDir)),$(call FN_SHELL,find $(includeDir) -type f -name '*.hpp' -or -name '*.hxx' 2> /dev/null),)))
     endif
 
-    ifeq ($(cpb_toolchains_toolchain_mk_is_cpp_project),)
+    ifeq ($(cpb_include_toolchain_mk_is_cpp_project),)
         # Pure C project
-        cpb_toolchains_toolchain_mk_ld := gcc
+        cpb_include_toolchain_mk_ld := gcc
     else
         # C/C++ project
-        cpb_toolchains_toolchain_mk_ld := g++
+        cpb_include_toolchain_mk_ld := g++
     endif
 else
-    cpb_toolchains_toolchain_mk_ld := gcc
+    cpb_include_toolchain_mk_ld := gcc
 endif
 
-LD ?= $(cpb_toolchains_toolchain_mk_ld)
+LD ?= $(cpb_include_toolchain_mk_ld)
 ifeq ($(origin LD),default)
-    LD := $(cpb_toolchains_toolchain_mk_ld)
+    LD := $(cpb_include_toolchain_mk_ld)
 else
     $(call FN_CHECK_NON_EMPTY,LD)
 endif
 
-cpb_toolchains_toolchain_mk_cflags += -Wall
-cpb_toolchains_toolchain_mk_cxxflags += -Wall
+cpb_include_toolchain_mk_cflags += -Wall
+cpb_include_toolchain_mk_cxxflags += -Wall
 
 ifneq ($(DEBUG),0)
-    cpb_toolchains_toolchain_mk_cflags += -g3
-    cpb_toolchains_toolchain_mk_cxxflags += -g3
-    cpb_toolchains_toolchain_mk_asflags += -g3
+    cpb_include_toolchain_mk_cflags += -g3
+    cpb_include_toolchain_mk_cxxflags += -g3
+    cpb_include_toolchain_mk_asflags += -g3
 else
     ifneq ($(RELEASE_OPTIMIZATION_LEVEL),)
-        cpb_toolchains_toolchain_mk_cflags += -O$(RELEASE_OPTIMIZATION_LEVEL)
-        cpb_toolchains_toolchain_mk_cxxflags += -O$(RELEASE_OPTIMIZATION_LEVEL)
+        cpb_include_toolchain_mk_cflags += -O$(RELEASE_OPTIMIZATION_LEVEL)
+        cpb_include_toolchain_mk_cxxflags += -O$(RELEASE_OPTIMIZATION_LEVEL)
     endif
 
     ifneq ($(STRIP_RELEASE),0)
-        cpb_toolchains_toolchain_mk_cflags += -s
-        cpb_toolchains_toolchain_mk_cxxflags += -s
-        cpb_toolchains_toolchain_mk_ldflags += -s
+        cpb_include_toolchain_mk_cflags += -s
+        cpb_include_toolchain_mk_cxxflags += -s
+        cpb_include_toolchain_mk_ldflags += -s
     endif
 endif
 
 ifeq ($(PROJ_TYPE),lib)
     ifeq ($(LIB_TYPE),shared)
-        cpb_toolchains_toolchain_mk_cflags += -fPIC
-        cpb_toolchains_toolchain_mk_cxxflags += -fPIC
-        cpb_toolchains_toolchain_mk_ldflags += -shared
+        cpb_include_toolchain_mk_cflags += -fPIC
+        cpb_include_toolchain_mk_cxxflags += -fPIC
+        cpb_include_toolchain_mk_ldflags += -shared
     endif
 endif
 
-cpb_toolchains_toolchain_mk_include_flags := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
+cpb_include_toolchain_mk_include_flags := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
 
-override CFLAGS   := $(strip $(call FN_UNIQUE,-MMD -MP $(cpb_toolchains_toolchain_mk_include_flags) $(cpb_toolchains_toolchain_mk_cflags) $(CFLAGS)))
-override CXXFLAGS := $(strip $(call FN_UNIQUE,-MMD -MP $(cpb_toolchains_toolchain_mk_include_flags) $(cpb_toolchains_toolchain_mk_cxxflags) $(CXXFLAGS)))
-override ASFLAGS  := $(strip $(call FN_UNIQUE,-MMD -MP $(cpb_toolchains_toolchain_mk_include_flags) $(cpb_toolchains_toolchain_mk_asflags) $(ASFLAGS)))
+override CFLAGS   := $(strip $(call FN_UNIQUE,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_cflags) $(CFLAGS)))
+override CXXFLAGS := $(strip $(call FN_UNIQUE,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_cxxflags) $(CXXFLAGS)))
+override ASFLAGS  := $(strip $(call FN_UNIQUE,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_asflags) $(ASFLAGS)))
 override ARFLAGS  := $(strip $(call FN_UNIQUE,rcs $(ARFLAGS)))
-override LDFLAGS  := $(strip $(call FN_UNIQUE,$(cpb_toolchains_toolchain_mk_ldflags) $(LDFLAGS)) $(LIBS_FLAGS))
+override LDFLAGS  := $(strip $(call FN_UNIQUE,$(cpb_include_toolchain_mk_ldflags) $(LDFLAGS)) $(LIBS_FLAGS))
 # ------------------------------------------------------------------------------
 
 # build ========================================================================
 ifeq ($(PROJ_TYPE),lib)
     # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
     ifneq ($(filter -fPIC,$(CFLAGS) $(CXXFLAGS)),)
-        cpb_toolchains_toolchain_mk_obj_suffix := .lo
+        cpb_include_toolchain_mk_obj_suffix := .lo
     else
-        cpb_toolchains_toolchain_mk_obj_suffix := .o
+        cpb_include_toolchain_mk_obj_suffix := .o
     endif
 else ifeq ($(PROJ_TYPE),app)
-    cpb_toolchains_toolchain_mk_obj_suffix := .o
+    cpb_include_toolchain_mk_obj_suffix := .o
 endif
 
-cpb_toolchains_toolchain_mk_obj_files := $(SRC_FILES:%=$(O_BUILD_DIR)/%$(cpb_toolchains_toolchain_mk_obj_suffix))
+cpb_include_toolchain_mk_obj_files := $(SRC_FILES:%=$(O_BUILD_DIR)/%$(cpb_include_toolchain_mk_obj_suffix))
 
 ifeq ($(PROJ_TYPE),lib)
     # NOTE: When enabled, '-fPIC' will be set for both C and C++ source files
     ifneq ($(filter -fPIC,$(CFLAGS) $(CXXFLAGS)),)
-        cpb_toolchains_toolchain_mk_dep_files := $(cpb_toolchains_toolchain_mk_obj_files:.lo=.d)
+        cpb_include_toolchain_mk_dep_files := $(cpb_include_toolchain_mk_obj_files:.lo=.d)
     else
-        cpb_toolchains_toolchain_mk_dep_files := $(cpb_toolchains_toolchain_mk_obj_files:.o=.d)
+        cpb_include_toolchain_mk_dep_files := $(cpb_include_toolchain_mk_obj_files:.o=.d)
     endif
 else ifeq ($(PROJ_TYPE),app)
-    cpb_toolchains_toolchain_mk_dep_files := $(cpb_toolchains_toolchain_mk_obj_files:.o=.d)
+    cpb_include_toolchain_mk_dep_files := $(cpb_include_toolchain_mk_obj_files:.o=.d)
 endif
 
 ifneq ($(SRC_FILES),) #*********************************************************
-BUILD_DEPS += --cpb_toolchains_toolchain_mk_pre_build_check $(O_BUILD_DIR)/$(ARTIFACT)
+BUILD_DEPS += --cpb_include_toolchain_mk_pre_build_check $(O_BUILD_DIR)/$(ARTIFACT)
 
-.PHONY: --cpb_toolchains_toolchain_mk_pre_build_check
---cpb_toolchains_toolchain_mk_pre_build_check:
+.PHONY: --cpb_include_toolchain_mk_pre_build_check
+--cpb_include_toolchain_mk_pre_build_check:
     ifneq ($(HOST),$(NATIVE_HOST))
         ifeq ($(origin CROSS_COMPILE),undefined)
 	        $(error [CROSS_COMPILE] Missing value for HOST $(HOST))
         endif
     endif
 
-$(O_BUILD_DIR)/$(ARTIFACT): $(cpb_toolchains_toolchain_mk_obj_files)
+$(O_BUILD_DIR)/$(ARTIFACT): $(cpb_include_toolchain_mk_obj_files)
     ifeq ($(PROJ_TYPE),lib)
         ifeq ($(LIB_TYPE),shared)
 	        $(call FN_LOG_INFO,$(V),[LD] $@)
-	        $(V_PREFIX)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_toolchains_toolchain_mk_obj_files) $(LDFLAGS))
+	        $(V_PREFIX)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_include_toolchain_mk_obj_files) $(LDFLAGS))
         else ifeq ($(LIB_TYPE),static)
 	        $(call FN_LOG_INFO,$(V),[AR] $@)
-	        $(V_PREFIX)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(cpb_toolchains_toolchain_mk_obj_files))
+	        $(V_PREFIX)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(cpb_include_toolchain_mk_obj_files))
         endif
     else ifeq ($(PROJ_TYPE),app)
 	    $(call FN_LOG_INFO,$(V),[LD] $@)
-	    $(V_PREFIX)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_toolchains_toolchain_mk_obj_files) $(LDFLAGS))
+	    $(V_PREFIX)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_include_toolchain_mk_obj_files) $(LDFLAGS))
     endif
 
 # C sources --------------------------------------------------------------------
-$(O_BUILD_DIR)/%.c$(cpb_toolchains_toolchain_mk_obj_suffix): %.c
+$(O_BUILD_DIR)/%.c$(cpb_include_toolchain_mk_obj_suffix): %.c
 	$(call FN_LOG_INFO,$(V),[CC] $@)
 	@mkdir -p $(dir $@)
 	$(V_PREFIX)$(CROSS_COMPILE)$(CC) $(strip $(CFLAGS) -c $< -o $@)
 # ------------------------------------------------------------------------------
 
 # C++ sources ------------------------------------------------------------------
-define cpb_toolchains_toolchain_mk_cxx_template =
-$(O_BUILD_DIR)/%.$(1)$(cpb_toolchains_toolchain_mk_obj_suffix): %.$(1)
+define cpb_include_toolchain_mk_cxx_template =
+$(O_BUILD_DIR)/%.$(1)$(cpb_include_toolchain_mk_obj_suffix): %.$(1)
 	$$(call FN_LOG_INFO,$$(V),[CXX] $$@)
 	@mkdir -p $$(dir $$@)
 	$(V_PREFIX)$(CROSS_COMPILE)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
 endef
 
-$(eval $(call cpb_toolchains_toolchain_mk_cxx_template,cpp))
-$(eval $(call cpb_toolchains_toolchain_mk_cxx_template,cxx))
-$(eval $(call cpb_toolchains_toolchain_mk_cxx_template,cc))
+$(eval $(call cpb_include_toolchain_mk_cxx_template,cpp))
+$(eval $(call cpb_include_toolchain_mk_cxx_template,cxx))
+$(eval $(call cpb_include_toolchain_mk_cxx_template,cc))
 # ------------------------------------------------------------------------------
 
 # Assembly sources -------------------------------------------------------------
-define cpb_toolchains_toolchain_mk_as_template =
-$(O_BUILD_DIR)/%.$(1)$(cpb_toolchains_toolchain_mk_obj_suffix): %.$(1)
+define cpb_include_toolchain_mk_as_template =
+$(O_BUILD_DIR)/%.$(1)$(cpb_include_toolchain_mk_obj_suffix): %.$(1)
 	$$(call FN_LOG_INFO,$$(V),[AS] $$@)
 	@mkdir -p $$(dir $$@)
 	$(V_PREFIX)$(CROSS_COMPILE)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
 endef
 
-$(eval $(call cpb_toolchains_toolchain_mk_as_template,s))
-$(eval $(call cpb_toolchains_toolchain_mk_as_template,S))
+$(eval $(call cpb_include_toolchain_mk_as_template,s))
+$(eval $(call cpb_include_toolchain_mk_as_template,S))
 # ------------------------------------------------------------------------------
 
--include $(cpb_toolchains_toolchain_mk_dep_files)
+-include $(cpb_include_toolchain_mk_dep_files)
 endif
 # ******************************************************************************
 # ==============================================================================
 
-endif # ifndef cpb_toolchains_toolchain_mk
+endif # ifndef cpb_include_toolchain_mk
