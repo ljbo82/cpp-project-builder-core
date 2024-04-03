@@ -39,14 +39,13 @@ ifdef CPB_MIN_VERSION
     $(call FN_CHECK_NON_EMPTY,CPB_MIN_VERSION)
     $(call FN_CHECK_ORIGIN,CPB_MIN_VERSION,file)
     $(call FN_CHECK_NO_WHITESPACE,CPB_MIN_VERSION)
-    $(if $(call FN_SEMVER_CMP,$(CPB_VERSION),$(CPB_MIN_VERSION)),,$(error [CPB_MIN_VERSION] Current version is not compatible: $(CPB_VERSION) (version should be $(CPB_MIN_VERSION)+)))
+    $(call FN_SEMVER_MIN_CHECK,$(CPB_MIN_VERSION),$(CPB_VERSION),[CPB_MIN_VERSION] Current version is not compatible: $(CPB_VERSION) (version should be $(CPB_MIN_VERSION)+))
 endif
 
 # Checks if GNU Make version is supported ----------------------------------------------
 cpb_include_common_mk_min_make_version := 4.2
 cpb_include_common_mk_make_version := $(word 3,$(call FN_SHELL,$(MAKE) --version | grep "GNU Make"))
-cpb_include_common_mk_make_version_cmp := $(call FN_SEMVER_CMP,$(cpb_include_common_mk_make_version),$(cpb_include_common_mk_min_make_version))
-$(if $(cpb_include_common_mk_make_version_cmp),,$(error Incompatible GNU Make version: $(if $(cpb_include_common_mk_make_version),$(cpb_include_common_mk_make_version),unknown) (version should be $(cpb_include_common_mk_min_make_version)+)))
+$(call FN_SEMVER_MIN_CHECK,$(cpb_include_common_mk_min_make_version),$(cpb_include_common_mk_make_version),Incompatible GNU Make version: $(if $(cpb_include_common_mk_make_version),$(cpb_include_common_mk_make_version),unknown) (version should be $(cpb_include_common_mk_min_make_version)+))
 # ------------------------------------------------------------------------------
 
 # Only one target per make call ------------------------------------------------

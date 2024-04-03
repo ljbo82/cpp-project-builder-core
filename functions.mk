@@ -82,6 +82,9 @@ FN_SEMVER_CMP = $(strip \
         )\
     )\
 )
+
+$(call FN_CHECK_RESERVED,FN_SEMVER_MIN_CHECK)
+FN_SEMVER_MIN_CHECK = $(if $(call FN_SEMVER_CMP,$(2),$(1)),,$(error $(if $(3),$(3),[FN_SEMVER_MIN_CHECK] Tested version is not compatible: $(2) (version should be $(1)+))))
 # ==============================================================================
 
 # == [File system functions] ===================================================
