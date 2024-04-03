@@ -98,4 +98,6 @@ $(call FN_CHECK_RESERVED,V_PREFIX)
 V_PREFIX := $(if $(filter 0,$(V)),@,)
 # ------------------------------------------------------------------------------
 
+VARS += CPB_VERSION CPB_MIN_VERSION DEBUG HOST O O_BASE
+
 endif # ifndef cpb_include_common_mk
