@@ -36,11 +36,12 @@ $(call FN_CHECK_RESERVED,cpb_include_hosts_mk_src_dirs)
 
 ifdef HOSTS_DIRS
     $(call FN_CHECK_ORIGIN,HOSTS_DIRS,file)
-else
-    ifneq ($(wildcard hosts),)
-        HOSTS_DIRS += hosts
-    endif
 endif
+
+ifneq ($(wildcard hosts),)
+    HOSTS_DIRS := hosts $(HOSTS_DIRS)
+endif
+
 
 HOSTS_DIRS := $(strip $(HOSTS_DIRS) $(dir $(cpb_builder_mk))hosts)
 
