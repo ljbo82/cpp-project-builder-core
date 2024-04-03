@@ -42,7 +42,6 @@ ifneq ($(wildcard hosts),)
     HOSTS_DIRS := hosts $(HOSTS_DIRS)
 endif
 
-
 HOSTS_DIRS := $(strip $(HOSTS_DIRS) $(dir $(cpb_builder_mk))hosts)
 
 # Precedence: From most specific to most generic. For example,
