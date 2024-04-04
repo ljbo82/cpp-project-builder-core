@@ -27,23 +27,23 @@ include $(dir $(cpb_git_mk))functions.mk
 include $(dir $(cpb_git_mk))include/common.mk
 
 GIT_REPO_DIR ?= .
-$(call FN_CHECK_NON_EMPTY,GIT_REPO_DIR)
-$(call FN_CHECK_NO_WHITESPACE,GIT_REPO_DIR)
-$(call FN_CHECK_ORIGIN,GIT_REPO_DIR,file)
+$(call fn_check_non_empty,GIT_REPO_DIR)
+$(call fn_check_no_whitespace,GIT_REPO_DIR)
+$(call fn_check_origin,GIT_REPO_DIR,file)
 
-$(call FN_CHECK_RESERVED,cpb_git_mk_repo_available)
+$(call fn_check_reserved,cpb_git_mk_repo_available)
 cpb_git_mk_repo_available := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status > /dev/null 2>&1 && echo y)
 
 ifneq ($(cpb_git_mk_repo_available),)
-    $(call FN_CHECK_RESERVED,GIT_COMMIT)
+    $(call fn_check_reserved,GIT_COMMIT)
     GIT_COMMIT := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD > /dev/null 2>&1 && echo y)
     ifneq ($(GIT_COMMIT),)
         GIT_COMMIT := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse HEAD)
 
-        $(call FN_CHECK_RESERVED,GIT_COMMIT_SHORT)
+        $(call fn_check_reserved,GIT_COMMIT_SHORT)
         GIT_COMMIT_SHORT := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git rev-parse --short HEAD)
 
-        $(call FN_CHECK_RESERVED,GIT_STATUS)
+        $(call fn_check_reserved,GIT_STATUS)
         GIT_STATUS := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git status -s)
         ifeq ($(GIT_STATUS),)
             GIT_STATUS := clean
@@ -51,7 +51,7 @@ ifneq ($(cpb_git_mk_repo_available),)
             GIT_STATUS := dirty
         endif
 
-        $(call FN_CHECK_RESERVED,GIT_TAG)
+        $(call fn_check_reserved,GIT_TAG)
         GIT_TAG := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git describe --tags > /dev/null 2>&1 && echo y)
         ifneq ($(GIT_TAG),)
             GIT_TAG := $(shell cd $(GIT_REPO_DIR) > /dev/null 2>&1; git describe --tags)
@@ -63,7 +63,7 @@ ifneq ($(cpb_git_mk_repo_available),)
     endif
 endif
 
-$(call FN_CHECK_RESERVED,GIT_VERSION)
+$(call fn_check_reserved,GIT_VERSION)
 ifneq ($(GIT_TAG),)
     GIT_VERSION := $(GIT_TAG)
 else ifneq ($(GIT_COMMIT_SHORT),)

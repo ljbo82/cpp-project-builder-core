@@ -28,14 +28,14 @@ ifndef cpb_include_hosts_mk
 cpb_include_hosts_mk := $(lastword $(MAKEFILE_LIST))
 
 # Reserved variables -----------------------------------------------------------
-$(call FN_CHECK_RESERVED,cpb_include_hosts_mk_layers)
-$(call FN_CHECK_RESERVED,cpb_include_hosts_mk_layer_aux_parser)
-$(call FN_CHECK_RESERVED,cpb_include_hosts_mk_includes)
-$(call FN_CHECK_RESERVED,cpb_include_hosts_mk_src_dirs)
+$(call fn_check_reserved,cpb_include_hosts_mk_layers)
+$(call fn_check_reserved,cpb_include_hosts_mk_layer_aux_parser)
+$(call fn_check_reserved,cpb_include_hosts_mk_includes)
+$(call fn_check_reserved,cpb_include_hosts_mk_src_dirs)
 # ------------------------------------------------------------------------------
 
 ifdef HOSTS_DIRS
-    $(call FN_CHECK_ORIGIN,HOSTS_DIRS,file)
+    $(call fn_check_origin,HOSTS_DIRS,file)
 endif
 
 ifneq ($(wildcard hosts),)
@@ -47,7 +47,7 @@ HOSTS_DIRS := $(strip $(HOSTS_DIRS) $(dir $(cpb_builder_mk))hosts)
 # Precedence: From most specific to most generic. For example,
 # for host 'linux-arm-v7', accepted layers are:
 #     linux-arm-v7 > linux/arm/v7 > linux/arm > linux
-cpb_include_hosts_mk_layers = $(HOST) $(call FN_REVERSE,$(call FN_HOST_FACTORIZE,$(HOST)))
+cpb_include_hosts_mk_layers = $(HOST) $(call fn_reverse,$(call fn_host_factorize,$(HOST)))
 
 # Auxiliar checker for 'host.mk' and 'src' directory in a layer directory ----
 #

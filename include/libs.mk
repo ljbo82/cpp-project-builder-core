@@ -38,12 +38,12 @@ endif
 export cpb_include_libs_mk_o_abs_libs_dir ?= $(abspath $(O)/libs)
 # ------------------------------------------------------------------------------
 
-$(call FN_CHECK_RESERVED,cpb_include_libs_mk_lib_template)
-$(call FN_CHECK_RESERVED,cpb_include_libs_mk_ldflags)
-$(call FN_CHECK_RESERVED,cpb_include_libs_mk_has_lib_to_build)
+$(call fn_check_reserved,cpb_include_libs_mk_lib_template)
+$(call fn_check_reserved,cpb_include_libs_mk_ldflags)
+$(call fn_check_reserved,cpb_include_libs_mk_has_lib_to_build)
 
 ifdef LIBS
-    $(call FN_CHECK_ORIGIN,LIBS,file)
+    $(call fn_check_origin,LIBS,file)
 endif
 
 # $(call cpb_include_libs_mk_lib_template,libName,libSrcDir,libMakefile,libFullEntry)
@@ -55,13 +55,13 @@ $$(if $$(and $(3),$(LIB_MAKEFILE_$(1))),$$(error [LIB_MAKEFILE_$(1)] Value redef
 
 LIB_MAKEFILE_$(1) ?= $(3)
 ifneq ($$(LIB_MAKEFILE_$(1)),)
-    $$(call FN_CHECK_ORIGIN,LIB_MAKEFILE_$(1),file)
+    $$(call fn_check_origin,LIB_MAKEFILE_$(1),file)
     LIB_MKFLAGS_$(1) := -f $$(LIB_MAKEFILE_$(1)) $$(LIB_MKFLAGS_$(1))
 endif
 
 LIB_MKDIR_$(1) ?= $(2)
 ifneq ($$(LIB_MKDIR_$(1)),)
-    $$(call FN_CHECK_ORIGIN,LIB_MKDIR_$(1),file)
+    $$(call fn_check_origin,LIB_MKDIR_$(1),file)
     LIB_MKFLAGS_$(1) := -C $$(LIB_MKDIR_$(1)) $$(LIB_MKFLAGS_$(1))
 endif
 
@@ -75,13 +75,13 @@ ifneq ($$(or $$(LIB_MKDIR_$(1)),$$(LIB_MAKEFILE_$(1))),)
 cpb_include_libs_mk_has_lib_to_build := 1
 cpb_include_libs_mk_ldflags += $$$$($$(MAKE) --no-print-directory $$(strip $$(LIB_MKFLAGS_$(1))) -- --show-libs)
 
-LIB_MKFLAGS_$(1) := $$(LIB_MKFLAGS_$(1)) O=$$(call FN_REL_DIR,$$(LIB_MKDIR_$(1)),$$(cpb_include_libs_mk_o_abs_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=.$(1).dist
+LIB_MKFLAGS_$(1) := $$(LIB_MKFLAGS_$(1)) O=$$(call fn_rel_dir,$$(LIB_MKDIR_$(1)),$$(cpb_include_libs_mk_o_abs_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=.$(1).dist
 PRE_BUILD_DEPS += $$(cpb_include_libs_mk_o_abs_libs_dir)/.$(1).dist
 
 # ==============================================================================
 .PHONY: --cpb-lib-$(1)
 --cpb-lib-$(1):
-	$$(call FN_LOG_INFO,$$(V),[LIB] $(4))
+	$$(call fn_log_info,$$(V),[LIB] $(4))
 	$$(V_PREFIX)$$(MAKE) $$(LIB_MKFLAGS_$(1))
 
 $$(cpb_include_libs_mk_o_abs_libs_dir)/.$(1).dist: --cpb-lib-$(1) ;
@@ -91,9 +91,9 @@ endif
 # ******************************************************************************
 endef
 
-$(foreach lib,$(LIBS),$(eval $(call cpb_include_libs_mk_lib_template,$(call FN_TOKEN,$(lib),:,1),$(call FN_TOKEN,$(lib),:,2),$(call FN_TOKEN,$(lib),:,3),$(lib))))
+$(foreach lib,$(LIBS),$(eval $(call cpb_include_libs_mk_lib_template,$(call fn_token,$(lib),:,1),$(call fn_token,$(lib),:,2),$(call fn_token,$(lib),:,3),$(lib))))
 
-$(call FN_CHECK_RESERVED,LIBS_FLAGS)
+$(call fn_check_reserved,LIBS_FLAGS)
 LIBS_FLAGS := $(cpb_include_libs_mk_ldflags)
 
 ifeq ($(cpb_include_libs_mk_has_lib_to_build),1)

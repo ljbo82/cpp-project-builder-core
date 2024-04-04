@@ -25,108 +25,127 @@ cpb_functions_mk := $(lastword $(MAKEFILE_LIST))
 
 # Checks if a reserved variable is defined elsewhere
 #
-# Syntax: $(call FN_CHECK_RESERVED,varName,errorMessage=?)
-$(call FN_CHECK_RESERVED,FN_CHECK_RESERVED)
-FN_CHECK_RESERVED = $(if $($(1)),$(error $(if $(2),$(2),[$(1)] Reserved variable)))
+# Syntax: $(call fn_check_reserved,varName,errorMessage=?)
+$(call fn_check_reserved,fn_check_reserved)
+fn_check_reserved = $(if $($(1)),$(error $(if $(2),$(2),[$(1)] Reserved variable)))
+
+# = [Constants] ================================================================
+$(call fn_check_reserved,cpb_functions_mk_split_prefix)
+cpb_functions_mk_split_prefix := __?__
+
+$(call fn_check_reserved,cpb_functions_mk_comma)
+cpb_functions_mk_comma :=,
+
+$(call fn_check_reserved,cpb_functions_mk_empty)
+cpb_functions_mk_empty :=
+
+$(call fn_check_reserved,cpb_functions_mk_space)
+cpb_functions_mk_space := $(cpb_functions_mk_empty) $(cpb_functions_mk_empty)
+# ==============================================================================
 
 # = [Text functions] ===========================================================
-$(call FN_CHECK_RESERVED,FN_SPLIT)
-$(call FN_CHECK_RESERVED,FN_SPLIT_prefix)
-FN_SPLIT_prefix := __?__
-FN_SPLIT = $(subst $(2), $(if $(3),$(3),$(FN_SPLIT_prefix)),$(if $(3),$(3),$(FN_SPLIT_prefix))$(1))
+$(call fn_check_reserved,fn_split)
+fn_split = $(subst $(2), $(if $(3),$(3),$(cpb_functions_mk_split_prefix)),$(if $(3),$(3),$(cpb_functions_mk_split_prefix))$(1))
 
-$(call FN_CHECK_RESERVED,FN_TOKEN)
-FN_TOKEN = $(subst $(FN_SPLIT_prefix),,$(word $(3),$(call FN_SPLIT,$(1),$(2))))
+$(call fn_check_reserved,fn_token)
+fn_token = $(subst $(cpb_functions_mk_split_prefix),,$(word $(3),$(call fn_split,$(1),$(2))))
 
-$(call FN_CHECK_RESERVED,FN_UNIQUE)
-FN_UNIQUE = $(strip $(if $(1),$(firstword $(1)) $(call FN_UNIQUE,$(filter-out $(firstword $(1)),$(1)))))
+$(call fn_check_reserved,fn_unique)
+fn_unique = $(strip $(if $(1),$(firstword $(1)) $(call fn_unique,$(filter-out $(firstword $(1)),$(1)))))
 
-$(call FN_CHECK_RESERVED,FN_EQ)
-FN_EQ = $(and $(findstring $(1),$(2)),$(findstring $(2),$(1)))
+$(call fn_check_reserved,fn_eq)
+fn_eq = $(and $(findstring $(1),$(2)),$(findstring $(2),$(1)))
 
-$(call FN_CHECK_RESERVED,FN_REVERSE)
-FN_REVERSE = $(strip $(if $(1),$(call FN_REVERSE,$(wordlist 2,$(words $(1)),$(1)))) $(firstword $(1)))
+$(call fn_check_reserved,fn_reverse)
+fn_reverse = $(strip $(if $(1),$(call fn_reverse,$(wordlist 2,$(words $(1)),$(1)))) $(firstword $(1)))
 # ==============================================================================
 
 # ==[Semantic version functions] ===============================================
-$(call FN_CHECK_RESERVED,FN_SEMVER_CHECK)
-$(call FN_CHECK_RESERVED,FN_SEMVER_val)
-$(call FN_CHECK_RESERVED,FN_SEMVER_CHECK_comma)
-FN_SEMVER_CHECK_comma :=,
-FN_SEMVER_CHECK = $(call FN_SHELL,echo $(1) | grep -E '^[0-9]+(.[0-9]+){$(FN_SEMVER_CHECK_comma)2}$$',$(if $(2),$(2),[FN_SEMVER_CHECK] Invalid semantic version: $(1)))
+$(call fn_check_reserved,fn_semver)
+$(call fn_check_reserved,fn_semver_val)
+fn_semver = $(if $(shell echo $(1) | grep -E '^[0-9]+(\.[0-9]+){$(cpb_functions_mk_comma)2}(\-[A-Za-z0-9_\.\-]+)*$$'),$(1),$(error $(if $(2),$(2),[fn_semver] Invalid semantic version: $(1))))
 
-$(call FN_CHECK_RESERVED,FN_SEMVER_MAJOR)
-FN_SEMVER_MAJOR = $(eval FN_SEMVER_val=$(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,1))$(if $(FN_SEMVER_val),$(FN_SEMVER_val),0)
+# syntax: $(call cpb_functions_mk_semver_token,semVer,tokenIndex)
+$(call fn_check_reserved,cpb_functions_mk_semver_token)
+cpb_functions_mk_semver_token = $(eval fn_semver_val=$(call fn_token,$(call fn_semver,$(1)),.,$(2)))$(if $(fn_semver_val),$(fn_semver_val),0)
 
-$(call FN_CHECK_RESERVED,FN_SEMVER_MINOR)
-FN_SEMVER_MINOR = $(eval FN_SEMVER_val=$(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,2))$(if $(FN_SEMVER_val),$(FN_SEMVER_val),0)
+$(call fn_check_reserved,fn_semver_major)
+fn_semver_major = $(word 1,$(subst -, ,$(call cpb_functions_mk_semver_token,$(1),1)))
 
-$(call FN_CHECK_RESERVED,FN_SEMVER_PATCH)
-FN_SEMVER_PATCH = $(eval FN_SEMVER_val=$(call FN_TOKEN,$(call FN_SEMVER_CHECK,$(1)),.,3))$(if $(FN_SEMVER_val),$(FN_SEMVER_val),0)
+$(call fn_check_reserved,fn_semver_minor)
+fn_semver_minor = $(word 1,$(subst -, ,$(call cpb_functions_mk_semver_token,$(1),2)))
 
-$(call FN_CHECK_RESERVED,FN_SEMVER_CMP)
-$(call FN_CHECK_RESERVED,FN_SEMVER_CMP_major)
-$(call FN_CHECK_RESERVED,FN_SEMVER_CMP_minor)
-$(call FN_CHECK_RESERVED,FN_SEMVER_CMP_patch)
-FN_SEMVER_CMP = $(strip \
-    $(eval FN_SEMVER_CMP_major := $(call FN_NUMBER_CMP,$(call FN_SEMVER_MAJOR,$(1)),$(call FN_SEMVER_MAJOR,$(2))))\
-    $(eval FN_SEMVER_CMP_minor := $(call FN_NUMBER_CMP,$(call FN_SEMVER_MINOR,$(1)),$(call FN_SEMVER_MINOR,$(2))))\
-    $(eval FN_SEMVER_CMP_patch := $(call FN_NUMBER_CMP,$(call FN_SEMVER_PATCH,$(1)),$(call FN_SEMVER_PATCH,$(2))))\
-    $(if $(call FN_EQ,$(FN_SEMVER_CMP_major),-1),,\
-        $(if $(call FN_EQ,$(FN_SEMVER_CMP_major),1),,\
-            $(if $(call FN_EQ,$(FN_SEMVER_CMP_minor),-1),,\
-                $(if $(call FN_EQ,$(FN_SEMVER_CMP_minor),1),$(1),\
-                    $(if $(call FN_EQ,$(FN_SEMVER_CMP_patch),-1),,$(1))\
+$(call fn_check_reserved,fn_semver_patch)
+fn_semver_patch = $ $(word 1,$(subst -, ,$(call cpb_functions_mk_semver_token,$(1),3)))
+
+$(call fn_check_reserved,fn_semver_metadata)
+fn_semver_metadata = $(subst $(cpb_functions_mk_space),-,$(wordlist 2,1000,$(subst -, ,$(call fn_semver,$(1)))))
+
+$(call fn_check_reserved,fn_semver_cmp)
+$(call fn_check_reserved,fn_semver_cmp_major)
+$(call fn_check_reserved,fn_semver_cmp_minor)
+$(call fn_check_reserved,fn_semver_cmp_patch)
+fn_semver_cmp = $(strip \
+    $(eval fn_semver_cmp_major := $(call fn_number_cmp,$(call fn_semver_major,$(1)),$(call fn_semver_major,$(2))))\
+    $(eval fn_semver_cmp_minor := $(call fn_number_cmp,$(call fn_semver_minor,$(1)),$(call fn_semver_minor,$(2))))\
+    $(eval fn_semver_cmp_patch := $(call fn_number_cmp,$(call fn_semver_patch,$(1)),$(call fn_semver_patch,$(2))))\
+    $(if $(call fn_eq,$(fn_semver_cmp_major),-1),-3,\
+        $(if $(call fn_eq,$(fn_semver_cmp_major),1),3,\
+            $(if $(call fn_eq,$(fn_semver_cmp_minor),-1),-2,\
+                $(if $(call fn_eq,$(fn_semver_cmp_minor),1),2,\
+                    $(if $(call fn_eq,$(fn_semver_cmp_patch),-1),-1,$(if $(call fn_eq,$(fn_semver_cmp_patch),1),1,0))\
                 )\
             )\
         )\
     )\
 )
 
-$(call FN_CHECK_RESERVED,FN_SEMVER_MIN_CHECK)
-FN_SEMVER_MIN_CHECK = $(if $(call FN_SEMVER_CMP,$(2),$(1)),,$(error $(if $(3),$(3),[FN_SEMVER_MIN_CHECK] Tested version is not compatible: $(2) (version should be $(1)+))))
+$(call fn_check_reserved,fn_semver_check_compat)
+$(call fn_check_reserved,fn_semver_check_compat_cmp)
+
+fn_semver_check_compat = $(eval fn_semver_check_compat_cmp := $(call fn_semver_cmp,$(2),$(1)))$(if $(or $(call fn_eq,$(fn_semver_check_compat_cmp),0),$(call fn_eq,$(fn_semver_check_compat_cmp),1)),,$(error $(if $(3),$(3),[fn_semver_check_compat] Tested version is not compatible: $(2) (version should be $(1)+))))
 # ==============================================================================
 
 # == [File system functions] ===================================================
-$(call FN_CHECK_RESERVED,FN_FIND_FILES)
-FN_FIND_FILES = $(call FN_SHELL,cd $(1) 2> /dev/null && find . -type f $(2) | sed 's:./::')
+$(call fn_check_reserved,fn_find_files)
+fn_find_files = $(call fn_shell,cd $(1) 2> /dev/null && find . -type f $(2) | sed 's:./::')
 
-$(call FN_CHECK_RESERVED,FN_REL_DIR)
-FN_REL_DIR = $(call FN_SHELL,realpath -m --relative-to=$(1) $(2))
+$(call fn_check_reserved,fn_rel_dir)
+fn_rel_dir = $(call fn_shell,realpath -m --relative-to=$(1) $(2))
 
-$(call FN_CHECK_RESERVED,FN_IS_INSIDE_DIR)
-FN_IS_INSIDE_DIR = $(filter $(abspath $(1)) $(abspath $(1)/%),$(abspath $(2)))
+$(call fn_check_reserved,fn_is_inside_dir)
+fn_is_inside_dir = $(filter $(abspath $(1)) $(abspath $(1)/%),$(abspath $(2)))
 # ==============================================================================
 
 # == [General utils] ===========================================================
-$(call FN_CHECK_RESERVED,FN_NUMBER_CMP)
-FN_NUMBER_CMP = $(call FN_SHELL,if [ $(if $(1),$(1),0) -eq $(if $(1),$(1),0) ] 2> /dev/null && [ $(if $(2),$(2),0) -eq $(if $(2),$(2),0) ] 2> /dev/null; then if [ $(if $(1),$(1),0) -eq $(if $(2),$(2),0) ]; then echo 0; elif [ $(if $(1),$(1),0) -gt $(if $(2),$(2),0) ]; then echo 1; else echo -1; fi else echo "?"; fi)
+$(call fn_check_reserved,fn_number_cmp)
+fn_number_cmp = $(call fn_shell,if [ $(if $(1),$(1),0) -eq $(if $(1),$(1),0) ] 2> /dev/null && [ $(if $(2),$(2),0) -eq $(if $(2),$(2),0) ] 2> /dev/null; then if [ $(if $(1),$(1),0) -eq $(if $(2),$(2),0) ]; then echo 0; elif [ $(if $(1),$(1),0) -gt $(if $(2),$(2),0) ]; then echo 1; else echo -1; fi else echo "?"; fi)
 
-$(call FN_CHECK_RESERVED,FN_HOST_FACTORIZE)
-$(call FN_CHECK_RESERVED,FN_HOST_FACTORIZE_previous)
-FN_HOST_FACTORIZE = $(foreach token,$(subst $(if $(2),$(2),-), ,$(1)),$(eval FN_HOST_FACTORIZE_previous=$(if $(FN_HOST_FACTORIZE_previous),$(FN_HOST_FACTORIZE_previous)$(if $(3),$(3),/)$(token),$(token)))$(FN_HOST_FACTORIZE_previous))$(eval undefine FN_HOST_FACTORIZE_previous)
+$(call fn_check_reserved,fn_host_factorize)
+$(call fn_check_reserved,fn_host_factorize_previous)
+fn_host_factorize = $(foreach token,$(subst $(if $(2),$(2),-), ,$(1)),$(eval fn_host_factorize_previous=$(if $(fn_host_factorize_previous),$(fn_host_factorize_previous)$(if $(3),$(3),/)$(token),$(token)))$(fn_host_factorize_previous))$(eval undefine fn_host_factorize_previous)
 
-$(call FN_CHECK_RESERVED,FN_SHELL)
-FN_SHELL = $(shell $(1))$(if $(call FN_EQ,$(.SHELLSTATUS),0),,$(error $(if $(2),$(2),[FN_SHELL] Execution error)))
+$(call fn_check_reserved,fn_shell)
+fn_shell = $(shell $(1))$(if $(call fn_eq,$(.SHELLSTATUS),0),,$(error $(if $(2),$(2),[fn_shell] Execution error)))
 
-$(call FN_CHECK_RESERVED,FN_CHECK_ORIGIN)
-FN_CHECK_ORIGIN = $(if $(call FN_EQ,$(origin $(1)),$(2)),,$(error $(if $(3),$(3),[$(1)] Unexpected origin: "$(origin $(1))" (expected: "$(2)"))))
+$(call fn_check_reserved,fn_check_origin)
+fn_check_origin = $(if $(call fn_eq,$(origin $(1)),$(2)),,$(error $(if $(3),$(3),[$(1)] Unexpected origin: "$(origin $(1))" (expected: "$(2)"))))
 
-$(call FN_CHECK_RESERVED,FN_CHECK_OPTIONS)
-FN_CHECK_OPTIONS=$(if $(or $(word 2,$($(1))),$(filter-out $(2),$($(1)))),$(error $(if $(3),$(3),[$(1)] Invalid value: $($(1)))),)
+$(call fn_check_reserved,fn_check_options)
+fn_check_options=$(if $(or $(word 2,$($(1))),$(filter-out $(2),$($(1)))),$(error $(if $(3),$(3),[$(1)] Invalid value: $($(1)))),)
 
-$(call FN_CHECK_RESERVED,FN_CHECK_NON_EMPTY)
-FN_CHECK_NON_EMPTY=$(if $(strip $($(1))),,$(error $(if $(2),$(2),[$(1)] Missing value)))
+$(call fn_check_reserved,fn_check_non_empty)
+fn_check_non_empty=$(if $(strip $($(1))),,$(error $(if $(2),$(2),[$(1)] Missing value)))
 
-$(call FN_CHECK_RESERVED,FN_CHECK_NO_WHITESPACE)
-FN_CHECK_NO_WHITESPACE=$(if $(call FN_EQ,0,$(words $($(1)))),,$(if $(call FN_EQ,1,$(words $($(1)))),,$(error $(if $(2),$(2),[$(1)] Value cannot have whitespaces: "$($(1))"))))
+$(call fn_check_reserved,fn_check_no_whitespace)
+fn_check_no_whitespace=$(if $(call fn_eq,0,$(words $($(1)))),,$(if $(call fn_eq,1,$(words $($(1)))),,$(error $(if $(2),$(2),[$(1)] Value cannot have whitespaces: "$($(1))"))))
 # ==============================================================================
 
 # == [Colored output] ==========================================================
-$(call FN_CHECK_RESERVED,cpb_functions_mk_term_support_colors)
-$(call FN_CHECK_RESERVED,FN_COLORED_TEXT)
-$(call FN_CHECK_RESERVED,FN_LOG)
-$(call FN_CHECK_RESERVED,FN_LOG_INFO)
+$(call fn_check_reserved,cpb_functions_mk_term_support_colors)
+$(call fn_check_reserved,fn_colored_text)
+$(call fn_check_reserved,fn_log)
+$(call fn_check_reserved,fn_log_info)
 
 cpb_functions_mk_term_support_colors := $(shell tput colors 2> /dev/null)
 ifneq ($(cpb_functions_mk_term_support_colors),)
@@ -137,11 +156,11 @@ ifneq ($(cpb_functions_mk_term_support_colors),)
     endif
 endif
 
-FN_COLORED_TEXT = $(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[$(1)m,)$(2)$(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[0m,)
+fn_colored_text = $(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[$(1)m,)$(2)$(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[0m,)
 
-FN_LOG = @printf "$(if $(1),\n,)$(call FN_COLORED_TEXT,$(1),$(2))\n"
+fn_log = @printf "$(if $(1),\n,)$(call fn_colored_text,$(1),$(2))\n"
 
-FN_LOG_INFO = $(call FN_LOG,$(if $(call FN_EQ,$(if $(1),$(1),0),0),,96),$(2))
+fn_log_info = $(call fn_log,$(if $(call fn_eq,$(if $(1),$(1),0),0),,96),$(2))
 # ==============================================================================
 
 endif # ifndef cpb_functions_mk

@@ -29,22 +29,22 @@ cpb_include_toolchain_mk := $(lastword $(MAKEFILE_LIST))
 
 include $(dir $(cpb_include_toolchain_mk))libs.mk
 
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_is_cpp_project)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_ld)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_cflags)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_cxxflags)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_asflags)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_ldflags)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_include_flags)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_obj_suffix)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_obj_files)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_dep_files)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_cxx_template)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_as_template)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_fn_dist_adjust_dir_entry)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_fn_dist_adjust_file_entry)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_dist_deps_template)
-$(call FN_CHECK_RESERVED,cpb_include_toolchain_mk_dist_deps)
+$(call fn_check_reserved,cpb_include_toolchain_mk_is_cpp_project)
+$(call fn_check_reserved,cpb_include_toolchain_mk_ld)
+$(call fn_check_reserved,cpb_include_toolchain_mk_cflags)
+$(call fn_check_reserved,cpb_include_toolchain_mk_cxxflags)
+$(call fn_check_reserved,cpb_include_toolchain_mk_asflags)
+$(call fn_check_reserved,cpb_include_toolchain_mk_ldflags)
+$(call fn_check_reserved,cpb_include_toolchain_mk_include_flags)
+$(call fn_check_reserved,cpb_include_toolchain_mk_obj_suffix)
+$(call fn_check_reserved,cpb_include_toolchain_mk_obj_files)
+$(call fn_check_reserved,cpb_include_toolchain_mk_dep_files)
+$(call fn_check_reserved,cpb_include_toolchain_mk_cxx_template)
+$(call fn_check_reserved,cpb_include_toolchain_mk_as_template)
+$(call fn_check_reserved,cpb_include_toolchain_mk_fn_dist_adjust_dir_entry)
+$(call fn_check_reserved,cpb_include_toolchain_mk_fn_dist_adjust_file_entry)
+$(call fn_check_reserved,cpb_include_toolchain_mk_dist_deps_template)
+$(call fn_check_reserved,cpb_include_toolchain_mk_dist_deps)
 
 VARS += LIBS STRIP_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS LIBS_FLAGS
 
@@ -52,10 +52,10 @@ VARS += LIBS STRIP_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS C
 # NOTE: A host layer may have set STRIP_RELEASE
 ifeq ($(DEBUG),0)
     STRIP_RELEASE ?= 1
-    $(call FN_CHECK_ORIGIN,STRIP_RELEASE,file)
-    $(call FN_CHECK_NON_EMPTY,STRIP_RELEASE)
-    $(call FN_CHECK_NO_WHITESPACE,STRIP_RELEASE)
-    $(call FN_CHECK_OPTIONS,STRIP_RELEASE,0 1)
+    $(call fn_check_origin,STRIP_RELEASE,file)
+    $(call fn_check_non_empty,STRIP_RELEASE)
+    $(call fn_check_no_whitespace,STRIP_RELEASE)
+    $(call fn_check_options,STRIP_RELEASE,0 1)
 endif
 # ------------------------------------------------------------------------------
 
@@ -63,10 +63,10 @@ endif
 # NOTE: A host layer may have set RELEASE_OPTIMIZATION_LEVEL
 ifeq ($(DEBUG),0)
     RELEASE_OPTIMIZATION_LEVEL ?= 2
-    $(call FN_CHECK_ORIGIN,RELEASE_OPTIMIZATION_LEVEL,file)
-    $(call FN_CHECK_NON_EMPTY,RELEASE_OPTIMIZATION_LEVEL)
-    $(call FN_CHECK_NO_WHITESPACE,RELEASE_OPTIMIZATION_LEVEL)
-    $(call FN_CHECK_OPTIONS,RELEASE_OPTIMIZATION_LEVEL,0 1 2 3 s fast g z)
+    $(call fn_check_origin,RELEASE_OPTIMIZATION_LEVEL,file)
+    $(call fn_check_non_empty,RELEASE_OPTIMIZATION_LEVEL)
+    $(call fn_check_no_whitespace,RELEASE_OPTIMIZATION_LEVEL)
+    $(call fn_check_options,RELEASE_OPTIMIZATION_LEVEL,0 1 2 3 s fast g z)
 endif
 # ------------------------------------------------------------------------------
 
@@ -78,7 +78,7 @@ AS ?= as
 ifeq ($(origin AS),default)
     AS := as
 else
-    $(call FN_CHECK_NON_EMPTY,AS)
+    $(call fn_check_non_empty,AS)
 endif
 
 # CC
@@ -86,7 +86,7 @@ CC ?= gcc
 ifeq ($(origin CC),default)
     CC := gcc
 else
-    $(call FN_CHECK_NON_EMPTY,CC)
+    $(call fn_check_non_empty,CC)
 endif
 
 # CXX
@@ -94,7 +94,7 @@ CXX ?= g++
 ifeq ($(origin CXX),default)
     CXX := g++
 else
-    $(call FN_CHECK_NON_EMPTY,CXX)
+    $(call fn_check_non_empty,CXX)
 endif
 
 # AR
@@ -102,14 +102,14 @@ AR ?= ar
 ifeq ($(origin AR),default)
     AR := ar
 else
-    $(call FN_CHECK_NON_EMPTY,AR)
+    $(call fn_check_non_empty,AR)
 endif
 
 # LD
 ifneq ($(SRC_FILES),)
     cpb_include_toolchain_mk_is_cpp_project := $(strip $(filter %.cpp %.cxx %.cc,$(SRC_FILES)))
     ifeq ($(cpb_include_toolchain_mk_is_cpp_project),)
-        cpb_include_toolchain_mk_is_cpp_project := $(strip $(foreach includeDir,$(INCLUDE_DIRS),$(if $(wildcard $(includeDir)),$(call FN_SHELL,find $(includeDir) -type f -name '*.hpp' -or -name '*.hxx' 2> /dev/null),)))
+        cpb_include_toolchain_mk_is_cpp_project := $(strip $(foreach includeDir,$(INCLUDE_DIRS),$(if $(wildcard $(includeDir)),$(call fn_shell,find $(includeDir) -type f -name '*.hpp' -or -name '*.hxx' 2> /dev/null),)))
     endif
 
     ifeq ($(cpb_include_toolchain_mk_is_cpp_project),)
@@ -127,7 +127,7 @@ LD ?= $(cpb_include_toolchain_mk_ld)
 ifeq ($(origin LD),default)
     LD := $(cpb_include_toolchain_mk_ld)
 else
-    $(call FN_CHECK_NON_EMPTY,LD)
+    $(call fn_check_non_empty,LD)
 endif
 
 cpb_include_toolchain_mk_cflags += -Wall
@@ -160,11 +160,11 @@ endif
 
 cpb_include_toolchain_mk_include_flags := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
 
-override CFLAGS   := $(strip $(call FN_UNIQUE,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_cflags) $(CFLAGS)))
-override CXXFLAGS := $(strip $(call FN_UNIQUE,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_cxxflags) $(CXXFLAGS)))
-override ASFLAGS  := $(strip $(call FN_UNIQUE,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_asflags) $(ASFLAGS)))
-override ARFLAGS  := $(strip $(call FN_UNIQUE,rcs $(ARFLAGS)))
-override LDFLAGS  := $(strip $(call FN_UNIQUE,$(cpb_include_toolchain_mk_ldflags) $(LDFLAGS)) $(LIBS_FLAGS))
+override CFLAGS   := $(strip $(call fn_unique,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_cflags) $(CFLAGS)))
+override CXXFLAGS := $(strip $(call fn_unique,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_cxxflags) $(CXXFLAGS)))
+override ASFLAGS  := $(strip $(call fn_unique,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_asflags) $(ASFLAGS)))
+override ARFLAGS  := $(strip $(call fn_unique,rcs $(ARFLAGS)))
+override LDFLAGS  := $(strip $(call fn_unique,$(cpb_include_toolchain_mk_ldflags) $(LDFLAGS)) $(LIBS_FLAGS))
 # ------------------------------------------------------------------------------
 
 # build ========================================================================
@@ -206,20 +206,20 @@ BUILD_DEPS += --cpb_include_toolchain_mk_pre_build_check $(O_BUILD_DIR)/$(ARTIFA
 $(O_BUILD_DIR)/$(ARTIFACT): $(cpb_include_toolchain_mk_obj_files)
     ifeq ($(PROJ_TYPE),lib)
         ifeq ($(LIB_TYPE),shared)
-	        $(call FN_LOG_INFO,$(V),[LD] $@)
+	        $(call fn_log_info,$(V),[LD] $@)
 	        $(V_PREFIX)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_include_toolchain_mk_obj_files) $(LDFLAGS))
         else ifeq ($(LIB_TYPE),static)
-	        $(call FN_LOG_INFO,$(V),[AR] $@)
+	        $(call fn_log_info,$(V),[AR] $@)
 	        $(V_PREFIX)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(cpb_include_toolchain_mk_obj_files))
         endif
     else ifeq ($(PROJ_TYPE),app)
-	    $(call FN_LOG_INFO,$(V),[LD] $@)
+	    $(call fn_log_info,$(V),[LD] $@)
 	    $(V_PREFIX)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_include_toolchain_mk_obj_files) $(LDFLAGS))
     endif
 
 # C sources --------------------------------------------------------------------
 $(O_BUILD_DIR)/%.c$(cpb_include_toolchain_mk_obj_suffix): %.c
-	$(call FN_LOG_INFO,$(V),[CC] $@)
+	$(call fn_log_info,$(V),[CC] $@)
 	@mkdir -p $(dir $@)
 	$(V_PREFIX)$(CROSS_COMPILE)$(CC) $(strip $(CFLAGS) -c $< -o $@)
 # ------------------------------------------------------------------------------
@@ -227,7 +227,7 @@ $(O_BUILD_DIR)/%.c$(cpb_include_toolchain_mk_obj_suffix): %.c
 # C++ sources ------------------------------------------------------------------
 define cpb_include_toolchain_mk_cxx_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_include_toolchain_mk_obj_suffix): %.$(1)
-	$$(call FN_LOG_INFO,$$(V),[CXX] $$@)
+	$$(call fn_log_info,$$(V),[CXX] $$@)
 	@mkdir -p $$(dir $$@)
 	$(V_PREFIX)$(CROSS_COMPILE)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
 endef
@@ -240,7 +240,7 @@ $(eval $(call cpb_include_toolchain_mk_cxx_template,cc))
 # Assembly sources -------------------------------------------------------------
 define cpb_include_toolchain_mk_as_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_include_toolchain_mk_obj_suffix): %.$(1)
-	$$(call FN_LOG_INFO,$$(V),[AS] $$@)
+	$$(call fn_log_info,$$(V),[AS] $$@)
 	@mkdir -p $$(dir $$@)
 	$(V_PREFIX)$(CROSS_COMPILE)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
 endef

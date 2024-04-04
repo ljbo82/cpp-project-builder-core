@@ -27,15 +27,15 @@ include $(dir $(cpb_builder_mk))functions.mk
 include $(dir $(cpb_builder_mk))include/common.mk
 
 # Reserved variables -----------------------------------------------------------
-$(call FN_CHECK_RESERVED,cpb_builder_mk_src_file_filter)
-$(call FN_CHECK_RESERVED,cpb_builder_mk_invalid_src_files)
-$(call FN_CHECK_RESERVED,cpb_builder_mk_dist_dirs)
-$(call FN_CHECK_RESERVED,cpb_builder_mk_dist_files)
-$(call FN_CHECK_RESERVED,cpb_builder_mk_fn_dist_adjust_dir_entry)
-$(call FN_CHECK_RESERVED,cpb_builder_mk_fn_dist_adjust_file_entry)
-$(call FN_CHECK_RESERVED,cpb_builder_mk_dist_deps_template)
-$(call FN_CHECK_RESERVED,O_BUILD_DIR)
-$(call FN_CHECK_RESERVED,O_DIST_DIR)
+$(call fn_check_reserved,cpb_builder_mk_src_file_filter)
+$(call fn_check_reserved,cpb_builder_mk_invalid_src_files)
+$(call fn_check_reserved,cpb_builder_mk_dist_dirs)
+$(call fn_check_reserved,cpb_builder_mk_dist_files)
+$(call fn_check_reserved,cpb_builder_mk_fn_dist_adjust_dir_entry)
+$(call fn_check_reserved,cpb_builder_mk_fn_dist_adjust_file_entry)
+$(call fn_check_reserved,cpb_builder_mk_dist_deps_template)
+$(call fn_check_reserved,O_BUILD_DIR)
+$(call fn_check_reserved,O_DIST_DIR)
 # ------------------------------------------------------------------------------
 
 # Checks for whitespace in CWD -------------------------------------------------
@@ -45,31 +45,31 @@ endif
 # ------------------------------------------------------------------------------
 
 # Project name -----------------------------------------------------------------
-$(call FN_CHECK_NON_EMPTY,PROJ_NAME)
-$(call FN_CHECK_ORIGIN,PROJ_NAME,file)
-$(call FN_CHECK_NO_WHITESPACE,PROJ_NAME)
+$(call fn_check_non_empty,PROJ_NAME)
+$(call fn_check_origin,PROJ_NAME,file)
+$(call fn_check_no_whitespace,PROJ_NAME)
 # ------------------------------------------------------------------------------
 
 # Project type -----------------------------------------------------------------
-$(call FN_CHECK_NON_EMPTY,PROJ_TYPE)
-$(call FN_CHECK_ORIGIN,PROJ_TYPE,file)
-$(call FN_CHECK_NO_WHITESPACE,PROJ_TYPE)
-$(call FN_CHECK_OPTIONS,PROJ_TYPE,app lib)
+$(call fn_check_non_empty,PROJ_TYPE)
+$(call fn_check_origin,PROJ_TYPE,file)
+$(call fn_check_no_whitespace,PROJ_TYPE)
+$(call fn_check_options,PROJ_TYPE,app lib)
 # ------------------------------------------------------------------------------
 
 # LIB_NAME (Only for PROJ_TYPE == lib) -----------------------------------------
 ifeq ($(PROJ_TYPE),lib)
     LIB_NAME ?= $(PROJ_NAME)
-    $(call FN_CHECK_NON_EMPTY,LIB_NAME)
-    $(call FN_CHECK_ORIGIN,LIB_NAME,file)
-    $(call FN_CHECK_NO_WHITESPACE,LIB_NAME)
+    $(call fn_check_non_empty,LIB_NAME)
+    $(call fn_check_origin,LIB_NAME,file)
+    $(call fn_check_no_whitespace,LIB_NAME)
 endif
 # ------------------------------------------------------------------------------
 
 # Build sub-directory ----------------------------------------------------------
 ifneq ($(BUILD_SUBDIR),)
-    $(call FN_CHECK_NO_WHITESPACE,BUILD_SUBDIR)
-    $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(BUILD_SUBDIR)),,$(error [BUILD_SUBDIR] Invalid path: $(BUILD_SUBDIR)))
+    $(call fn_check_no_whitespace,BUILD_SUBDIR)
+    $(if $(call fn_is_inside_dir,$(CURDIR),$(BUILD_SUBDIR)),,$(error [BUILD_SUBDIR] Invalid path: $(BUILD_SUBDIR)))
 endif
 
 O_BUILD_DIR := $(O)/build
@@ -80,8 +80,8 @@ endif
 
 # Distribution sub-directory ---------------------------------------------------
 ifneq ($(DIST_SUBDIR),)
-    $(call FN_CHECK_NO_WHITESPACE,DIST_SUBDIR)
-    $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(DIST_SUBDIR)),,$(error [DIST_SUBDIR] Invalid path: $(DIST_SUBDIR)))
+    $(call fn_check_no_whitespace,DIST_SUBDIR)
+    $(if $(call fn_is_inside_dir,$(CURDIR),$(DIST_SUBDIR)),,$(error [DIST_SUBDIR] Invalid path: $(DIST_SUBDIR)))
 endif
 O_DIST_DIR := $(O)/dist
 ifneq ($(DIST_SUBDIR),)
@@ -91,16 +91,16 @@ endif
 
 # Default include & source directories -----------------------------------------
 ifdef SRC_DIRS
-    $(call FN_CHECK_ORIGIN,SRC_DIRS,file)
+    $(call fn_check_origin,SRC_DIRS,file)
 else ifdef SRC_FILES
-    $(call FN_CHECK_ORIGIN,SRC_FILES,file)
+    $(call fn_check_origin,SRC_FILES,file)
 else
     ifneq ($(wildcard src),)
         SRC_DIRS := src
     endif
 endif
 ifdef INCLUDE_DIRS
-    $(call FN_CHECK_ORIGIN,INCLUDE_DIRS,file)
+    $(call fn_check_origin,INCLUDE_DIRS,file)
 else
     ifneq ($(wildcard include),)
         INCLUDE_DIRS := include
@@ -118,25 +118,25 @@ include $(dir $(cpb_builder_mk))include/hosts.mk
 # LIB_TYPE ---------------------------------------------------------------------
 # NOTE: A host layer may have set LIB_TYPE
 LIB_TYPE ?= static
-$(call FN_CHECK_NON_EMPTY,LIB_TYPE)
-$(call FN_CHECK_OPTIONS,LIB_TYPE,shared static)
+$(call fn_check_non_empty,LIB_TYPE)
+$(call fn_check_options,LIB_TYPE,shared static)
 # ------------------------------------------------------------------------------
 
 # ARTIFACT ---------------------------------------------------------------------
 # NOTE: A host layer may have set ARTIFACT
 ARTIFACT ?= a.out
-$(call FN_CHECK_NON_EMPTY,ARTIFACT)
-$(call FN_CHECK_NO_WHITESPACE,ARTIFACT)
+$(call fn_check_non_empty,ARTIFACT)
+$(call fn_check_no_whitespace,ARTIFACT)
 # ------------------------------------------------------------------------------
 
 # Identify source files --------------------------------------------------------
 # NOTE: A host layer could have added source directories.
 ifdef SKIPPED_SRC_DIRS
-    $(call FN_CHECK_ORIGIN,SKIPPED_SRC_DIRS,file)
+    $(call fn_check_origin,SKIPPED_SRC_DIRS,file)
 endif
 
 ifdef SKIPPED_SRC_FILES
-    $(call FN_CHECK_ORIGIN,SKIPPED_SRC_FILES,file)
+    $(call fn_check_origin,SKIPPED_SRC_FILES,file)
 endif
 
 # Checks if a entry was added to included and skipped at the same time
@@ -154,14 +154,14 @@ SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
 # NOTE: A second filter-out is required due to files contained in SRC_DIRS
 SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(SRC_FILES))
 
-$(foreach srcDir,$(SRC_DIRS),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Directory outside project root directory: '$(srcDir)')))
-$(foreach srcFile,$(SRC_FILES),$(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(dir $(srcFile))),,$(error [SRC_FILES] File outside project root directory: '$(srcFile)')))
+$(foreach srcDir,$(SRC_DIRS),$(if $(call fn_is_inside_dir,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Directory outside project root directory: '$(srcDir)')))
+$(foreach srcFile,$(SRC_FILES),$(if $(call fn_is_inside_dir,$(CURDIR),$(dir $(srcFile))),,$(error [SRC_FILES] File outside project root directory: '$(srcFile)')))
 
 # Checks if any SRC_DIR or SRC_FILE is outside CURDIR
 cpb_builder_mk_src_file_filter := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
 
 # Second filter-out
-SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(call FN_SHELL,find $(srcDir) -type f $(cpb_builder_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES))
+SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(call fn_shell,find $(srcDir) -type f $(cpb_builder_mk_src_file_filter) 2> /dev/null)) $(SRC_FILES))
 
 cpb_builder_mk_invalid_src_files := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
 
@@ -177,14 +177,14 @@ INCLUDE_DIRS := $(strip $(SRC_DIRS) $(INCLUDE_DIRS))
 
 # POST_INCLUDES ----------------------------------------------------------------
 ifneq ($(POST_INCLUDES),)
-    $(call FN_CHECK_ORIGIN,POST_INCLUDES,file)
+    $(call fn_check_origin,POST_INCLUDES,file)
     include $(POST_INCLUDES)
 endif
 # ------------------------------------------------------------------------------
 
 # POST_EVAL --------------------------------------------------------------------
 ifdef POST_EVAL
-    $(call FN_CHECK_ORIGIN,POST_EVAL,file)
+    $(call fn_check_origin,POST_EVAL,file)
     $(eval $(POST_EVAL))
 endif
 # ------------------------------------------------------------------------------
@@ -203,7 +203,7 @@ all: dist ;
 # print-vars ===================================================================
 VARS += PROJ_NAME PROJ_TYPE LIB_NAME BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS
 override VARS := $(sort $(VARS))
-$(call FN_CHECK_NON_EMPTY,VARS)
+$(call fn_check_non_empty,VARS)
 
 .PHONY: print-vars
 print-vars:
@@ -246,13 +246,13 @@ clean-all: --cpb_builder_mk_post_clean_all ;
 
 # build ========================================================================
 ifdef PRE_BUILD_DEPS
-    $(call FN_CHECK_ORIGIN,PRE_BUILD_DEPS,file)
+    $(call fn_check_origin,PRE_BUILD_DEPS,file)
 endif
 ifdef BUILD_DEPS
-    $(call FN_CHECK_ORIGIN,BUILD_DEPS,file)
+    $(call fn_check_origin,BUILD_DEPS,file)
 endif
 ifdef POST_BUILD_DEPS
-    $(call FN_CHECK_ORIGIN,POST_BUILD_DEPS,file)
+    $(call fn_check_origin,POST_BUILD_DEPS,file)
 endif
 
 .PHONY: --cpb_builder_mk_pre_build
@@ -270,17 +270,17 @@ build: --cpb_builder_mk_post_build ;
 
 # dist =========================================================================
 ifneq ($(DIST_MARKER),)
-    $(call FN_CHECK_NO_WHITESPACE,DIST_MARKER)
-    $(if $(call FN_IS_INSIDE_DIR,$(CURDIR),$(DIST_MARKER)),,$(error [DIST_MARKER] Invalid path: $(DIST_MARKER)))
+    $(call fn_check_no_whitespace,DIST_MARKER)
+    $(if $(call fn_is_inside_dir,$(CURDIR),$(DIST_MARKER)),,$(error [DIST_MARKER] Invalid path: $(DIST_MARKER)))
 endif
 ifdef DIST_DIRS
-    $(call FN_CHECK_ORIGIN,DIST_DIRS,file)
+    $(call fn_check_origin,DIST_DIRS,file)
 endif
 
 cpb_builder_mk_dist_dirs := $(DIST_DIRS)
 
 ifdef DIST_FILES
-    $(call FN_CHECK_ORIGIN,DIST_FILES,file)
+    $(call fn_check_origin,DIST_FILES,file)
 endif
 ifneq ($(SRC_FILES),)
     ifeq ($(PROJ_TYPE),app)
@@ -295,19 +295,19 @@ cpb_builder_mk_dist_files := $(DIST_FILES) $(cpb_builder_mk_dist_files)
 
 # Auxiliary function to adjust a distribution directory entry in DIST_DIRS.
 # Syntax: $(call cpb_builder_mk_fn_dist_adjust_dir_entry,distDirEntry)
-cpb_builder_mk_fn_dist_adjust_dir_entry = $(if $(call FN_TOKEN,$(1),:,2),$(1),$(1):$(1))
+cpb_builder_mk_fn_dist_adjust_dir_entry = $(if $(call fn_token,$(1),:,2),$(1),$(1):$(1))
 
 # Auxiliary function to adjust a distribution file entry in DIST_FILES.
 # Syntax: $(call cpb_builder_mk_fn_dist_adjust_file_entry,distFileEntry)
-cpb_builder_mk_fn_dist_adjust_file_entry = $(if $(call FN_TOKEN,$(1),:,2),$(1),$(1):$(notdir $(1)))
+cpb_builder_mk_fn_dist_adjust_file_entry = $(if $(call fn_token,$(1),:,2),$(1),$(1):$(notdir $(1)))
 
 cpb_builder_mk_dist_dirs := $(foreach distDirEntry,$(cpb_builder_mk_dist_dirs),$(call cpb_builder_mk_fn_dist_adjust_dir_entry,$(distDirEntry)))
 
 DIST_DIRS := $(cpb_builder_mk_dist_dirs)
 
-cpb_builder_mk_dist_files := $(cpb_builder_mk_dist_files) $(foreach distDirEntry,$(cpb_builder_mk_dist_dirs),$(foreach distFile,$(call FN_FIND_FILES,$(call FN_TOKEN,$(distDirEntry),:,1)),$(call FN_TOKEN,$(distDirEntry),:,1)/$(distFile):$(if $(call FN_TOKEN,$(distDirEntry),:,2),$(call FN_TOKEN,$(distDirEntry),:,2)/,)$(distFile)))
+cpb_builder_mk_dist_files := $(cpb_builder_mk_dist_files) $(foreach distDirEntry,$(cpb_builder_mk_dist_dirs),$(foreach distFile,$(call fn_find_files,$(call fn_token,$(distDirEntry),:,1)),$(call fn_token,$(distDirEntry),:,1)/$(distFile):$(if $(call fn_token,$(distDirEntry),:,2),$(call fn_token,$(distDirEntry),:,2)/,)$(distFile)))
 cpb_builder_mk_dist_files := $(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(call cpb_builder_mk_fn_dist_adjust_file_entry,$(distFileEntry)))
-cpb_builder_mk_dist_files := $(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(call FN_TOKEN,$(distFileEntry),:,1):$(O_DIST_DIR)/$(call FN_TOKEN,$(distFileEntry),:,2))
+cpb_builder_mk_dist_files := $(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(call fn_token,$(distFileEntry),:,1):$(O_DIST_DIR)/$(call fn_token,$(distFileEntry),:,2))
 
 DIST_FILES := $(cpb_builder_mk_dist_files)
 
@@ -317,18 +317,18 @@ define cpb_builder_mk_dist_deps_template
 cpb_builder_mk_dist_deps += $(2)
 
 $(2): $(1)
-	$$(call FN_LOG_INFO,$$(V),[DIST] $$@)
+	$$(call fn_log_info,$$(V),[DIST] $$@)
 	@mkdir -p $$(dir $$@)
 	$(V_PREFIX)ln -f $$< $$@
 endef
 
-$(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(eval $(call cpb_builder_mk_dist_deps_template,$(call FN_TOKEN,$(distFileEntry),:,1),$(call FN_TOKEN,$(distFileEntry),:,2))))
+$(foreach distFileEntry,$(cpb_builder_mk_dist_files),$(eval $(call cpb_builder_mk_dist_deps_template,$(call fn_token,$(distFileEntry),:,1),$(call fn_token,$(distFileEntry),:,2))))
 
 ifdef PRE_DIST_DEPS
-    $(call FN_CHECK_ORIGIN,PRE_DIST_DEPS,file)
+    $(call fn_check_origin,PRE_DIST_DEPS,file)
 endif
 ifdef POST_DIST_DEPS
-    $(call FN_CHECK_ORIGIN,POST_DIST_DEPS,file)
+    $(call fn_check_origin,POST_DIST_DEPS,file)
 endif
 
 --cpb_builder_mk_pre_dist: build $(PRE_DIST_DEPS) ;

@@ -30,17 +30,17 @@ cpb_native_mk := $(lastword $(MAKEFILE_LIST))
 include $(dir $(cpb_native_mk))functions.mk
 
 # Reserved variables -----------------------------------------------------------
-$(call FN_CHECK_RESERVED,cpb_native_mk_os)
-$(call FN_CHECK_RESERVED,cpb_native_mk_arch)
-$(call FN_CHECK_RESERVED,NATIVE_OS)
-$(call FN_CHECK_RESERVED,NATIVE_ARCH)
-$(call FN_CHECK_RESERVED,NATIVE_HOST)
+$(call fn_check_reserved,cpb_native_mk_os)
+$(call fn_check_reserved,cpb_native_mk_arch)
+$(call fn_check_reserved,NATIVE_OS)
+$(call fn_check_reserved,NATIVE_ARCH)
+$(call fn_check_reserved,NATIVE_HOST)
 # ------------------------------------------------------------------------------
 
 ifeq ($(OS),Windows_NT)
     NATIVE_OS := windows
 else
-    cpb_native_mk_os := $(call FN_SHELL,uname -s)
+    cpb_native_mk_os := $(call fn_shell,uname -s)
     ifneq ($(filter Linux linux,$(cpb_native_mk_os)),)
         NATIVE_OS := linux
     else
@@ -52,7 +52,7 @@ endif
 
 ifdef NATIVE_OS
     ifeq ($(NATIVE_OS),windows)
-        cpb_native_mk_arch := $(call FN_SHELL,cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
+        cpb_native_mk_arch := $(call fn_shell,cmd /C SET Processor | grep PROCESSOR_ARCHITECTURE | sed 's:PROCESSOR_ARCHITECTURE=::')
         ifeq ($(cpb_native_mk_arch),AMD64)
             NATIVE_ARCH := x64
         else
@@ -69,7 +69,7 @@ ifdef NATIVE_OS
             endif
         endif
     else
-        cpb_native_mk_arch := $(call FN_SHELL,uname -m)
+        cpb_native_mk_arch := $(call fn_shell,uname -m)
         ifeq ($(cpb_native_mk_arch),x86_64)
             NATIVE_ARCH := x64
         else

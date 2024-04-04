@@ -27,9 +27,9 @@ include $(dir $(cpb_doxygen_mk))include/common.mk
 
 # Doc src/output directories----------------------------------------------------
 ifdef DOC_DIR
-    $(call FN_CHECK_NON_EMPTY,DOC_DIR)
-    $(call FN_CHECK_NO_WHITESPACE,DOC_DIR)
-    $(call FN_CHECK_ORIGIN,DOC_DIR,file)
+    $(call fn_check_non_empty,DOC_DIR)
+    $(call fn_check_no_whitespace,DOC_DIR)
+    $(call fn_check_origin,DOC_DIR,file)
 else
     DOC_DIR ?= $(O_BASE)/doc
 endif
@@ -37,20 +37,20 @@ endif
 
 # Doxyfile definition ----------------------------------------------------------
 DOXYFILE ?= Doxyfile
-$(call FN_CHECK_NON_EMPTY,DOXYFILE)
-$(call FN_CHECK_NO_WHITESPACE,DOXYFILE)
-$(call FN_CHECK_ORIGIN,DOXYFILE,file)
+$(call fn_check_non_empty,DOXYFILE)
+$(call fn_check_no_whitespace,DOXYFILE)
+$(call fn_check_origin,DOXYFILE,file)
 # ------------------------------------------------------------------------------
 
 # doc ==========================================================================
 ifdef PRE_DOC_DEPS
-    $(call FN_CHECK_ORIGIN,PRE_DOC_DEPS,file)
+    $(call fn_check_origin,PRE_DOC_DEPS,file)
 endif
 ifdef POST_DOC_DEPS
-    $(call FN_CHECK_ORIGIN,POST_DOC_DEPS,file)
+    $(call fn_check_origin,POST_DOC_DEPS,file)
 endif
 ifdef DOXYARGS
-    $(call FN_CHECK_ORIGIN,DOXYARGS,file)
+    $(call fn_check_origin,DOXYARGS,file)
 endif
 
 .PHONY: --cpb_doxygen_mk_pre_doc
