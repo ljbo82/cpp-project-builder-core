@@ -47,7 +47,7 @@ ifeq ($(PROJ_TYPE),lib)
     endif
 
     ifneq ($(filter $(PROJ_NAME),$(cpb_include_libs_mk_lib_chain)),)
-        $(error Detected circular reference for project "$(PROJ_NAME)")
+        $(error Detected circular reference for project "$(PROJ_NAME)" ($(foreach proj,$(cpb_include_libs_mk_lib_chain),$(proj) ->) $(PROJ_NAME)))
     endif
 
     export cpb_include_libs_mk_lib_chain += $(PROJ_NAME)
