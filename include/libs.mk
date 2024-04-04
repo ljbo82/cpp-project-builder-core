@@ -27,7 +27,7 @@ endif
 ifndef cpb_include_libs_mk
 cpb_include_libs_mk := $(lastword $(MAKEFILE_LIST))
 
-# ------------------------------------------------------------------------------
+# Unifies the output dir for all libraries -------------------------------------
 ifdef cpb_include_libs_mk_o_abs_libs_dir
     ifneq ($(origin cpb_include_libs_mk_o_abs_libs_dir),environment)
         $(error [cpb_include_libs_mk_o_abs_libs_dir] Reserved variable)
@@ -36,6 +36,22 @@ endif
 
 # This variable has to be exported in order to sub-make calls use the same output directory
 export cpb_include_libs_mk_o_abs_libs_dir ?= $(abspath $(O)/libs)
+# ------------------------------------------------------------------------------
+
+# Checks for circular references -----------------------------------------------
+ifeq ($(PROJ_TYPE),lib)
+    ifdef cpb_include_libs_mk_lib_chain
+        ifneq ($(origin cpb_include_libs_mk_lib_chain),environment)
+            $(error [cpb_include_libs_mk_lib_chain] Reserved variable)
+        endif
+    endif
+
+    ifneq ($(filter $(PROJ_NAME),$(cpb_include_libs_mk_lib_chain)),)
+        $(error Detected circular reference for project "$(PROJ_NAME)")
+    endif
+
+    export cpb_include_libs_mk_lib_chain += $(PROJ_NAME)
+endif
 # ------------------------------------------------------------------------------
 
 $(call fn_check_reserved,cpb_include_libs_mk_lib_template)
@@ -73,7 +89,7 @@ cpb_include_libs_mk_ldflags += -l$(1)
 ifneq ($$(or $$(LIB_MKDIR_$(1)),$$(LIB_MAKEFILE_$(1))),)
 # ------------------------------------------------------------------------------
 cpb_include_libs_mk_has_lib_to_build := 1
-cpb_include_libs_mk_ldflags += $$$$($$(MAKE) --no-print-directory $$(strip $$(LIB_MKFLAGS_$(1))) -- --show-libs)
+cpb_include_libs_mk_ldflags += $$$$($$(MAKE) --no-print-directory $$(strip $$(LIB_MKFLAGS_$(1))) -- --cpb-show-libs)
 
 LIB_MKFLAGS_$(1) := $$(LIB_MKFLAGS_$(1)) O=$$(call fn_rel_dir,$$(LIB_MKDIR_$(1)),$$(cpb_include_libs_mk_o_abs_libs_dir)) BUILD_SUBDIR=$(1) DIST_MARKER=.$(1).dist
 PRE_BUILD_DEPS += $$(cpb_include_libs_mk_o_abs_libs_dir)/.$(1).dist
@@ -101,9 +117,9 @@ ifeq ($(cpb_include_libs_mk_has_lib_to_build),1)
     LIBS_FLAGS := -L$(cpb_include_libs_mk_o_abs_libs_dir)/dist/lib $(LIBS_FLAGS)
 endif
 
-# --show-libs ==================================================================
-.PHONY: --show-libs
---show-libs:
+# --cpb-show-libs ==============================================================
+.PHONY: --cpb-show-libs
+--cpb-show-libs:
 	@printf -- "$(cpb_include_libs_mk_ldflags)"
 # ==============================================================================
 

@@ -192,7 +192,8 @@ else ifeq ($(PROJ_TYPE),app)
     cpb_include_toolchain_mk_dep_files := $(cpb_include_toolchain_mk_obj_files:.o=.d)
 endif
 
-ifneq ($(SRC_FILES),) #*********************************************************
+ifneq ($(SRC_FILES),)
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 BUILD_DEPS += --cpb_include_toolchain_mk_pre_build_check $(O_BUILD_DIR)/$(ARTIFACT)
 
 .PHONY: --cpb_include_toolchain_mk_pre_build_check
@@ -250,8 +251,8 @@ $(eval $(call cpb_include_toolchain_mk_as_template,S))
 # ------------------------------------------------------------------------------
 
 -include $(cpb_include_toolchain_mk_dep_files)
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 endif
-# ******************************************************************************
 # ==============================================================================
 
 endif # ifndef cpb_include_toolchain_mk
