@@ -57,9 +57,21 @@ $(call fn_check_no_whitespace,PROJ_TYPE)
 $(call fn_check_options,PROJ_TYPE,app lib)
 # ------------------------------------------------------------------------------
 
+# Project version --------------------------------------------------------------
+ifdef PROJ_VERSION
+    $(call fn_check_non_empty,PROJ_TYPE)
+    $(call fn_check_origin,PROJ_TYPE,file)
+    PROJ_VERSION := $(call fn_semver,$(PROJ_VERSION),[PROJ_VERSION] Invalid value: $(PROJ_VERSION))
+endif
+# ------------------------------------------------------------------------------
+
 # LIB_NAME (Only for PROJ_TYPE == lib) -----------------------------------------
 ifeq ($(PROJ_TYPE),lib)
-    LIB_NAME ?= $(PROJ_NAME)
+    ifneq ($(PROJ_VERSION),)
+        LIB_NAME ?= $(PROJ_NAME)$(call fn_semver_major,$(PROJ_VERSION))
+    else
+        LIB_NAME ?= $(PROJ_NAME)
+    endif
     $(call fn_check_non_empty,LIB_NAME)
     $(call fn_check_origin,LIB_NAME,file)
     $(call fn_check_no_whitespace,LIB_NAME)
@@ -201,7 +213,7 @@ all: dist ;
 # ==============================================================================
 
 # print-vars ===================================================================
-VARS += PROJ_NAME PROJ_TYPE LIB_NAME BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS
+VARS += PROJ_NAME PROJ_TYPE PROJ_VERSION LIB_NAME BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS
 override VARS := $(sort $(VARS))
 $(call fn_check_non_empty,VARS)
 
