@@ -53,7 +53,7 @@ VARS += LIBS STRIP_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS C
 ifeq ($(DEBUG),0)
     STRIP_RELEASE ?= 1
     $(call fn_check_origin,STRIP_RELEASE,file)
-    $(call fn_check_non_empty,STRIP_RELEASE)
+    $(call fn_check_not_empty,STRIP_RELEASE)
     $(call fn_check_no_whitespace,STRIP_RELEASE)
     $(call fn_check_options,STRIP_RELEASE,0 1)
 endif
@@ -64,7 +64,7 @@ endif
 ifeq ($(DEBUG),0)
     RELEASE_OPTIMIZATION_LEVEL ?= 2
     $(call fn_check_origin,RELEASE_OPTIMIZATION_LEVEL,file)
-    $(call fn_check_non_empty,RELEASE_OPTIMIZATION_LEVEL)
+    $(call fn_check_not_empty,RELEASE_OPTIMIZATION_LEVEL)
     $(call fn_check_no_whitespace,RELEASE_OPTIMIZATION_LEVEL)
     $(call fn_check_options,RELEASE_OPTIMIZATION_LEVEL,0 1 2 3 s fast g z)
 endif
@@ -78,7 +78,7 @@ AS ?= as
 ifeq ($(origin AS),default)
     AS := as
 else
-    $(call fn_check_non_empty,AS)
+    $(call fn_check_not_empty,AS)
 endif
 
 # CC
@@ -86,7 +86,7 @@ CC ?= gcc
 ifeq ($(origin CC),default)
     CC := gcc
 else
-    $(call fn_check_non_empty,CC)
+    $(call fn_check_not_empty,CC)
 endif
 
 # CXX
@@ -94,7 +94,7 @@ CXX ?= g++
 ifeq ($(origin CXX),default)
     CXX := g++
 else
-    $(call fn_check_non_empty,CXX)
+    $(call fn_check_not_empty,CXX)
 endif
 
 # AR
@@ -102,7 +102,7 @@ AR ?= ar
 ifeq ($(origin AR),default)
     AR := ar
 else
-    $(call fn_check_non_empty,AR)
+    $(call fn_check_not_empty,AR)
 endif
 
 # LD
@@ -127,7 +127,7 @@ LD ?= $(cpb_include_toolchain_mk_ld)
 ifeq ($(origin LD),default)
     LD := $(cpb_include_toolchain_mk_ld)
 else
-    $(call fn_check_non_empty,LD)
+    $(call fn_check_not_empty,LD)
 endif
 
 cpb_include_toolchain_mk_cflags += -Wall
@@ -207,20 +207,20 @@ BUILD_DEPS += --cpb_include_toolchain_mk_pre_build_check $(O_BUILD_DIR)/$(ARTIFA
 $(O_BUILD_DIR)/$(ARTIFACT): $(cpb_include_toolchain_mk_obj_files)
     ifeq ($(PROJ_TYPE),lib)
         ifeq ($(LIB_TYPE),shared)
-	        $(call fn_log_info,$(V),[LD] $@)
+	        $(call fn_log_cmd,$(V),[LD] $@)
 	        $(V_PREFIX)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_include_toolchain_mk_obj_files) $(LDFLAGS))
         else ifeq ($(LIB_TYPE),static)
-	        $(call fn_log_info,$(V),[AR] $@)
+	        $(call fn_log_cmd,$(V),[AR] $@)
 	        $(V_PREFIX)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(cpb_include_toolchain_mk_obj_files))
         endif
     else ifeq ($(PROJ_TYPE),app)
-	    $(call fn_log_info,$(V),[LD] $@)
+	    $(call fn_log_cmd,$(V),[LD] $@)
 	    $(V_PREFIX)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_include_toolchain_mk_obj_files) $(LDFLAGS))
     endif
 
 # C sources --------------------------------------------------------------------
 $(O_BUILD_DIR)/%.c$(cpb_include_toolchain_mk_obj_suffix): %.c
-	$(call fn_log_info,$(V),[CC] $@)
+	$(call fn_log_cmd,$(V),[CC] $@)
 	@mkdir -p $(dir $@)
 	$(V_PREFIX)$(CROSS_COMPILE)$(CC) $(strip $(CFLAGS) -c $< -o $@)
 # ------------------------------------------------------------------------------
@@ -228,7 +228,7 @@ $(O_BUILD_DIR)/%.c$(cpb_include_toolchain_mk_obj_suffix): %.c
 # C++ sources ------------------------------------------------------------------
 define cpb_include_toolchain_mk_cxx_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_include_toolchain_mk_obj_suffix): %.$(1)
-	$$(call fn_log_info,$$(V),[CXX] $$@)
+	$$(call fn_log_cmd,$$(V),[CXX] $$@)
 	@mkdir -p $$(dir $$@)
 	$(V_PREFIX)$(CROSS_COMPILE)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
 endef
@@ -241,7 +241,7 @@ $(eval $(call cpb_include_toolchain_mk_cxx_template,cc))
 # Assembly sources -------------------------------------------------------------
 define cpb_include_toolchain_mk_as_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_include_toolchain_mk_obj_suffix): %.$(1)
-	$$(call fn_log_info,$$(V),[AS] $$@)
+	$$(call fn_log_cmd,$$(V),[AS] $$@)
 	@mkdir -p $$(dir $$@)
 	$(V_PREFIX)$(CROSS_COMPILE)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
 endef

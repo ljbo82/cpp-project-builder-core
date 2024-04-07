@@ -45,13 +45,13 @@ endif
 # ------------------------------------------------------------------------------
 
 # Project name -----------------------------------------------------------------
-$(call fn_check_non_empty,PROJ_NAME)
+$(call fn_check_not_empty,PROJ_NAME)
 $(call fn_check_origin,PROJ_NAME,file)
 $(call fn_check_no_whitespace,PROJ_NAME)
 # ------------------------------------------------------------------------------
 
 # Project type -----------------------------------------------------------------
-$(call fn_check_non_empty,PROJ_TYPE)
+$(call fn_check_not_empty,PROJ_TYPE)
 $(call fn_check_origin,PROJ_TYPE,file)
 $(call fn_check_no_whitespace,PROJ_TYPE)
 $(call fn_check_options,PROJ_TYPE,app lib)
@@ -59,7 +59,7 @@ $(call fn_check_options,PROJ_TYPE,app lib)
 
 # Project version --------------------------------------------------------------
 ifdef PROJ_VERSION
-    $(call fn_check_non_empty,PROJ_TYPE)
+    $(call fn_check_not_empty,PROJ_TYPE)
     $(call fn_check_origin,PROJ_TYPE,file)
     PROJ_VERSION := $(call fn_semver,$(PROJ_VERSION),[PROJ_VERSION] Invalid value: $(PROJ_VERSION))
 endif
@@ -72,7 +72,7 @@ ifeq ($(PROJ_TYPE),lib)
     else
         LIB_NAME ?= $(PROJ_NAME)
     endif
-    $(call fn_check_non_empty,LIB_NAME)
+    $(call fn_check_not_empty,LIB_NAME)
     $(call fn_check_origin,LIB_NAME,file)
     $(call fn_check_no_whitespace,LIB_NAME)
 endif
@@ -130,14 +130,14 @@ include $(dir $(cpb_builder_mk))include/hosts.mk
 # LIB_TYPE ---------------------------------------------------------------------
 # NOTE: A host layer may have set LIB_TYPE
 LIB_TYPE ?= static
-$(call fn_check_non_empty,LIB_TYPE)
+$(call fn_check_not_empty,LIB_TYPE)
 $(call fn_check_options,LIB_TYPE,shared static)
 # ------------------------------------------------------------------------------
 
 # ARTIFACT ---------------------------------------------------------------------
 # NOTE: A host layer may have set ARTIFACT
 ARTIFACT ?= a.out
-$(call fn_check_non_empty,ARTIFACT)
+$(call fn_check_not_empty,ARTIFACT)
 $(call fn_check_no_whitespace,ARTIFACT)
 # ------------------------------------------------------------------------------
 
@@ -215,7 +215,7 @@ all: dist ;
 # print-vars ===================================================================
 VARS += PROJ_NAME PROJ_TYPE PROJ_VERSION LIB_NAME BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS
 override VARS := $(sort $(VARS))
-$(call fn_check_non_empty,VARS)
+$(call fn_check_not_empty,VARS)
 
 .PHONY: print-vars
 print-vars:
@@ -329,7 +329,7 @@ define cpb_builder_mk_dist_deps_template
 cpb_builder_mk_dist_deps += $(2)
 
 $(2): $(1)
-	$$(call fn_log_info,$$(V),[DIST] $$@)
+	$$(call fn_log_cmd,$$(V),[DIST] $$@)
 	@mkdir -p $$(dir $$@)
 	$(V_PREFIX)ln -f $$< $$@
 endef

@@ -81,6 +81,8 @@ ifneq ($$(LIB_MKDIR_$(1)),)
     LIB_MKFLAGS_$(1) := -C $$(LIB_MKDIR_$(1)) $$(LIB_MKFLAGS_$(1))
 endif
 
+LIB_MKFLAGS_$(1) := $$(strip $$(LIB_MKFLAGS_$(1)))
+
 ifneq ($$(filter -l$(1),$$(cpb_include_libs_mk_ldflags)),)
     $$(error [LIBS] Duplicate library definition: $(1))
 endif
@@ -97,7 +99,7 @@ PRE_BUILD_DEPS += $$(cpb_include_libs_mk_o_abs_libs_dir)/.$(1).dist
 # ==============================================================================
 .PHONY: --cpb-lib-$(1)
 --cpb-lib-$(1):
-	$$(call fn_log_info,$$(V),[LIB] $(4))
+	$$(call fn_log_cmd,$$(V),[LIB] $(4))
 	$$(V_PREFIX)$$(MAKE) $$(LIB_MKFLAGS_$(1))
 
 $$(cpb_include_libs_mk_o_abs_libs_dir)/.$(1).dist: --cpb-lib-$(1) ;

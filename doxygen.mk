@@ -27,7 +27,7 @@ include $(dir $(cpb_doxygen_mk))include/common.mk
 
 # Doc src/output directories----------------------------------------------------
 ifdef DOC_DIR
-    $(call fn_check_non_empty,DOC_DIR)
+    $(call fn_check_not_empty,DOC_DIR)
     $(call fn_check_no_whitespace,DOC_DIR)
     $(call fn_check_origin,DOC_DIR,file)
 else
@@ -37,10 +37,20 @@ endif
 
 # Doxyfile definition ----------------------------------------------------------
 DOXYFILE ?= Doxyfile
-$(call fn_check_non_empty,DOXYFILE)
+$(call fn_check_not_empty,DOXYFILE)
 $(call fn_check_no_whitespace,DOXYFILE)
 $(call fn_check_origin,DOXYFILE,file)
 # ------------------------------------------------------------------------------
+
+$(call fn_check_reserved,cpb_doxygen_mk_new_line)
+define cpb_doxygen_mk_new_line
+
+
+endef
+
+DOXYVARS += \nOUTPUT_DIRECTORY = \"$(DOC_DIR)\"\n
+DOXYVARS := $(subst \$(cpb_doxygen_mk_new_line),\\\n,$(DOXYVARS))
+DOXYVARS := $(subst $(cpb_doxygen_mk_new_line),\n,$(DOXYVARS))
 
 # doc ==========================================================================
 ifdef PRE_DOC_DEPS
@@ -49,8 +59,8 @@ endif
 ifdef POST_DOC_DEPS
     $(call fn_check_origin,POST_DOC_DEPS,file)
 endif
-ifdef DOXYARGS
-    $(call fn_check_origin,DOXYARGS,file)
+ifdef DOXYVARS
+    $(call fn_check_origin,DOXYVARS,file)
 endif
 
 .PHONY: --cpb_doxygen_mk_pre_doc
@@ -62,7 +72,7 @@ endif
 	    $(error [DOXYFILE] File not found: $(DOXYFILE))
     else
 	    @mkdir -p $(DOC_DIR)
-	    $(V_PREFIX)(cat $(DOXYFILE)$(foreach arg,$(strip OUTPUT_DIRECTORY=$(DOC_DIR) $(DOXYARGS)),; echo "$(arg)")) | doxygen -
+	    $(V_PREFIX)(cat $(DOXYFILE); printf "$(DOXYVARS)\n") | doxygen -
     endif
 
 .PHONY: --cpb_doxygen_mk_post_doc
@@ -73,6 +83,6 @@ doc: --cpb_doxygen_mk_post_doc ;
 # ==============================================================================
 
 # Exports default variable set for print-vars
-VARS += DOC_DIR DOXYFILE DOXYARGS PRE_DOC_DEPS POST_DOC_DEPS
+VARS += DOC_DIR DOXYFILE DOXYVARS PRE_DOC_DEPS POST_DOC_DEPS
 
 endif # ifndef cpb_doxygen_mk

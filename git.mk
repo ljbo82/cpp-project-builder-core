@@ -27,7 +27,7 @@ include $(dir $(cpb_git_mk))functions.mk
 include $(dir $(cpb_git_mk))include/common.mk
 
 GIT_REPO_DIR ?= .
-$(call fn_check_non_empty,GIT_REPO_DIR)
+$(call fn_check_not_empty,GIT_REPO_DIR)
 $(call fn_check_no_whitespace,GIT_REPO_DIR)
 $(call fn_check_origin,GIT_REPO_DIR,file)
 
