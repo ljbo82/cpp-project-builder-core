@@ -139,6 +139,10 @@ $(call fn_check_options,LIB_TYPE,shared static)
 ARTIFACT ?= a.out
 $(call fn_check_not_empty,ARTIFACT)
 $(call fn_check_no_whitespace,ARTIFACT)
+
+ifneq ($(findstring /,$(ARTIFACT)),)
+    $(error [ARTIFACT] Value cannot have path components: "$(ARTIFACT)")
+endif
 # ------------------------------------------------------------------------------
 
 # Identify source files --------------------------------------------------------
