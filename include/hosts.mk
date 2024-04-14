@@ -42,7 +42,7 @@ ifneq ($(wildcard hosts),)
     HOSTS_DIRS := hosts $(HOSTS_DIRS)
 endif
 
-HOSTS_DIRS := $(strip $(HOSTS_DIRS) $(dir $(cpb_builder_mk))hosts)
+HOSTS_DIRS := $(strip $(HOSTS_DIRS) $(CPB_DIR)/hosts)
 
 # Precedence: From most specific to most generic. For example,
 # for host 'linux-arm-v7', accepted layers are:
