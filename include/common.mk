@@ -42,7 +42,7 @@ ifdef CPB_MIN_VERSION
     $(call fn_semver_check_compat,$(CPB_MIN_VERSION),$(CPB_VERSION),[CPB_MIN_VERSION] Current version is not compatible: $(CPB_VERSION) (version should be $(CPB_MIN_VERSION)+))
 endif
 
-override CPB_DIR := $(realpath $(dir $(cpb_include_common_mk)))
+override CPB_DIR := $(realpath $(dir $(cpb_include_common_mk))..)
 
 # Checks if GNU Make version is supported ----------------------------------------------
 cpb_include_common_mk_min_make_version := 4.2
