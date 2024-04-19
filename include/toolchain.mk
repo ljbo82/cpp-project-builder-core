@@ -74,33 +74,33 @@ endif
 override ARFLAGS := $(subst v,,$(subst r,,$(ARFLAGS)))
 
 # AS
-AS ?= as
+AS ?= $(CROSS_COMPILE)as
 ifeq ($(origin AS),default)
-    AS := as
+    AS := $(CROSS_COMPILE)as
 else
     $(call fn_check_not_empty,AS)
 endif
 
 # CC
-CC ?= gcc
+CC ?= $(CROSS_COMPILE)gcc
 ifeq ($(origin CC),default)
-    CC := gcc
+    CC := $(CROSS_COMPILE)gcc
 else
     $(call fn_check_not_empty,CC)
 endif
 
 # CXX
-CXX ?= g++
+CXX ?= $(CROSS_COMPILE)g++
 ifeq ($(origin CXX),default)
-    CXX := g++
+    CXX := $(CROSS_COMPILE)g++
 else
     $(call fn_check_not_empty,CXX)
 endif
 
 # AR
-AR ?= ar
+AR ?= $(CROSS_COMPILE)ar
 ifeq ($(origin AR),default)
-    AR := ar
+    AR := $(CROSS_COMPILE)ar
 else
     $(call fn_check_not_empty,AR)
 endif
@@ -114,13 +114,13 @@ ifneq ($(SRC_FILES),)
 
     ifeq ($(cpb_include_toolchain_mk_is_cpp_project),)
         # Pure C project
-        cpb_include_toolchain_mk_ld := gcc
+        cpb_include_toolchain_mk_ld := $(CROSS_COMPILE)gcc
     else
         # C/C++ project
-        cpb_include_toolchain_mk_ld := g++
+        cpb_include_toolchain_mk_ld := $(CROSS_COMPILE)g++
     endif
 else
-    cpb_include_toolchain_mk_ld := gcc
+    cpb_include_toolchain_mk_ld := $(CROSS_COMPILE)gcc
 endif
 
 LD ?= $(cpb_include_toolchain_mk_ld)
@@ -196,33 +196,25 @@ ifneq ($(SRC_FILES),)
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 BUILD_DEPS += --cpb_include_toolchain_mk_pre_build_check $(O_BUILD_DIR)/$(ARTIFACT)
 
-.PHONY: --cpb_include_toolchain_mk_pre_build_check
---cpb_include_toolchain_mk_pre_build_check:
-    ifneq ($(HOST),$(NATIVE_HOST))
-        ifeq ($(origin CROSS_COMPILE),undefined)
-	        $(error [CROSS_COMPILE] Missing value for HOST $(HOST))
-        endif
-    endif
-
 $(O_BUILD_DIR)/$(ARTIFACT): $(cpb_include_toolchain_mk_obj_files)
     ifeq ($(PROJ_TYPE),lib)
         ifeq ($(LIB_TYPE),shared)
 	        $(call fn_log_cmd,$(V),[LD] $@)
-	        $(V_PREFIX)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_include_toolchain_mk_obj_files) $(LDFLAGS))
+	        $(V_PREFIX)$(LD) $(strip -o $@ $(cpb_include_toolchain_mk_obj_files) $(LDFLAGS))
         else ifeq ($(LIB_TYPE),static)
 	        $(call fn_log_cmd,$(V),[AR] $@)
-	        $(V_PREFIX)$(CROSS_COMPILE)$(AR) $(strip $(ARFLAGS) $@ $(cpb_include_toolchain_mk_obj_files))
+	        $(V_PREFIX)$(AR) $(strip $(ARFLAGS) $@ $(cpb_include_toolchain_mk_obj_files))
         endif
     else ifeq ($(PROJ_TYPE),app)
 	    $(call fn_log_cmd,$(V),[LD] $@)
-	    $(V_PREFIX)$(CROSS_COMPILE)$(LD) $(strip -o $@ $(cpb_include_toolchain_mk_obj_files) $(LDFLAGS))
+	    $(V_PREFIX)$(LD) $(strip -o $@ $(cpb_include_toolchain_mk_obj_files) $(LDFLAGS))
     endif
 
 # C sources --------------------------------------------------------------------
 $(O_BUILD_DIR)/%.c$(cpb_include_toolchain_mk_obj_suffix): %.c
 	$(call fn_log_cmd,$(V),[CC] $@)
 	@mkdir -p $(dir $@)
-	$(V_PREFIX)$(CROSS_COMPILE)$(CC) $(strip $(CFLAGS) -c $< -o $@)
+	$(V_PREFIX)$(CC) $(strip $(CFLAGS) -c $< -o $@)
 # ------------------------------------------------------------------------------
 
 # C++ sources ------------------------------------------------------------------
@@ -230,7 +222,7 @@ define cpb_include_toolchain_mk_cxx_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_include_toolchain_mk_obj_suffix): %.$(1)
 	$$(call fn_log_cmd,$$(V),[CXX] $$@)
 	@mkdir -p $$(dir $$@)
-	$(V_PREFIX)$(CROSS_COMPILE)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
+	$(V_PREFIX)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
 endef
 
 $(eval $(call cpb_include_toolchain_mk_cxx_template,cpp))
@@ -243,7 +235,7 @@ define cpb_include_toolchain_mk_as_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_include_toolchain_mk_obj_suffix): %.$(1)
 	$$(call fn_log_cmd,$$(V),[AS] $$@)
 	@mkdir -p $$(dir $$@)
-	$(V_PREFIX)$(CROSS_COMPILE)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
+	$(V_PREFIX)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
 endef
 
 $(eval $(call cpb_include_toolchain_mk_as_template,s))
