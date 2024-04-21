@@ -59,8 +59,8 @@ $(call fn_check_options,PROJ_TYPE,app lib)
 
 # Project version --------------------------------------------------------------
 ifdef PROJ_VERSION
-    $(call fn_check_not_empty,PROJ_TYPE)
-    $(call fn_check_origin,PROJ_TYPE,file)
+    $(call fn_check_not_empty,PROJ_VERSION)
+    $(call fn_check_origin,PROJ_VERSION,file)
     PROJ_VERSION := $(call fn_semver,$(PROJ_VERSION),[PROJ_VERSION] Invalid value: $(PROJ_VERSION))
 endif
 # ------------------------------------------------------------------------------
