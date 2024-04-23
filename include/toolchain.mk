@@ -46,7 +46,7 @@ $(call fn_check_reserved,cpb_include_toolchain_mk_fn_dist_adjust_file_entry)
 $(call fn_check_reserved,cpb_include_toolchain_mk_dist_deps_template)
 $(call fn_check_reserved,cpb_include_toolchain_mk_dist_deps)
 
-VARS += LIBS STRIP_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS LIBS_FLAGS
+VARS += CUSTOM_BUILD LIBS STRIP_RELEASE RELEASE_OPTIMIZATION_LEVEL CROSS_COMPILE AS ASFLAGS CC CFLAGS CXX CXXFLAGS AR ARFLAGS LD LDFLAGS LIBS_FLAGS
 
 # Strips release build ---------------------------------------------------------
 # NOTE: A host layer may have set STRIP_RELEASE
@@ -192,6 +192,12 @@ else ifeq ($(PROJ_TYPE),app)
     cpb_include_toolchain_mk_dep_files := $(cpb_include_toolchain_mk_obj_files:.o=.d)
 endif
 
+CUSTOM_BUILD ?= 0
+$(call fn_check_not_empty,CUSTOM_BUILD)
+$(call fn_check_options,CUSTOM_BUILD,0 1)
+$(call fn_check_origin,CUSTOM_BUILD,file)
+
+ifeq ($(CUSTOM_BUILD),0)
 ifneq ($(SRC_FILES),)
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 BUILD_DEPS += $(O_BUILD_DIR)/$(ARTIFACT)
@@ -244,7 +250,8 @@ $(eval $(call cpb_include_toolchain_mk_as_template,S))
 
 -include $(cpb_include_toolchain_mk_dep_files)
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-endif
+endif # ifneq ($(SRC_FILES),)
+endif # ifeq ($(CUSTOM_BUILD),0)
 # ==============================================================================
 
 endif # ifndef cpb_include_toolchain_mk
