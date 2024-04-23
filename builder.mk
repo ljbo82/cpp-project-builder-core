@@ -170,8 +170,8 @@ SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
 # NOTE: A second filter-out is required due to files contained in SRC_DIRS
 SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(SRC_FILES))
 
-$(foreach srcDir,$(SRC_DIRS),$(if $(call fn_is_inside_dir,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Directory outside project root directory: '$(srcDir)')))
-$(foreach srcFile,$(SRC_FILES),$(if $(call fn_is_inside_dir,$(CURDIR),$(dir $(srcFile))),,$(error [SRC_FILES] File outside project root directory: '$(srcFile)')))
+$(foreach srcDir,$(SRC_DIRS),$(if $(wildcard $(srcDir)),$(if $(call fn_is_inside_dir,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Directory outside project root directory: '$(srcDir)')),$(error [SRC_DIRS] No such directory: '$(srcDir)')))
+$(foreach srcFile,$(SRC_FILES),$(if $(wildcard $(srcFile)),$(if $(call fn_is_inside_dir,$(CURDIR),$(dir $(srcFile))),,$(error [SRC_FILES] File outside project root directory: '$(srcFile)')),$(error [SRC_FILES] No such file: '$(srcFile)')))
 
 # Checks if any SRC_DIR or SRC_FILE is outside CURDIR
 cpb_builder_mk_src_file_filter := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
