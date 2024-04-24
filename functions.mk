@@ -172,7 +172,7 @@ fn_semver = $(if $(shell echo $(1) | grep -E '^[0-9]+(\.[0-9]+){$(cpb_functions_
 # Syntax: $(call fn_semver_check_compat,minVersion,version,[errorMessage])
 $(call fn_check_reserved,fn_semver_check_compat)
 $(call fn_check_reserved,fn_semver_check_compat_cmp)
-fn_semver_check_compat = $(eval fn_semver_check_compat_cmp := $(call fn_semver_cmp,$(2),$(1)))$(if $(or $(call fn_eq,$(fn_semver_check_compat_cmp),0),$(call fn_eq,$(fn_semver_check_compat_cmp),1)),,$(error $(if $(3),$(3),[fn_semver_check_compat] Tested version is not compatible: $(2) (version should be $(1)+))))
+fn_semver_check_compat = $(eval fn_semver_check_compat_cmp := $(call fn_semver_cmp,$(1),$(2)))$(if $(or $(call fn_eq,$(fn_semver_check_compat_cmp),0),$(call fn_eq,$(fn_semver_check_compat_cmp),-1),$(call fn_eq,$(fn_semver_check_compat_cmp),-2)),,$(error $(if $(3),$(3),[fn_semver_check_compat] Tested version is not compatible: $(2) (version should be $(1)+))))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
