@@ -41,6 +41,14 @@ fn_check_origin = $(if $(call fn_eq,$(origin $(1)),$(2)),,$(error $(if $(3),$(3)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+# Ensures the origin of an variable.
+#
+# Syntax: $(call fn_check_not_origin,varName,forbiddenOrigin,[errorMessage])
+$(call fn_check_reserved,fn_check_not_origin)
+fn_check_not_origin = $(if $(call fn_eq,$(origin $(1)),$(2)),$(error $(if $(3),$(3),[$(1)] Forbidden origin: "$(origin $(1))")),)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # Ensures the contents of a variable is one among a list of accepted values.
 #
 # Syntax: $(call fn_check_options,varName,acceptedOptions,[errorMessage])

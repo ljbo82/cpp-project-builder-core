@@ -50,8 +50,8 @@ else
         endif
 
         ifneq ($(SRC_FILES),)
-            override LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
-            override LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
+            LDFLAGS += -Wl,--out-implib,$(O_BUILD_DIR)/$(ARTIFACT).lib
+            LDFLAGS += -Wl,--output-def,$(O_BUILD_DIR)/$(ARTIFACT).def
             DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).lib:lib/$(ARTIFACT).lib
             DIST_FILES += $(O_BUILD_DIR)/$(ARTIFACT).def:lib/$(ARTIFACT).def
         endif

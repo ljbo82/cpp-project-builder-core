@@ -71,7 +71,7 @@ endif
 # ------------------------------------------------------------------------------
 
 # Compiler management ----------------------------------------------------------
-override ARFLAGS := $(subst v,,$(subst r,,$(ARFLAGS)))
+ARFLAGS := $(subst v,,$(subst r,,$(ARFLAGS)))
 
 # AS
 AS ?= $(CROSS_COMPILE)as
@@ -79,6 +79,7 @@ ifeq ($(origin AS),default)
     AS := $(CROSS_COMPILE)as
 else
     $(call fn_check_not_empty,AS)
+    $(call fn_check_not_origin,AS,command line)
 endif
 
 # CC
@@ -87,6 +88,7 @@ ifeq ($(origin CC),default)
     CC := $(CROSS_COMPILE)gcc
 else
     $(call fn_check_not_empty,CC)
+    $(call fn_check_not_origin,CC,command line)
 endif
 
 # CXX
@@ -95,6 +97,7 @@ ifeq ($(origin CXX),default)
     CXX := $(CROSS_COMPILE)g++
 else
     $(call fn_check_not_empty,CXX)
+    $(call fn_check_not_origin,CXX,command line)
 endif
 
 # AR
@@ -103,6 +106,7 @@ ifeq ($(origin AR),default)
     AR := $(CROSS_COMPILE)ar
 else
     $(call fn_check_not_empty,AR)
+    $(call fn_check_not_origin,AR,command line)
 endif
 
 # LD
@@ -128,6 +132,7 @@ ifeq ($(origin LD),default)
     LD := $(cpb_include_toolchain_mk_ld)
 else
     $(call fn_check_not_empty,LD)
+    $(call fn_check_not_origin,LD,command line)
 endif
 
 cpb_include_toolchain_mk_cflags += -Wall
@@ -160,11 +165,17 @@ endif
 
 cpb_include_toolchain_mk_include_flags := $(strip $(foreach includeDir,$(INCLUDE_DIRS),-I$(includeDir)))
 
-override CFLAGS   := $(strip $(call fn_unique,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_cflags) $(CFLAGS)))
-override CXXFLAGS := $(strip $(call fn_unique,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_cxxflags) $(CXXFLAGS)))
-override ASFLAGS  := $(strip $(call fn_unique,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_asflags) $(ASFLAGS)))
-override ARFLAGS  := $(strip $(call fn_unique,rcs $(ARFLAGS)))
-override LDFLAGS  := $(strip $(call fn_unique,$(cpb_include_toolchain_mk_ldflags) $(LDFLAGS)) $(LIBS_FLAGS))
+CFLAGS   := $(strip $(call fn_unique,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_cflags) $(CFLAGS)))
+CXXFLAGS := $(strip $(call fn_unique,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_cxxflags) $(CXXFLAGS)))
+ASFLAGS  := $(strip $(call fn_unique,-MMD -MP $(cpb_include_toolchain_mk_include_flags) $(cpb_include_toolchain_mk_asflags) $(ASFLAGS)))
+ARFLAGS  := $(strip $(call fn_unique,rcs $(ARFLAGS)))
+LDFLAGS  := $(strip $(call fn_unique,$(cpb_include_toolchain_mk_ldflags) $(LDFLAGS)) $(LIBS_FLAGS))
+
+$(call fn_check_not_origin,CFLAGS,command line)
+$(call fn_check_not_origin,CXXFLAGS,command line)
+$(call fn_check_not_origin,ASFLAGS,command line)
+$(call fn_check_not_origin,ARFLAGS,command line)
+$(call fn_check_not_origin,LDFLAGS,command line)
 # ------------------------------------------------------------------------------
 
 # build ========================================================================
