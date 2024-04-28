@@ -44,14 +44,15 @@ ifeq ($(PROJ_TYPE),lib)
         endif
     endif
 
-    # TODO: How to handle a scenario of a lib project calling a sub-make
-    #     (which depens on lib project) in order to build and run a test app
-    #     project.
-    ifneq ($(filter $(LIB_NAME),$(cpb_include_libs_mk_lib_chain)),)
-        $(error Detected circular reference for project "$(LIB_NAME)" ($(foreach lib,$(cpb_include_libs_mk_lib_chain),$(lib) ->) $(LIB_NAME)))
+    # Allows a scenario where a lib project calls a sub-make to run a
+    # test application (which in turn depends on lib project itself)
+    ifneq ($(sort $(words $(cpb_include_libs_mk_lib_chain))),1)
+        ifneq ($(filter $(PROJ_NAME),$(cpb_include_libs_mk_lib_chain)),)
+            $(error Detected circular reference for project "$(PROJ_NAME)" ($(foreach lib,$(cpb_include_libs_mk_lib_chain),$(lib) ->) $(PROJ_NAME)))
+        endif
     endif
 
-    export cpb_include_libs_mk_lib_chain += $(LIB_NAME)
+    export cpb_include_libs_mk_lib_chain += $(PROJ_NAME)
 endif
 # ------------------------------------------------------------------------------
 
