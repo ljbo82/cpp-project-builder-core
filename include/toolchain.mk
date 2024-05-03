@@ -71,6 +71,10 @@ endif
 # ------------------------------------------------------------------------------
 
 # Compiler management ----------------------------------------------------------
+ifdef CROSS_COMPILE
+    $(call fn_check_not_origin,CROSS_COMPILE,command line)
+endif
+
 ARFLAGS := $(subst v,,$(subst r,,$(ARFLAGS)))
 
 # AS
