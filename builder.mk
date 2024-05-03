@@ -54,7 +54,7 @@ $(call fn_check_no_whitespace,PROJ_NAME)
 $(call fn_check_not_empty,PROJ_TYPE)
 $(call fn_check_origin,PROJ_TYPE,file)
 $(call fn_check_no_whitespace,PROJ_TYPE)
-$(call fn_check_options,PROJ_TYPE,app lib)
+$(call fn_check_options,PROJ_TYPE,app lib custom)
 # ------------------------------------------------------------------------------
 
 # Project version --------------------------------------------------------------
@@ -217,7 +217,7 @@ all: dist ;
 # ==============================================================================
 
 # print-vars ===================================================================
-VARS += PROJ_NAME PROJ_TYPE PROJ_VERSION LIB_NAME BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS
+VARS += PROJ_NAME PROJ_TYPE PROJ_VERSION LIB_NAME BUILD_SUBDIR O_BUILD_DIR DIST_SUBDIR O_DIST_DIR SRC_DIRS HOSTS_DIRS LIB_TYPE ARTIFACT SKIPPED_SRC_DIRS SKIPPED_SRC_FILES SRC_FILES INCLUDE_DIRS POST_INCLUDES POST_EVAL PRE_CLEAN_DEPS POST_CLEAN_DEPS PRE_CLEAN_ALL_DEPS POST_CLEAN_ALL_DEPS PRE_BUILD_DEPS BUILD_DEPS POST_BUILD_DEPS DIST_MARKER DIST_DIRS DIST_FILES PRE_DIST_DEPS POST_DIST_DEPS
 override VARS := $(sort $(VARS))
 $(call fn_check_not_empty,VARS)
 

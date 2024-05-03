@@ -37,8 +37,7 @@ ifeq ($(PROJ_TYPE),app)
     ifndef ARTIFACT
         ARTIFACT := $(PROJ_NAME).exe
     endif
-else
-    # $(PROJ_TYPE) is equal lib
+else ifeq ($(PROJ_TYPE),lib)
     LIB_TYPE ?= shared
     ifeq ($(LIB_TYPE),static)
         ifndef ARTIFACT
