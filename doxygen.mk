@@ -26,12 +26,12 @@ include $(dir $(cpb_doxygen_mk))functions.mk
 include $(dir $(cpb_doxygen_mk))include/common.mk
 
 # Doc src/output directories----------------------------------------------------
-ifdef DOC_DIR
-    $(call fn_check_not_empty,DOC_DIR)
-    $(call fn_check_no_whitespace,DOC_DIR)
-    $(call fn_check_origin,DOC_DIR,file)
+ifdef O_DOC_DIR
+    $(call fn_check_not_empty,O_DOC_DIR)
+    $(call fn_check_no_whitespace,O_DOC_DIR)
+    $(call fn_check_origin,O_DOC_DIR,file)
 else
-    DOC_DIR ?= $(O_BASE)/doc
+    O_DOC_DIR ?= $(O_BASE)/doc
 endif
 # ------------------------------------------------------------------------------
 
@@ -48,7 +48,7 @@ define cpb_doxygen_mk_new_line
 
 endef
 
-DOXYVARS += \nOUTPUT_DIRECTORY = \"$(DOC_DIR)\"\n
+DOXYVARS += \nOUTPUT_DIRECTORY = \"$(O_DOC_DIR)\"\n
 DOXYVARS := $(subst \$(cpb_doxygen_mk_new_line),\\\n,$(DOXYVARS))
 DOXYVARS := $(subst $(cpb_doxygen_mk_new_line),\n,$(DOXYVARS))
 
@@ -71,7 +71,7 @@ endif
     ifeq ($(wildcard $(DOXYFILE)),)
 	    $(error [DOXYFILE] File not found: $(DOXYFILE))
     else
-	    @mkdir -p $(DOC_DIR)
+	    @mkdir -p $(O_DOC_DIR)
 	    $(V_PREFIX)(cat $(DOXYFILE); printf "$(DOXYVARS)\n") | doxygen -
     endif
 
@@ -83,6 +83,6 @@ doc: --cpb_doxygen_mk_post_doc ;
 # ==============================================================================
 
 # Exports default variable set for print-vars
-VARS += DOC_DIR DOXYFILE DOXYVARS PRE_DOC_DEPS POST_DOC_DEPS
+VARS += O_DOC_DIR DOXYFILE DOXYVARS PRE_DOC_DEPS POST_DOC_DEPS
 
 endif # ifndef cpb_doxygen_mk
