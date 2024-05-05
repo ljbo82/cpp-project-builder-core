@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# TODO MIN_DOXYGEN_VERSION ?
+
 # Doxygen support
 ifndef cpb_doxygen_mk
 cpb_doxygen_mk := $(lastword $(MAKEFILE_LIST))
