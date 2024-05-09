@@ -86,11 +86,16 @@ else
     O := $(O_BASE)/$(HOST)/$(if $(call fn_eq,$(DEBUG),0),release,debug)
 endif
 
-$(if $(call fn_is_inside_dir,$(O_BASE),$(O)),,$(error [O] Output dir is outside O_BASE: O=$(O), O_BASE=$(O_BASE)))
+ifeq ($(realpath $(O_BASE)),$(CURDIR))
+    $(error [O_BASE] Project root cannot be used as output base directory)
+endif
 
 ifeq ($(realpath $(O)),$(CURDIR))
     $(error [O] Project root cannot be used as output directory)
 endif
+
+$(if $(call fn_is_inside_dir,$(O_BASE),$(O)),,$(error [O] Output dir is outside O_BASE: O=$(O), O_BASE=$(O_BASE)))
+
 # ------------------------------------------------------------------------------
 
 # Enable/Disable verbose mode --------------------------------------------------
