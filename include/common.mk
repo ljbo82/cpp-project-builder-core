@@ -86,6 +86,9 @@ else
     O := $(O_BASE)/$(HOST)/$(if $(call fn_eq,$(DEBUG),0),release,debug)
 endif
 
+$(call fn_check_not_empty,O_BASE)
+$(call fn_check_no_whitespace,O_BASE)
+
 ifeq ($(realpath $(O_BASE)),$(CURDIR))
     $(error [O_BASE] Project root cannot be used as output base directory)
 endif
