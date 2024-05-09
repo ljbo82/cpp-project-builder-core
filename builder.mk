@@ -102,6 +102,7 @@ endif
 # ------------------------------------------------------------------------------
 
 # Default include & source directories -----------------------------------------
+ifneq ($(PROJ_TYPE),custom)
 ifdef SRC_DIRS
     $(call fn_check_origin,SRC_DIRS,file)
 else ifdef SRC_FILES
@@ -121,6 +122,7 @@ else
         endif
     endif
 endif
+endif #ifneq ($(PROJ_TYPE),custom)
 # ------------------------------------------------------------------------------
 
 # Process host layers ----------------------------------------------------------
@@ -241,7 +243,7 @@ endif
 .PHONY: --cpb_builder_mk_clean
 --cpb_builder_mk_clean: --cpb_builder_mk_pre_clean
 	$(V_PREFIX)rm -rf $(O)
-	$(V_PREFIX)[ -d $(O_BASE) ] && rmdir --ignore-fail-on-non-empty $(O_BASE)/* || true
+	$(V_PREFIX)[ -d $(O_BASE) ] && rmdir --ignore-fail-on-non-empty $(O_BASE)/* > /dev/null 2>&1|| true
 	$(V_PREFIX)[ -d $(O_BASE) ] && rmdir --ignore-fail-on-non-empty $(O_BASE) || true
 
 .PHONY: --cpb_builder_mk_post_clean
