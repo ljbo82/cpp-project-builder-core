@@ -229,10 +229,10 @@ print-vars:
 
 # clean & clean-all ============================================================
 # clean ------------------------------------------------------------------------
-ifdef PRE_CLEAN_ALL_DEPS
+ifdef PRE_CLEAN_DEPS
     $(call fn_check_origin,PRE_CLEAN_DEPS,file)
 endif
-ifdef POST_CLEAN_ALL_DEPS
+ifdef POST_CLEAN_DEPS
     $(call fn_check_origin,POST_CLEAN_DEPS,file)
 endif
 .PHONY: --cpb_builder_mk_pre_clean
