@@ -77,15 +77,16 @@ $(call fn_check_no_whitespace,HOST)
 # ------------------------------------------------------------------------------
 
 # Output directory -------------------------------------------------------------
-$(call fn_check_reserved,O_BASE)
 ifdef O
     $(call fn_check_not_empty,O)
     $(call fn_check_no_whitespace,O)
-    O_BASE := $(O)
+    O_BASE ?= $(O)
 else
-    O_BASE := output
+    O_BASE ?= output
     O := $(O_BASE)/$(HOST)/$(if $(call fn_eq,$(DEBUG),0),release,debug)
 endif
+
+$(if $(call fn_is_inside_dir,$(O_BASE),$(O)),,$(error [O] Output dir is outside O_BASE: O=$(O), O_BASE=$(O_BASE)))
 
 ifeq ($(realpath $(O)),$(CURDIR))
     $(error [O] Project root cannot be used as output directory)
