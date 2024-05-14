@@ -20,10 +20,6 @@
 
 # Common definitions
 
-ifndef cpb_functions_mk
-    $(error This file cannot be manually included)
-endif
-
 ifndef cpb_include_common_mk
 cpb_include_common_mk := $(lastword $(MAKEFILE_LIST))
 
