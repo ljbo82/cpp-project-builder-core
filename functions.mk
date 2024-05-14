@@ -23,12 +23,59 @@
 ifndef cpb_functions_mk
 cpb_functions_mk := $(lastword $(MAKEFILE_LIST))
 
+# == [Checking terminal capabilities] ==========================================
+# ------------------------------------------------------------------------------
+$(if $(cpb_functions_mk_check_reserved),$(error [cpb_functions_mk_check_reserved] Reserved variable))
+cpb_functions_mk_check_reserved = $(if $($(1)),$(error $(if $(2),$(2),[$(1)] Reserved variable)))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+$(call cpb_functions_mk_check_reserved,cpb_functions_mk_term_support_colors)
+cpb_functions_mk_term_support_colors := $(shell tput colors 2> /dev/null)
+ifneq ($(cpb_functions_mk_term_support_colors),)
+    ifneq ($(cpb_functions_mk_term_support_colors),0)
+        cpb_functions_mk_term_support_colors := 1
+    else
+        cpb_functions_mk_term_support_colors :=
+    endif
+endif
+# ------------------------------------------------------------------------------
+# ==============================================================================
+
+# = [Text functions] ===========================================================
+# ------------------------------------------------------------------------------
+#Generate a colored string.
+#
+# Syntax: $(call fn_text,[ansiColor],msg)
+$(call cpb_functions_mk_check_reserved,fn_text)
+fn_text = $(shell printf "$(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[$(1)m,)$(subst ",\",$(2))$(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[0m,)")
+# ------------------------------------------------------------------------------
+# ==============================================================================
+
+# == [Miscellaneous functions] ===========================================================
+# ------------------------------------------------------------------------------
+# Logs a warning message.
+#
+# Syntax: $(call fn_warning,message)
+$(call cpb_functions_mk_check_reserved,fn_warning)
+fn_warning = $(warning $(call fn_text,93,$(1)))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# Logs an error and raises a fault.
+#
+# Syntax: $(call fn_error,message)
+$(call cpb_functions_mk_check_reserved,fn_error)
+fn_error = $(error $(call fn_text,91,$(1)))
+# ------------------------------------------------------------------------------
+# ==============================================================================
+
 # == [Validations] =============================================================
 # ------------------------------------------------------------------------------
 # Ensures a variable is not defined until the call the function.
 #
 # Syntax: $(call fn_check_reserved,varName,[errorMessage])
-$(if $(fn_check_reserved),$(call fn_error,[fn_check_reserved] Reserved variable))
+$(call cpb_functions_mk_check_reserved,fn_check_reserved)
 fn_check_reserved = $(if $($(1)),$(call fn_error,$(if $(2),$(2),[$(1)] Reserved variable)))
 # ------------------------------------------------------------------------------
 
@@ -80,18 +127,18 @@ cpb_functions_mk_split_prefix := __?__
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-$(call fn_check_reserved,cpb_functions_mk_comma)
-cpb_functions_mk_comma :=,
+$(call fn_check_reserved,comma)
+comma :=,
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-$(call fn_check_reserved,cpb_functions_mk_empty)
-cpb_functions_mk_empty :=
+$(call fn_check_reserved,empty)
+empty :=
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-$(call fn_check_reserved,cpb_functions_mk_space)
-cpb_functions_mk_space := $(cpb_functions_mk_empty) $(cpb_functions_mk_empty)
+$(call fn_check_reserved,space)
+space := $(empty) $(empty)
 # ------------------------------------------------------------------------------
 # ==============================================================================
 
@@ -130,24 +177,6 @@ fn_split = $(subst $(2), $(if $(3),$(3),$(cpb_functions_mk_split_prefix)),$(if $
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-#Generate a colored string.
-#
-# Syntax: $(call fn_text,[ansiColor],msg)
-$(call fn_check_reserved,cpb_functions_mk_term_support_colors)
-$(call fn_check_reserved,fn_text)
-cpb_functions_mk_term_support_colors := $(shell tput colors 2> /dev/null)
-ifneq ($(cpb_functions_mk_term_support_colors),)
-    ifneq ($(cpb_functions_mk_term_support_colors),0)
-        cpb_functions_mk_term_support_colors := 1
-    else
-        cpb_functions_mk_term_support_colors :=
-    endif
-endif
-
-fn_text = $(shell printf "$(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[$(1)m,)$(subst ",\",$(2))$(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[0m,)")
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
 # Returns a token on delimited word (i.e. explodes the word into a list of words and returns a word of generated list).
 #
 # Syntax: $(call fn_token,delimitedWord,delimiter,index)
@@ -171,7 +200,7 @@ fn_unique = $(strip $(if $(1),$(firstword $(1)) $(call fn_unique,$(filter-out $(
 # Syntax: $(call fn_semver,semanticVersion,[errorMessage])
 $(call fn_check_reserved,fn_semver)
 $(call fn_check_reserved,cpb_functions_mk_semver_val)
-fn_semver = $(if $(shell echo $(1) | grep -E '^[0-9]+(\.[0-9]+){$(cpb_functions_mk_comma)2}(\-[A-Za-z0-9_\.\-]+)*$$'),$(1),$(call fn_error,$(if $(2),$(2),[fn_semver] Invalid semantic version: '$(1)')))
+fn_semver = $(if $(shell echo $(1) | grep -E '^[0-9]+(\.[0-9]+){$(comma)2}(\-[A-Za-z0-9_\.\-]+)*$$'),$(1),$(call fn_error,$(if $(2),$(2),[fn_semver] Invalid semantic version: '$(1)')))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -242,7 +271,7 @@ fn_semver_patch = $ $(word 1,$(subst -, ,$(call cpb_functions_mk_semver_token,$(
 #
 # Syntax: $(call fn_semver_metadata,semanticVersion)
 $(call fn_check_reserved,fn_semver_metadata)
-fn_semver_metadata = $(subst $(cpb_functions_mk_space),-,$(wordlist 2,1000,$(subst -, ,$(call fn_semver,$(1)))))
+fn_semver_metadata = $(subst $(space),-,$(wordlist 2,1000,$(subst -, ,$(call fn_semver,$(1)))))
 # ------------------------------------------------------------------------------
 # ==============================================================================
 
@@ -304,19 +333,4 @@ fn_shell = $(shell $(1))$(if $(call fn_eq,$(.SHELLSTATUS),0),,$(call fn_error,$(
 # ------------------------------------------------------------------------------
 # ==============================================================================
 
-# == [Log functions] ===========================================================
-# ------------------------------------------------------------------------------
-# Logs a warning message.
-#
-# Syntax: $(call fn_warning,message)
-fn_warning = $(warning $(call fn_text,93,$(1)))
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-# Logs an error and raises a fault.
-#
-# Syntax: $(call fn_error,message)
-fn_error = $(error $(call fn_text,91,$(1)))
-# ------------------------------------------------------------------------------
-# ==============================================================================
 endif # ifndef cpb_functions_mk
