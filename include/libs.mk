@@ -68,41 +68,41 @@ endif
 define cpb_include_libs_mk_lib_template
 # ******************************************************************************
 $$(if $(1),,$$(call fn_error,[LIBS] Missing library name in entry: '$(4)'))
-$$(if $$(and $(2),$(LIB_MKDIR_$(1))),$$(call fn_error,[LIB_MKDIR_$(1)] Value redefinition),)
-$$(if $$(and $(3),$(LIB_MAKEFILE_$(1))),$$(call fn_error,[LIB_MAKEFILE_$(1)] Value redefinition),)
+$$(if $$(and $(2),$(LIB_MKDIR[$(1)])),$$(call fn_error,[LIB_MKDIR[$(1)]] Value redefinition),)
+$$(if $$(and $(3),$(LIB_MAKEFILE[$(1)])),$$(call fn_error,[LIB_MAKEFILE[$(1)]] Value redefinition),)
 
-LIB_MAKEFILE_$(1) ?= $(3)
-ifneq ($$(LIB_MAKEFILE_$(1)),)
-    $$(call fn_check_origin,LIB_MAKEFILE_$(1),file)
-    LIB_MKFLAGS_$(1) := -f $$(LIB_MAKEFILE_$(1)) $$(LIB_MKFLAGS_$(1))
+LIB_MAKEFILE[$(1)] ?= $(3)
+ifneq ($$(LIB_MAKEFILE[$(1)]),)
+    $$(call fn_check_origin,LIB_MAKEFILE[$(1)],file)
+    LIB_MKFLAGS[$(1)] := -f $$(LIB_MAKEFILE[$(1)]) $$(LIB_MKFLAGS[$(1)])
 endif
 
-LIB_MKDIR_$(1) ?= $(2)
-ifneq ($$(LIB_MKDIR_$(1)),)
-    $$(call fn_check_origin,LIB_MKDIR_$(1),file)
-    LIB_MKFLAGS_$(1) := -C $$(LIB_MKDIR_$(1)) $$(LIB_MKFLAGS_$(1))
+LIB_MKDIR[$(1)] ?= $(2)
+ifneq ($$(LIB_MKDIR[$(1)]),)
+    $$(call fn_check_origin,LIB_MKDIR[$(1)],file)
+    LIB_MKFLAGS[$(1)] := -C $$(LIB_MKDIR[$(1)]) $$(LIB_MKFLAGS[$(1)])
 endif
 
-LIB_MKFLAGS_$(1) := $$(strip $$(LIB_MKFLAGS_$(1)))
+LIB_MKFLAGS[$(1)] := $$(strip $$(LIB_MKFLAGS[$(1)]))
 
 ifneq ($$(filter -l$(1),$$(cpb_include_libs_mk_ldflags)),)
     $$(call fn_error,[LIBS] Duplicate library definition: '$(1)')
 endif
 cpb_include_libs_mk_ldflags += -l$(1)
 
-ifneq ($$(or $$(LIB_MKDIR_$(1)),$$(LIB_MAKEFILE_$(1))),)
+ifneq ($$(or $$(LIB_MKDIR[$(1)]),$$(LIB_MAKEFILE[$(1)])),)
 # ------------------------------------------------------------------------------
 cpb_include_libs_mk_has_lib_to_build := 1
-cpb_include_libs_mk_ldflags += $$$$($$(MAKE) --no-print-directory $$(strip $$(LIB_MKFLAGS_$(1))) -- --cpb-show-libs)
+cpb_include_libs_mk_ldflags += $$$$($$(MAKE) --no-print-directory $$(strip $$(LIB_MKFLAGS[$(1)])) -- --cpb-show-libs)
 
-LIB_MKFLAGS_$(1) := $$(LIB_MKFLAGS_$(1)) O=$$(call fn_rel_dir,$$(LIB_MKDIR_$(1)),$$(O_LIBS_DIR)) BUILD_SUBDIR=$(1) DIST_MARKER=.$(1)
+LIB_MKFLAGS[$(1)] := $$(LIB_MKFLAGS[$(1)]) O=$$(call fn_rel_dir,$$(LIB_MKDIR[$(1)]),$$(O_LIBS_DIR)) BUILD_SUBDIR=$(1) DIST_MARKER=.$(1)
 PRE_BUILD_DEPS += $$(O_LIBS_DIR)/.$(1)
 
 # ==============================================================================
 .PHONY: --cpb-lib-$(1)
 --cpb-lib-$(1):
 	$$(call fn_log_cmd,$$(V),[LIB] $(1))
-	$$(V_PREFIX)$$(MAKE) $$(LIB_MKFLAGS_$(1))
+	$$(V_PREFIX)$$(MAKE) $$(LIB_MKFLAGS[$(1)])
 
 $$(O_LIBS_DIR)/.$(1): --cpb-lib-$(1) ;
 # ==============================================================================
