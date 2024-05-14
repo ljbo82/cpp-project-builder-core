@@ -49,7 +49,7 @@ $(call fn_semver_check_compat,$(cpb_include_common_mk_min_make_version),$(cpb_in
 # Only one target per make call ------------------------------------------------
 ifneq ($(words $(MAKECMDGOALS)),0)
     ifneq ($(words $(MAKECMDGOALS)),1)
-        $(error Only one target can be called per time)
+        $(call fn_error,Only one target can be called per time)
     endif
 endif
 # ------------------------------------------------------------------------------
@@ -86,14 +86,14 @@ $(call fn_check_not_empty,O_BASE)
 $(call fn_check_no_whitespace,O_BASE)
 
 ifeq ($(realpath $(O_BASE)),$(CURDIR))
-    $(error [O_BASE] Project root cannot be used as output base directory)
+    $(call fn_error,[O_BASE] Project root cannot be used as output base directory)
 endif
 
 ifeq ($(realpath $(O)),$(CURDIR))
-    $(error [O] Project root cannot be used as output directory)
+    $(call fn_error,[O] Project root cannot be used as output directory)
 endif
 
-$(if $(call fn_is_inside_dir,$(O_BASE),$(O)),,$(error [O] Output dir is outside O_BASE: O=$(O), O_BASE=$(O_BASE)))
+$(if $(call fn_is_inside_dir,$(O_BASE),$(O)),,$(call fn_error,[O] Output dir is outside O_BASE: O=$(O); O_BASE=$(O_BASE)))
 
 # ------------------------------------------------------------------------------
 

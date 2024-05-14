@@ -21,7 +21,7 @@
 # Library dependency management
 
 ifndef cpb_include_toolchain_mk
-    $(error This file cannot be manually included)
+    $(call fn_error,This file cannot be manually included)
 endif
 
 ifndef cpb_include_libs_mk
@@ -40,7 +40,7 @@ VARS += O_LIBS_DIR
 ifeq ($(PROJ_TYPE),lib)
     ifdef cpb_include_libs_mk_lib_chain
         ifneq ($(origin cpb_include_libs_mk_lib_chain),environment)
-            $(error [cpb_include_libs_mk_lib_chain] Reserved variable)
+            $(call fn_error,[cpb_include_libs_mk_lib_chain] Reserved variable)
         endif
     endif
 
@@ -48,7 +48,7 @@ ifeq ($(PROJ_TYPE),lib)
     # test application (which in turn depends on lib project itself)
     ifneq ($(sort $(words $(cpb_include_libs_mk_lib_chain))),1)
         ifneq ($(filter $(PROJ_NAME),$(cpb_include_libs_mk_lib_chain)),)
-            $(error Detected circular reference for project "$(PROJ_NAME)" ($(foreach lib,$(cpb_include_libs_mk_lib_chain),$(lib) ->) $(PROJ_NAME)))
+            $(call fn_error,Detected circular reference for project '$(PROJ_NAME)' ($(foreach lib,$(cpb_include_libs_mk_lib_chain),$(lib) ->) $(PROJ_NAME)))
         endif
     endif
 
@@ -67,9 +67,9 @@ endif
 # $(call cpb_include_libs_mk_lib_template,libName,libSrcDir,libMakefile,libFullEntry)
 define cpb_include_libs_mk_lib_template
 # ******************************************************************************
-$$(if $(1),,$$(error [LIBS] Missing library name in entry: $(4)))
-$$(if $$(and $(2),$(LIB_MKDIR_$(1))),$$(error [LIB_MKDIR_$(1)] Value redefinition),)
-$$(if $$(and $(3),$(LIB_MAKEFILE_$(1))),$$(error [LIB_MAKEFILE_$(1)] Value redefinition),)
+$$(if $(1),,$$(call fn_error,[LIBS] Missing library name in entry: '$(4)'))
+$$(if $$(and $(2),$(LIB_MKDIR_$(1))),$$(call fn_error,[LIB_MKDIR_$(1)] Value redefinition),)
+$$(if $$(and $(3),$(LIB_MAKEFILE_$(1))),$$(call fn_error,[LIB_MAKEFILE_$(1)] Value redefinition),)
 
 LIB_MAKEFILE_$(1) ?= $(3)
 ifneq ($$(LIB_MAKEFILE_$(1)),)
@@ -86,7 +86,7 @@ endif
 LIB_MKFLAGS_$(1) := $$(strip $$(LIB_MKFLAGS_$(1)))
 
 ifneq ($$(filter -l$(1),$$(cpb_include_libs_mk_ldflags)),)
-    $$(error [LIBS] Duplicate library definition: $(1))
+    $$(call fn_error,[LIBS] Duplicate library definition: '$(1)')
 endif
 cpb_include_libs_mk_ldflags += -l$(1)
 

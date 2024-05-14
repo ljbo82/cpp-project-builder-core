@@ -40,7 +40,7 @@ $(call fn_check_reserved,O_DIST_DIR)
 
 # Checks for whitespace in CWD -------------------------------------------------
 ifneq ($(words $(CURDIR)),1)
-    $(error Current directory ('$(CURDIR)') contains one or more whitespaces)
+    $(call fn_error,Current directory ('$(CURDIR)') contains one or more whitespaces)
 endif
 # ------------------------------------------------------------------------------
 
@@ -81,7 +81,7 @@ endif
 # Build sub-directory ----------------------------------------------------------
 ifneq ($(BUILD_SUBDIR),)
     $(call fn_check_no_whitespace,BUILD_SUBDIR)
-    $(if $(call fn_is_inside_dir,$(CURDIR),$(BUILD_SUBDIR)),,$(error [BUILD_SUBDIR] Invalid path: $(BUILD_SUBDIR)))
+    $(if $(call fn_is_inside_dir,$(CURDIR),$(BUILD_SUBDIR)),,$(call fn_error,[BUILD_SUBDIR] Invalid path: $(BUILD_SUBDIR)))
 endif
 
 O_BUILD_DIR := $(O)/build
@@ -93,7 +93,7 @@ endif
 # Distribution sub-directory ---------------------------------------------------
 ifneq ($(DIST_SUBDIR),)
     $(call fn_check_no_whitespace,DIST_SUBDIR)
-    $(if $(call fn_is_inside_dir,$(CURDIR),$(DIST_SUBDIR)),,$(error [DIST_SUBDIR] Invalid path: $(DIST_SUBDIR)))
+    $(if $(call fn_is_inside_dir,$(CURDIR),$(DIST_SUBDIR)),,$(call fn_error,[DIST_SUBDIR] Invalid path: $(DIST_SUBDIR)))
 endif
 O_DIST_DIR := $(O)/dist
 ifneq ($(DIST_SUBDIR),)
@@ -143,7 +143,7 @@ $(call fn_check_not_empty,ARTIFACT)
 $(call fn_check_no_whitespace,ARTIFACT)
 
 ifneq ($(findstring /,$(ARTIFACT)),)
-    $(error [ARTIFACT] Value cannot have path components: "$(ARTIFACT)")
+    $(call fn_error,[ARTIFACT] Value cannot have path components: "$(ARTIFACT)")
 endif
 # ------------------------------------------------------------------------------
 
@@ -159,12 +159,12 @@ endif
 
 # Checks if a entry was added to included and skipped at the same time
 ifneq ($(filter $(SKIPPED_SRC_DIRS),$(SRC_DIRS)),)
-    $(error [SRC_DIRS][SKIPPED_SRC_DIRS] Value(s) present on both variables: $(filter $(SKIPPED_SRC_DIRS),$(SRC_DIRS)))
+    $(call fn_error,[SRC_DIRS][SKIPPED_SRC_DIRS] Value(s) present on both variables: $(filter $(SKIPPED_SRC_DIRS),$(SRC_DIRS)))
 endif
 
 # Checks if a entry was added to included and skipped at the same time
 ifneq ($(filter $(SKIPPED_SRC_FILES),$(SRC_FILES)),)
-    $(error [SRC_FILES][SKIPPED_SRC_FILES] Value(s) present on both variables: $(filter $(SKIPPED_SRC_FILES),$(SRC_FILES)))
+    $(call fn_error,[SRC_FILES][SKIPPED_SRC_FILES] Value(s) present on both variables: $(filter $(SKIPPED_SRC_FILES),$(SRC_FILES)))
 endif
 
 SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
@@ -172,8 +172,8 @@ SRC_DIRS := $(filter-out $(SKIPPED_SRC_DIRS),$(SRC_DIRS))
 # NOTE: A second filter-out is required due to files contained in SRC_DIRS
 SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(SRC_FILES))
 
-$(foreach srcDir,$(SRC_DIRS),$(if $(wildcard $(srcDir)),$(if $(call fn_is_inside_dir,$(CURDIR),$(srcDir)),,$(error [SRC_DIRS] Directory outside project root directory: '$(srcDir)')),$(error [SRC_DIRS] No such directory: '$(srcDir)')))
-$(foreach srcFile,$(SRC_FILES),$(if $(wildcard $(srcFile)),$(if $(call fn_is_inside_dir,$(CURDIR),$(dir $(srcFile))),,$(error [SRC_FILES] File outside project root directory: '$(srcFile)')),$(error [SRC_FILES] No such file: '$(srcFile)')))
+$(foreach srcDir,$(SRC_DIRS),$(if $(wildcard $(srcDir)),$(if $(call fn_is_inside_dir,$(CURDIR),$(srcDir)),,$(call fn_error,[SRC_DIRS] Directory outside project root directory: '$(srcDir)')),$(call fn_error,[SRC_DIRS] No such directory: '$(srcDir)')))
+$(foreach srcFile,$(SRC_FILES),$(if $(wildcard $(srcFile)),$(if $(call fn_is_inside_dir,$(CURDIR),$(dir $(srcFile))),,$(call fn_error,[SRC_FILES] File outside project root directory: '$(srcFile)')),$(call fn_error,[SRC_FILES] No such file: '$(srcFile)')))
 
 # Checks if any SRC_DIR or SRC_FILE is outside CURDIR
 cpb_builder_mk_src_file_filter := $(subst //,/,$(foreach skippedSrcDir,$(SKIPPED_SRC_DIRS),-and -not -path '$(skippedSrcDir)/*')) -and -name '*.c' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.cc' -or -name '*.s' -or -name '*.S'
@@ -184,7 +184,7 @@ SRC_FILES := $(filter-out $(SKIPPED_SRC_FILES),$(foreach srcDir,$(SRC_DIRS),$(ca
 cpb_builder_mk_invalid_src_files := $(filter-out %.c %.cpp %.cxx %.cc %.s %.S,$(SRC_FILES))
 
 ifneq ($(cpb_builder_mk_invalid_src_files),)
-    $(error [SRC_FILES] Unsupported source file(s): $(cpb_builder_mk_invalid_src_files))
+    $(call fn_error,[SRC_FILES] Unsupported source file(s): $(cpb_builder_mk_invalid_src_files))
 endif
 # ------------------------------------------------------------------------------
 
@@ -301,7 +301,7 @@ build: --cpb_builder_mk_post_build ;
 # dist =========================================================================
 ifneq ($(DIST_MARKER),)
     $(call fn_check_no_whitespace,DIST_MARKER)
-    $(if $(call fn_is_inside_dir,$(CURDIR),$(DIST_MARKER)),,$(error [DIST_MARKER] Invalid path: $(DIST_MARKER)))
+    $(if $(call fn_is_inside_dir,$(CURDIR),$(DIST_MARKER)),,$(call fn_error,[DIST_MARKER] Invalid path: '$(DIST_MARKER)'))
 endif
 ifdef DIST_DIRS
     $(call fn_check_origin,DIST_DIRS,file)

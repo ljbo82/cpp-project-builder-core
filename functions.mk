@@ -28,8 +28,8 @@ cpb_functions_mk := $(lastword $(MAKEFILE_LIST))
 # Ensures a variable is not defined until the call the function.
 #
 # Syntax: $(call fn_check_reserved,varName,[errorMessage])
-$(if $(fn_check_reserved),$(error [fn_check_reserved] Reserved variable))
-fn_check_reserved = $(if $($(1)),$(error $(if $(2),$(2),[$(1)] Reserved variable)))
+$(if $(fn_check_reserved),$(call fn_error,[fn_check_reserved] Reserved variable))
+fn_check_reserved = $(if $($(1)),$(call fn_error,$(if $(2),$(2),[$(1)] Reserved variable)))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ fn_check_reserved = $(if $($(1)),$(error $(if $(2),$(2),[$(1)] Reserved variable
 #
 # Syntax: $(call fn_check_origin,varName,expectedOrigin,[errorMessage])
 $(call fn_check_reserved,fn_check_origin)
-fn_check_origin = $(if $(call fn_eq,$(origin $(1)),$(2)),,$(error $(if $(3),$(3),[$(1)] Unexpected origin: "$(origin $(1))" (expected: "$(2)"))))
+fn_check_origin = $(if $(call fn_eq,$(origin $(1)),$(2)),,$(call fn_error,$(if $(3),$(3),[$(1)] Unexpected origin: '$(origin $(1))' (expected: '$(2)'))))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ fn_check_origin = $(if $(call fn_eq,$(origin $(1)),$(2)),,$(error $(if $(3),$(3)
 #
 # Syntax: $(call fn_check_not_origin,varName,forbiddenOrigin,[errorMessage])
 $(call fn_check_reserved,fn_check_not_origin)
-fn_check_not_origin = $(if $(call fn_eq,$(origin $(1)),$(2)),$(error $(if $(3),$(3),[$(1)] Forbidden origin: "$(origin $(1))")),)
+fn_check_not_origin = $(if $(call fn_eq,$(origin $(1)),$(2)),$(call fn_error,$(if $(3),$(3),[$(1)] Forbidden origin: '$(origin $(1))')),)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ fn_check_not_origin = $(if $(call fn_eq,$(origin $(1)),$(2)),$(error $(if $(3),$
 #
 # Syntax: $(call fn_check_options,varName,acceptedOptions,[errorMessage])
 $(call fn_check_reserved,fn_check_options)
-fn_check_options=$(if $(or $(word 2,$($(1))),$(filter-out $(2),$($(1)))),$(error $(if $(3),$(3),[$(1)] Invalid value: $($(1)))),)
+fn_check_options=$(if $(or $(word 2,$($(1))),$(filter-out $(2),$($(1)))),$(call fn_error,$(if $(3),$(3),[$(1)] Invalid value: '$($(1))')),)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -61,7 +61,7 @@ fn_check_options=$(if $(or $(word 2,$($(1))),$(filter-out $(2),$($(1)))),$(error
 #
 # Syntax: $(call fn_check_not_empty,varName,[errorMessage])
 $(call fn_check_reserved,fn_check_not_empty)
-fn_check_not_empty=$(if $(strip $($(1))),,$(error $(if $(2),$(2),[$(1)] Missing value)))
+fn_check_not_empty=$(if $(strip $($(1))),,$(call fn_error,$(if $(2),$(2),[$(1)] Missing value)))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ fn_check_not_empty=$(if $(strip $($(1))),,$(error $(if $(2),$(2),[$(1)] Missing 
 #
 # Syntax: $(call fn_check_no_whitespace,varName,[errorMessage])
 $(call fn_check_reserved,fn_check_no_whitespace)
-fn_check_no_whitespace=$(if $(call fn_eq,0,$(words $($(1)))),,$(if $(call fn_eq,1,$(words $($(1)))),,$(error $(if $(2),$(2),[$(1)] Value cannot have whitespaces: "$($(1))"))))
+fn_check_no_whitespace=$(if $(call fn_eq,0,$(words $($(1)))),,$(if $(call fn_eq,1,$(words $($(1)))),,$(call fn_error,$(if $(2),$(2),[$(1)] Value cannot have whitespaces: '$($(1))'))))
 # ------------------------------------------------------------------------------
 # ==============================================================================
 
@@ -144,7 +144,7 @@ ifneq ($(cpb_functions_mk_term_support_colors),)
     endif
 endif
 
-fn_text = $(shell printf "$(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[$(1)m,)$(2)$(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[0m,)")
+fn_text = $(shell printf "$(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[$(1)m,)$(subst ",\",$(2))$(if $(and $(cpb_functions_mk_term_support_colors),$(1)),\033[0m,)")
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -171,7 +171,7 @@ fn_unique = $(strip $(if $(1),$(firstword $(1)) $(call fn_unique,$(filter-out $(
 # Syntax: $(call fn_semver,semanticVersion,[errorMessage])
 $(call fn_check_reserved,fn_semver)
 $(call fn_check_reserved,cpb_functions_mk_semver_val)
-fn_semver = $(if $(shell echo $(1) | grep -E '^[0-9]+(\.[0-9]+){$(cpb_functions_mk_comma)2}(\-[A-Za-z0-9_\.\-]+)*$$'),$(1),$(error $(if $(2),$(2),[fn_semver] Invalid semantic version: $(1))))
+fn_semver = $(if $(shell echo $(1) | grep -E '^[0-9]+(\.[0-9]+){$(cpb_functions_mk_comma)2}(\-[A-Za-z0-9_\.\-]+)*$$'),$(1),$(call fn_error,$(if $(2),$(2),[fn_semver] Invalid semantic version: '$(1)')))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -180,7 +180,7 @@ fn_semver = $(if $(shell echo $(1) | grep -E '^[0-9]+(\.[0-9]+){$(cpb_functions_
 # Syntax: $(call fn_semver_check_compat,minVersion,version,[errorMessage])
 $(call fn_check_reserved,fn_semver_check_compat)
 $(call fn_check_reserved,fn_semver_check_compat_cmp)
-fn_semver_check_compat = $(eval fn_semver_check_compat_cmp := $(call fn_semver_cmp,$(1),$(2)))$(if $(or $(call fn_eq,$(fn_semver_check_compat_cmp),0),$(call fn_eq,$(fn_semver_check_compat_cmp),-1),$(call fn_eq,$(fn_semver_check_compat_cmp),-2)),,$(error $(if $(3),$(3),[fn_semver_check_compat] Tested version is not compatible: $(2) (version should be $(1)+))))
+fn_semver_check_compat = $(eval fn_semver_check_compat_cmp := $(call fn_semver_cmp,$(1),$(2)))$(if $(or $(call fn_eq,$(fn_semver_check_compat_cmp),0),$(call fn_eq,$(fn_semver_check_compat_cmp),-1),$(call fn_eq,$(fn_semver_check_compat_cmp),-2)),,$(call fn_error,$(if $(3),$(3),[fn_semver_check_compat] Tested version is not compatible: '$(2)' (version should be '$(1)+'))))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -300,8 +300,23 @@ fn_number_cmp = $(call fn_shell,if [ $(if $(1),$(1),0) -eq $(if $(1),$(1),0) ] 2
 #
 # Syntax: $(call fn_shell,cmd,[errorMessage])
 $(call fn_check_reserved,fn_shell)
-fn_shell = $(shell $(1))$(if $(call fn_eq,$(.SHELLSTATUS),0),,$(error $(if $(2),$(2),[fn_shell] Execution error)))
+fn_shell = $(shell $(1))$(if $(call fn_eq,$(.SHELLSTATUS),0),,$(call fn_error,$(if $(2),$(2),[fn_shell] Execution error)))
 # ------------------------------------------------------------------------------
 # ==============================================================================
 
+# == [Log functions] ===========================================================
+# ------------------------------------------------------------------------------
+# Logs a warning message.
+#
+# Syntax: $(call fn_warning,message)
+fn_warning = $(warning $(call fn_text,93,$(1)))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# Logs an error and raises a fault.
+#
+# Syntax: $(call fn_error,message)
+fn_error = $(error $(call fn_text,91,$(1)))
+# ------------------------------------------------------------------------------
+# ==============================================================================
 endif # ifndef cpb_functions_mk

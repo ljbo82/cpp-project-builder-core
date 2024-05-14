@@ -21,7 +21,7 @@
 # OSX customizations for GCC toolchain
 
 ifndef cpb_builder_mk
-    $(error This file cannot be manually included)
+    $(call fn_error,This file cannot be manually included)
 endif
 
 ifndef cpb_hosts_osx_host_mk

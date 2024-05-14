@@ -71,7 +71,7 @@ endif
 .PHONY: --cpb_doxygen_mk_doc
 --cpb_doxygen_mk_doc: --cpb_doxygen_mk_pre_doc
     ifeq ($(wildcard $(DOXYFILE)),)
-	    $(error [DOXYFILE] File not found: $(DOXYFILE))
+	    $(call fn_error,[DOXYFILE] File not found: '$(DOXYFILE)')
     else
 	    @mkdir -p $(O_DOC_DIR)
 	    $(V_PREFIX)(cat $(DOXYFILE); printf "$(DOXYVARS)\n") | doxygen -

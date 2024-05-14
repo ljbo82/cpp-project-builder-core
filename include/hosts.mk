@@ -21,7 +21,7 @@
 # Host layers management
 
 ifndef cpb_builder_mk
-    $(error This file cannot be manually included)
+    $(call fn_error,This file cannot be manually included)
 endif
 
 ifndef cpb_include_hosts_mk

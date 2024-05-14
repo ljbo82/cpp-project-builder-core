@@ -21,7 +21,7 @@
 # GCC toolchain
 
 ifndef cpb_builder_mk
-    $(error This file cannot be manually included)
+    $(call fn_error,This file cannot be manually included)
 endif
 
 ifndef cpb_include_toolchain_mk
