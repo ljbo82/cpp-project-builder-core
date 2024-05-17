@@ -28,15 +28,13 @@ include $(dir $(cpb_include_common_mk))../native.mk
 $(call fn_check_reserved,CPB_VERSION)
 $(call fn_check_reserved,cpb_include_common_mk_min_make_version)
 $(call fn_check_reserved,cpb_include_common_mk_make_version)
-$(call fn_check_reserved,cpb_include_common_mk_make_version_cmp)
 
-# TODO: Newer major should be accepted!
 CPB_VERSION := 0.1.0
 ifdef CPB_MIN_VERSION
     $(call fn_check_not_empty,CPB_MIN_VERSION)
     $(call fn_check_origin,CPB_MIN_VERSION,file)
     $(call fn_check_no_whitespace,CPB_MIN_VERSION)
-    $(call fn_semver_check_compat,$(CPB_MIN_VERSION),$(CPB_VERSION),[CPB_MIN_VERSION] Current version is not compatible: $(CPB_VERSION) (version should be $(CPB_MIN_VERSION)+))
+    $(if $(filter -1,$(call fn_number_cmp,$(call fn_semver_cmp,$(CPB_VERSION),$(CPB_MIN_VERSION)),0)),$(call fn_error,[CPB_MIN_VERSION] Current version is not compatible: $(CPB_VERSION) (version should be $(CPB_MIN_VERSION)+)),)
 endif
 
 override CPB_DIR := $(realpath $(dir $(cpb_include_common_mk))..)
