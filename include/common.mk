@@ -30,6 +30,7 @@ $(call fn_check_reserved,cpb_include_common_mk_min_make_version)
 $(call fn_check_reserved,cpb_include_common_mk_make_version)
 $(call fn_check_reserved,cpb_include_common_mk_make_version_cmp)
 
+# TODO: Newer major should be accepted!
 CPB_VERSION := 0.1.0
 ifdef CPB_MIN_VERSION
     $(call fn_check_not_empty,CPB_MIN_VERSION)

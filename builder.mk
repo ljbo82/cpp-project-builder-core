@@ -347,7 +347,7 @@ define cpb_builder_mk_dist_deps_template
 cpb_builder_mk_dist_deps += $(2)
 
 $(2): $(1)
-	$$(call fn_log_cmd,$$(V),[DIST] $$@)
+	$$(call fn_log,[DIST] $$@,$$(V))
 	@mkdir -p $$(dir $$@)
 	$(V_PREFIX)ln -f $$< $$@
 endef

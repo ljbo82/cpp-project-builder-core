@@ -101,7 +101,7 @@ PRE_BUILD_DEPS += $$(O_LIBS_DIR)/.$(1)
 # ==============================================================================
 .PHONY: --cpb-lib-$(1)
 --cpb-lib-$(1):
-	$$(call fn_log_cmd,$$(V),[LIB] $(1))
+	$$(call fn_log,[LIB] $(1),$$(V))
 	$$(V_PREFIX)$$(MAKE) $$(LIB_MKFLAGS[$(1)])
 
 $$(O_LIBS_DIR)/.$(1): --cpb-lib-$(1) ;
