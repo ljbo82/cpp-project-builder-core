@@ -172,6 +172,14 @@ fn_host_factorize = $(foreach token,$(subst $(if $(2),$(2),-), ,$(1)),$(eval fn_
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+# Identifies which patterns match against a value.
+#
+# Syntax: $(call fn_test_patterns,1:patterns,2:value,[3:find=],[4:replace=])
+$(call fn_check_reserved,fn_test_patterns)
+fn_test_patterns = $(subst $(3),$(4),$(strip $(foreach pattern,$(1),$(if $(filter $(pattern),$(2)),$(pattern),))))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # Reverses a list of words.
 #
 # Syntax: $(call fn_reverse,1:word1 word2 ...)
