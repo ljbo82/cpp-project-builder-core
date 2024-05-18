@@ -62,6 +62,22 @@ fn_bool = $(if $(call fn_eq,0,$(if $(1),$(1),0)),$(4),$(if $(3),$(3),1))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+# Logs a debug message.
+#
+# Syntax: $(call fn_debug,1:message)
+$(call cpb_functions_mk_check_reserved,fn_debug)
+fn_debug = $(warning $(call fn_text,[DEBUG] $(1),95))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# Returns the printf statement that can be used in recipes to print a colored text into console.
+#
+# Syntax: $(call fn_color_print_cmd,1:message,[2:ansiColor=])
+$(call cpb_functions_mk_check_reserved,fn_color_print_cmd)
+fn_color_print_cmd = printf "$(call fn_text,$(1),$(2))\n"
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # Logs an info message.
 #
 # Syntax: $(call fn_info,1:message,[2:skipColor=0])
@@ -323,9 +339,21 @@ fn_is_inside_dir = $(filter $(abspath $(1)) $(abspath $(1)/%),$(abspath $(2)))
 
 # == [Miscellaneous] ===========================================================
 # ------------------------------------------------------------------------------
-# syntax: $(call fn_log,1:message,[verbose=0])
+# Prints an log message in standardized way. If verbose mode is informed, messages are colored.
+#
+# syntax: $(call fn_log,1:message,[2:verbose=0])
 $(call fn_check_reserved,fn_log)
 fn_log = $(eval fn_log[verbose] := $(call fn_bool,$(2)))$(eval fn_log[skipColor] := $(if $(fn_log[verbose]),,1))$(if $(and $(fn_log[verbose]),$(fn_log[pad])),$(info ),)$(call fn_info,$(1),$(fn_log[skipColor]))$(eval export fn_log[pad] := 1)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# Returns the printf statement that can be used in recipes to emulate fn_log.
+#
+# NOTE: it uses fn_log[pad] to synchronize padding behavior.
+#
+# Syntax: $(call fn_log_cmd,1:message,[2:verbose=0])
+$(call cpb_functions_mk_check_reserved,fn_log_cmd)
+fn_log_cmd =  printf "$(eval fn_log_cmd[verbose] := $(call fn_bool,$(2)))$(eval fn_log_cmd[color] := $(if $(fn_log_cmd[verbose]),96,))$(if $(and $(fn_log_cmd[verbose]),$(fn_log[pad])),\n,)$(call fn_text,$(1),$(fn_log_cmd[color]))\n"$(eval export fn_log[pad] := 1)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
