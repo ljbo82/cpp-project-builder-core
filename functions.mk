@@ -225,10 +225,9 @@ fn_semver_token = $(eval fn_semver_token[val]=$(call fn_token,$(call fn_semver,$
 # ------------------------------------------------------------------------------
 # Checks if a version is compatible with a minimum one. If version is not compatible, it raises an error.
 #
-# Syntax: $(call fn_semver_check_compat,1:minVersion,2:version,[3:errorMessage=<predefined_message>])
+# Syntax: $(call fn_semver_check_compat,1:minVersion,2:version,[3:majorBackwardsCompatible=0],[4:errorMessage=<predefined_message>])
 $(call fn_check_reserved,fn_semver_check_compat)
-$(call fn_check_reserved,fn_semver_check_compat[cmp])
-fn_semver_check_compat = $(eval fn_semver_check_compat[cmp] := $(call fn_semver_cmp,$(1),$(2)))$(if $(or $(call fn_eq,$(fn_semver_check_compat[cmp]),0),$(call fn_eq,$(fn_semver_check_compat[cmp]),-1),$(call fn_eq,$(fn_semver_check_compat[cmp]),-2)),,$(call fn_error,$(if $(3),$(3),[fn_semver_check_compat] Tested version is not compatible: '$(2)' (version should be '$(1)+'))))
+fn_semver_check_compat = $(if $(filter $(strip -1 -2 -3 $(if $(call fn_bool,$(3)),,3)),$(call fn_semver_cmp,$(2),$(1))),$(call fn_error,$(if $(4),$(4),[fn_semver_check_compat] Tested version is not compatible: '$(2)' (version should be '$(1)+'))),)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
