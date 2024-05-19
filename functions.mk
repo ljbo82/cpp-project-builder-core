@@ -74,7 +74,7 @@ fn_debug = $(warning $(call fn_text,[DEBUG] $(1),95))
 #
 # Syntax: $(call fn_color_print_cmd,1:message,[2:ansiColor=])
 $(call cpb_functions_mk_check_reserved,fn_color_print_cmd)
-fn_color_print_cmd = printf "$(call fn_text,$(1),$(2))\n"
+fn_color_print_cmd = printf -- "$(call fn_text,$(1),$(2))\n"
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -353,7 +353,7 @@ fn_log = $(eval fn_log[verbose] := $(call fn_bool,$(2)))$(eval fn_log[skipColor]
 #
 # Syntax: $(call fn_log_cmd,1:message,[2:verbose=0])
 $(call cpb_functions_mk_check_reserved,fn_log_cmd)
-fn_log_cmd =  printf "$(eval fn_log_cmd[verbose] := $(call fn_bool,$(2)))$(eval fn_log_cmd[color] := $(if $(fn_log_cmd[verbose]),96,))$(if $(and $(fn_log_cmd[verbose]),$(fn_log[pad])),\n,)$(call fn_text,$(1),$(fn_log_cmd[color]))\n"$(eval export fn_log[pad] := 1)
+fn_log_cmd =  printf -- "$(eval fn_log_cmd[verbose] := $(call fn_bool,$(2)))$(eval fn_log_cmd[color] := $(if $(fn_log_cmd[verbose]),96,))$(if $(and $(fn_log_cmd[verbose]),$(fn_log[pad])),\n,)$(call fn_text,$(1),$(fn_log_cmd[color]))\n"$(eval export fn_log[pad] := 1)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------

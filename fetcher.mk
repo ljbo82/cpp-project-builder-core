@@ -151,7 +151,7 @@ $$(DOWNLOADS_DIR)/$$(SRC_URI[file_or_dir]): --force
 	    @if [ ! -d $$@ ]; then $$(call fn_log_cmd,[GIT] $$(SRC_URI[$$(notdir $$@).uri]),$$(V)) && git clone $$(SRC_URI[$$(notdir $$@).uri]) $$@ --recursive || ($$(call fn_color_print_cmd,[SRC_URI] Failure cloning repository,91) && false); fi
 
         # Switching branches...
-	    @$$(if $$(SRC_URI[$$(notdir $$@).checksum]),@cd $$@ && git checkout -q $$(SRC_URI[$$(notdir $$@).checksum]) && git clean -dfx && git submodule update || ($$(call fn_color_print_cmd,[SRC_URI] Failure switching branches,91) && false),)
+	    @$$(if $$(SRC_URI[$$(notdir $$@).checksum]),@cd $$@ && git checkout -q $$(SRC_URI[$$(notdir $$@).checksum]) && git clean -dfx && git submodule update || ($$(call fn_color_print_cmd,[SRC_URI] Failure switching branches in '$$@',91) && false),)
     endif
 # ==============================================================================
 # ------------------------------------------------------------------------------
