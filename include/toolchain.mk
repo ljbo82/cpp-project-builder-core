@@ -215,20 +215,20 @@ BUILD_DEPS += $(O_BUILD_DIR)/$(ARTIFACT)
 $(O_BUILD_DIR)/$(ARTIFACT): $(cpb_include_toolchain_mk_obj_files)
     ifeq ($(PROJ_TYPE),lib)
         ifeq ($(LIB_TYPE),shared)
-	        $(call fn_log_cmd,[LD] $@,$(V))
+	        @$(call fn_log_cmd,[LD] $@,$(V))
 	        $(V_PREFIX)$(LD) $(strip -o $@ $(cpb_include_toolchain_mk_obj_files) $(LDFLAGS))
         else ifeq ($(LIB_TYPE),static)
-	        $(call fn_log_cmd,[AR] $@,$(V))
+	        @$(call fn_log_cmd,[AR] $@,$(V))
 	        $(V_PREFIX)$(AR) $(strip $(ARFLAGS) $@ $(cpb_include_toolchain_mk_obj_files))
         endif
     else ifeq ($(PROJ_TYPE),app)
-	    $(call fn_log_cmd,[LD] $@,$(V))
+	    @$(call fn_log_cmd,[LD] $@,$(V))
 	    $(V_PREFIX)$(LD) $(strip -o $@ $(cpb_include_toolchain_mk_obj_files) $(LDFLAGS))
     endif
 
 # C sources --------------------------------------------------------------------
 $(O_BUILD_DIR)/%.c$(cpb_include_toolchain_mk_obj_suffix): %.c
-	$(call fn_log_cmd,[CC] $@,$(V))
+	@$(call fn_log_cmd,[CC] $@,$(V))
 	@mkdir -p $(dir $@)
 	$(V_PREFIX)$(CC) $(strip $(CFLAGS) -c $< -o $@)
 # ------------------------------------------------------------------------------
@@ -236,7 +236,7 @@ $(O_BUILD_DIR)/%.c$(cpb_include_toolchain_mk_obj_suffix): %.c
 # C++ sources ------------------------------------------------------------------
 define cpb_include_toolchain_mk_cxx_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_include_toolchain_mk_obj_suffix): %.$(1)
-	$$(call fn_log_cmd,[CXX] $$@,$$(V))
+	@$$(call fn_log_cmd,[CXX] $$@,$$(V))
 	@mkdir -p $$(dir $$@)
 	$(V_PREFIX)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
 endef
@@ -249,7 +249,7 @@ $(eval $(call cpb_include_toolchain_mk_cxx_template,cc))
 # Assembly sources -------------------------------------------------------------
 define cpb_include_toolchain_mk_as_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_include_toolchain_mk_obj_suffix): %.$(1)
-	$$(call fn_log_cmd,[AS] $$@,$$(V))
+	@$$(call fn_log_cmd,[AS] $$@,$$(V))
 	@mkdir -p $$(dir $$@)
 	$(V_PREFIX)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
 endef
