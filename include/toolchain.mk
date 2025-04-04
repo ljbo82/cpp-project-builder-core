@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Leandro José Britto de Oliveira
+# Copyright (c) 2022-2025 Leandro José Britto de Oliveira
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -229,7 +229,7 @@ $(O_BUILD_DIR)/$(ARTIFACT): $(cpb_include_toolchain_mk_obj_files)
 # C sources --------------------------------------------------------------------
 $(O_BUILD_DIR)/%.c$(cpb_include_toolchain_mk_obj_suffix): %.c
 	@$(call fn_log_cmd,[CC] $@,$(V))
-	@mkdir -p $(dir $@)
+	@if [ ! -d "$(dir $@)" ]; then if [ -z "$(V_PREFIX)" ]; then echo "mkdir -p $(dir $@)"; fi; mkdir -p $(dir $@); fi
 	$(V_PREFIX)$(CC) $(strip $(CFLAGS) -c $< -o $@)
 # ------------------------------------------------------------------------------
 
@@ -237,7 +237,7 @@ $(O_BUILD_DIR)/%.c$(cpb_include_toolchain_mk_obj_suffix): %.c
 define cpb_include_toolchain_mk_cxx_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_include_toolchain_mk_obj_suffix): %.$(1)
 	@$$(call fn_log_cmd,[CXX] $$@,$$(V))
-	@mkdir -p $$(dir $$@)
+	@if [ ! -d "$$(dir $$@)" ]; then if [ -z "$$(V_PREFIX)" ]; then echo "mkdir -p $$(dir $$@)"; fi; mkdir -p $$(dir $$@); fi
 	$(V_PREFIX)$(CXX) $$(strip $(CXXFLAGS) -c $$< -o $$@)
 endef
 
@@ -250,7 +250,7 @@ $(eval $(call cpb_include_toolchain_mk_cxx_template,cc))
 define cpb_include_toolchain_mk_as_template =
 $(O_BUILD_DIR)/%.$(1)$(cpb_include_toolchain_mk_obj_suffix): %.$(1)
 	@$$(call fn_log_cmd,[AS] $$@,$$(V))
-	@mkdir -p $$(dir $$@)
+	@if [ ! -d "$$(dir $$@)" ]; then if [ -z "$$(V_PREFIX)" ]; then echo "mkdir -p $$(dir $$@)"; fi mkdir -p $$(dir $$@); fi
 	$(V_PREFIX)$(AS) $$(strip $(ASFLAGS) -c $$< -o $$@)
 endef
 
